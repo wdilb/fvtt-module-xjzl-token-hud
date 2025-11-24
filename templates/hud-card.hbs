@@ -1,0 +1,64 @@
+<div class="hud-card {{type}}" id="hud-token-{{id}}" data-token-id="{{id}}">
+    <!-- 左侧头像 -->
+    <div class="hud-avatar-container">
+        <img class="hud-avatar" src="{{img}}" alt="{{name}}">
+    </div>
+
+    <!-- 右侧信息区 -->
+    <div class="hud-info">
+        
+        <!-- 1. 名字 (最上方) -->
+        <div class="hud-header">
+            <div class="hud-name">{{name}}</div>
+        </div>
+
+        <!-- 2. HP 血条 (中间层，带数值) -->
+        <div class="hp-track bar-track {{#unless showExactHp}}obscured{{/unless}}">
+            <div class="hp-ghost bar-ghost" style="width: {{hpPercent}}%"></div>
+            <div class="hp-bar bar-fill" style="width: {{hpPercent}}%"></div>
+            
+            <!-- 数值内嵌层 -->
+            <div class="bar-text hp-text-overlay">
+                {{#if showExactHp}}
+                    <span class="current-val">{{hpValue}}</span> / <span class="max-val">{{hpMax}}</span>
+                {{else}}
+                    <span class="status-label {{statusColorClass}}">{{statusLabel}}</span>
+                {{/if}}
+            </div>
+        </div>
+
+        <!-- 3. 内力条 (中间层，带数值) -->
+        {{#if hasNeili}}
+        <div class="neili-track bar-track {{#unless showExactHp}}obscured{{/unless}}">
+            <div class="neili-ghost bar-ghost" style="width: {{neiliPercent}}%"></div>
+            <div class="neili-bar bar-fill" style="width: {{neiliPercent}}%"></div>
+            
+            <!-- 数值内嵌层 -->
+            <div class="bar-text neili-text-overlay">
+                {{#if showExactHp}}
+                    <span class="current-val">{{neiliValue}}</span> / <span class="max-val">{{neiliMax}}</span>
+                {{else}}
+                    <span class="status-unknown">???</span>
+                {{/if}}
+            </div>
+        </div>
+        {{/if}}
+
+        <!-- 4. 怒气槽 (最下方) -->
+        {{#if hasRage}}
+        <div class="rage-track">
+            {{#each rageDots}}
+                <div class="rage-dot {{#if this.active}}active{{/if}}"></div>
+            {{/each}}
+        </div>
+        {{/if}}
+
+    </div>
+
+    <!-- 绝招特效层 -->
+    <div class="ultimate-overlay">
+        <!-- 增加 preload="auto" 提高加载速度 -->
+        <video class="ultimate-video" src="modules/xjzl-token-hud/resource/effect.webm" muted preload="auto"></video>
+        <img class="ultimate-img" src="{{img}}">
+    </div>
+</div>

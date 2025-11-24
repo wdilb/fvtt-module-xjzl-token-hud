@@ -1,0 +1,26 @@
+{
+  "id": "xjzl-token-hud",
+  "title": "侠界之旅 Token HUD",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "13"
+  },
+  "relationships": {
+    "systems": [],
+    "requires": []
+  },
+  "authors": [
+    {
+      "name": "Tiwelee",
+      "QQ": "273437679"
+    }
+  ],
+  "esmodules": ["scripts/main.js"],
+  "styles": [
+    "styles/xjzl-token-hud.css"
+  ],
+  "url": "",
+  "manifest": "",
+  "download": ""
+}

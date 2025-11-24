@@ -1,0 +1,304 @@
+/* =================================================================
+   My Token HUD - 样式表
+   ================================================================= */
+
+/* 引入 Google Fonts: 马山正 (书法字体) 和 Roboto Condensed (紧凑数值字体) */
+@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Roboto+Condensed:wght@700&display=swap');
+
+/* -------------------------------------------------------------
+   1. 基础布局容器 (Layout Container)
+   ------------------------------------------------------------- */
+#xjzl-custom-hud {
+    position: absolute; 
+    top: 0; left: 0; width: 100%; height: 100%;
+    /* 关键: pointer-events: none 确保 HUD 容器本身不阻挡鼠标点击地图 */
+    pointer-events: none; 
+    z-index: 40; /* 确保位于大多数 UI 之上 */
+    font-family: 'Roboto Condensed', sans-serif; 
+    overflow: hidden;
+}
+
+/* 左侧友方列表 */
+#hud-friends {
+    position: absolute; 
+    top: 100px; bottom: 180px; width: 280px;
+    left: 120px; 
+    display: flex; flex-direction: column; align-items: flex-start; gap: 14px;
+    overflow-y: scroll; scrollbar-width: none; /* 隐藏滚动条 */
+    padding-bottom: 20px;
+    pointer-events: none; /* 列表容器不可点，内部卡片可点 */
+}
+
+/* 右侧敌方列表 */
+#hud-enemies {
+    position: absolute; 
+    top: 100px; bottom: 180px; width: 280px;
+    
+    /* [核心修改] 侧边栏联动定位
+       逻辑：默认情况下侧边栏是收起的，所以默认值设为 60px。
+       如果 JS 检测到侧边栏展开，会修改 --hud-right-offset 变量。
+    */
+    right: var(--hud-right-offset, 60px);
+    
+    display: flex; flex-direction: column; align-items: flex-end; gap: 14px;
+    overflow-y: scroll; scrollbar-width: none; 
+    padding-bottom: 20px;
+    pointer-events: none;
+
+    /* 添加平滑过渡动画，当侧边栏展开/收起时，卡片会平滑移动 */
+    transition: right 0.5s ease-in-out;
+}
+
+/* 隐藏 Webkit 浏览器的滚动条 */
+#hud-friends::-webkit-scrollbar, #hud-enemies::-webkit-scrollbar { display: none; }
+
+/* -------------------------------------------------------------
+   2. 卡片主体 (Card Component)
+   ------------------------------------------------------------- */
+.hud-card {
+    pointer-events: auto; /* 恢复卡片的鼠标交互 */
+    position: relative; 
+    width: 270px; min-height: 80px; padding: 10px;
+    
+    /* 深色磨砂玻璃背景，营造高级感 */
+    background: linear-gradient(180deg, rgba(32, 32, 38, 0.95) 0%, rgba(15, 15, 20, 0.92) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px; 
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7);
+    
+    display: flex; align-items: center; gap: 12px;
+    
+    /* 进场动画：从侧边滑入并渐变显示 */
+    transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    opacity: 0; transform: translateX(-20px);
+    overflow: visible; /* 允许光晕溢出边框 */
+}
+
+/* 激活状态 (插入 DOM 后通过 JS 添加此类以触发动画) */
+.hud-card.active { opacity: 1; transform: translateX(0); }
+
+/* 阵营样式区分 */
+.hud-card.friend { border-left: 4px solid #00e676; } /* 友方：左绿条 */
+.hud-card.enemy { 
+    flex-direction: row-reverse; /* 敌方：反向布局 (头像在右) */
+    border-right: 4px solid #ff3d00; /* 敌方：右红条 */
+    border-left: none; 
+    text-align: right; 
+    transform: translateX(20px); /* 敌方从右侧滑入 */
+}
+/* 敌方卡片激活时的位置修正 */
+.hud-column-right .hud-card.active { transform: translateX(0); }
+
+/* 头像容器 */
+.hud-avatar-container {
+    width: 72px; height: 72px; flex-shrink: 0; 
+    position: relative; overflow: hidden; background: #000; 
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
+    z-index: 2; 
+}
+.hud-avatar { width: 100%; height: 100%; object-fit: cover; }
+
+/* 信息文字区 */
+.hud-info { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 6px; min-width: 0; z-index: 2; }
+.hud-header { width: 100%; margin-bottom: 2px; }
+.hud-card.enemy .hud-header { text-align: right; } 
+
+/* -------------------------------------------------------------
+   3. 排版与字体 (Typography)
+   ------------------------------------------------------------- */
+.hud-name {
+    font-family: 'Ma Shan Zheng', cursive; /* 书法体 */
+    font-size: 18px; 
+    font-weight: normal; 
+    letter-spacing: 1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;
+    transition: color 0.3s;
+}
+
+/* 名字发光特效 */
+.hud-card.friend .hud-name { color: #00e676; text-shadow: 0 0 8px rgba(0, 230, 118, 0.3); }
+.hud-card.enemy .hud-name { color: #ff3d00; text-shadow: 0 0 8px rgba(255, 61, 0, 0.3); }
+
+/* 状态标签 (如: 濒临死亡) */
+.status-label { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+.status-perfect { color: #00e676; } 
+.status-high { color: #b9f6ca; }
+.status-mid { color: #ffe57f; } 
+.status-low { color: #ff9e80; }
+.status-critical { color: #ff5252; animation: pulseText 1s infinite; } /* 暴击闪烁 */
+.status-dead { color: #9e9e9e; }
+.status-unknown { color: #00bcd4; font-weight: bold; }
+
+@keyframes pulseText { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+/* -------------------------------------------------------------
+   4. 条形图系统 (Skewed Bars - 斜切风格)
+   ------------------------------------------------------------- */
+.bar-track {
+    position: relative; width: 100%; height: 16px; 
+    background: #111; border: 1px solid #333; 
+    transform: skewX(-12deg); /* 核心风格：-12度斜切 */
+    border-radius: 2px; 
+    overflow: hidden; 
+}
+
+/* 幽灵条 (Ghost Bar) - 用于显示伤害延迟或治疗预测 */
+.bar-ghost {
+    position: absolute; top: 0; bottom: 0; left: 0;
+    background: #ffffff; opacity: 0.6; 
+    transition: width 0.5s ease 0.4s; /* 延迟跟随 */
+    z-index: 1;
+}
+.enemy .bar-ghost { right: 0; left: auto; } /* 敌方反向 */
+
+/* 实际填充条 */
+.bar-fill {
+    position: absolute; top: 0; bottom: 0; left: 0; z-index: 2;
+    transition: width 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    /* 科技感条纹背景 */
+    background-image: linear-gradient(135deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent);
+    background-size: 20px 20px;
+    will-change: background-position;
+}
+.enemy .bar-fill { right: 0; left: auto; }
+
+/* 条末端高光 (Glow Tip) */
+.bar-fill::after {
+    content: ""; position: absolute; top: -50%; bottom: -50%; 
+    width: 15px; right: -5px; 
+    background: currentColor; filter: blur(6px); opacity: 0.8;
+    mix-blend-mode: screen; z-index: 3;
+}
+.enemy .bar-fill::after { right: auto; left: -5px; }
+
+/* HP 血条配色 */
+.hp-bar { animation: kf-bar-flow 2s linear infinite; color: #00e676; }
+.friend .hp-bar { background-color: #00e676; box-shadow: inset 0 0 5px rgba(0,0,0,0.3); }
+.enemy .hp-bar { background-color: #ff3d00; color: #ff3d00; box-shadow: inset 0 0 5px rgba(0,0,0,0.3); }
+
+/* 内力条配色 */
+.neili-bar {
+    animation: kf-bar-flow 1.5s linear infinite;
+    background-color: #00bcd4; color: #00bcd4;
+    box-shadow: inset 0 0 5px rgba(255,255,255,0.4), 0 0 5px rgba(0, 188, 212, 0.3); 
+}
+
+/* 条纹流动动画 */
+@keyframes kf-bar-flow { 0% { background-position: 0 0; } 100% { background-position: 40px 0; } }
+
+/* 数值内嵌层 (反向斜切以让文字回正) */
+.bar-text {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 4;
+    display: flex; align-items: center; justify-content: center;
+    transform: skewX(12deg); /* +12度抵消容器的 -12度 */
+    font-family: 'Roboto Condensed', sans-serif; font-size: 11px; font-weight: 700; 
+    line-height: 1; text-shadow: 0 0 3px #000, 0 0 3px #000;
+}
+.hp-text-overlay { color: #fff; }
+.neili-text-overlay { color: #e0f7fa; }
+
+/* 模糊模式 (Obscured Mode) - 用于未知信息的敌人 */
+.bar-track.obscured { border: none; background: rgba(0,0,0,0.3); }
+.bar-track.obscured .bar-ghost { display: none; }
+.mode-obscured .bar-text .current-val, .mode-obscured .bar-text .max-val { display: none; }
+
+.hp-track.obscured .hp-bar {
+    filter: blur(3px); opacity: 0.8;
+    background-image: linear-gradient(90deg, rgba(255,61,0,0.8) 0%, rgba(255,61,0,0.2) 100%);
+    background-color: transparent; animation: none;
+}
+.hp-track.obscured .hp-bar::after { display: none; }
+
+.neili-track.obscured .neili-bar {
+    filter: blur(2px); opacity: 0.7;
+    background-image: linear-gradient(90deg, rgba(0,188,212,0.8) 0%, rgba(0,188,212,0.1) 100%);
+    background-color: transparent; animation: none;
+}
+.neili-track.obscured .neili-bar::after { display: none; }
+
+/* -------------------------------------------------------------
+   5. 怒气系统 (Chaos Orbs)
+   ------------------------------------------------------------- */
+.rage-track {
+    display: flex; width: 100%; height: 12px; 
+    justify-content: space-between; align-items: center; margin-top: 4px;
+}
+
+.rage-dot {
+    position: relative;
+    width: 8px; height: 8px; border-radius: 50%; 
+    background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.15);
+    transition: all 0.3s ease;
+}
+
+.rage-dot.active {
+    border: none;
+    /* 怒气点亮时的等离子球效果 */
+    background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ffd54f 40%, #ff6f00 100%);
+    box-shadow: 
+        0 0 3px 1px rgba(255, 255, 0, 0.8),
+        0 0 8px 2px rgba(255, 87, 34, 0.6),
+        0 0 12px rgba(255, 0, 0, 0.4);
+    animation: kf-plasma-surge 0.8s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes kf-plasma-surge {
+    0% { transform: scale(1); box-shadow: 0 0 3px 1px rgba(255, 215, 0, 0.6), 0 0 6px rgba(255, 69, 0, 0.4); }
+    100% { transform: scale(1.25); box-shadow: 0 0 5px 2px rgba(255, 255, 0, 0.9), 0 0 12px 4px rgba(255, 30, 0, 0.7); }
+}
+
+/* -------------------------------------------------------------
+   6. 动态特效与动画 (VFX)
+   ------------------------------------------------------------- */
+
+/* 怒气过载呼吸灯 (当怒气>=5) */
+.hud-card.rage-overload:not(.effect-shake):not(.effect-heal):not(.effect-neili-cast):not(.effect-neili-surge):not(.effect-ultimate) {
+    border-color: rgba(213, 0, 0, var(--rage-intensity));
+    box-shadow: 0 0 calc(15px * var(--rage-intensity)) rgba(255, 0, 0, calc(0.6 * var(--rage-intensity)));
+    animation: kf-overload-breathe 2s infinite alternate ease-in-out;
+}
+
+/* 保护边框色不被过载覆盖 */
+.hud-card.friend.rage-overload { border-left-color: #00e676 !important; }
+.hud-card.enemy.rage-overload { border-right-color: #ff3d00 !important; }
+
+@keyframes kf-overload-breathe {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.01); box-shadow: 0 0 calc(20px * var(--rage-intensity)) rgba(255, 50, 0, 0.8); }
+}
+
+/* 动作反馈动画类 */
+.effect-shake { animation: kf-shake 0.4s both; border-color: #ff5252 !important; } /* 受伤震动 */
+.effect-heal { animation: kf-pop 0.4s ease-out; border-color: #00e676 !important; } /* 治疗弹跳 */
+.effect-heal .hp-bar { filter: brightness(1.8); }
+
+.effect-neili-cast { animation: kf-recoil 0.3s ease-out; box-shadow: inset 0 0 15px rgba(0, 188, 212, 0.6); } /* 施法后坐力 */
+.effect-neili-surge { animation: kf-pulse-cyan 0.6s ease-out; border-color: #e0f7fa !important; } /* 回蓝脉冲 */
+
+/* 绝招全屏切入 (Cut-in) */
+.ultimate-overlay { 
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+    pointer-events: none; overflow: hidden; z-index: 10; opacity: 0; 
+}
+.ultimate-video { 
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+    object-fit: cover; mix-blend-mode: screen; opacity: 0; z-index: 1; 
+}
+.ultimate-img { 
+    position: absolute; height: 220%; width: auto; 
+    top: -30%; left: -100%; opacity: 0; 
+    transform: skewX(-20deg); filter: contrast(1.2) brightness(1.2); z-index: 2; 
+}
+
+.effect-ultimate .ultimate-overlay { animation: kf-fade-in-out 1.5s ease-out forwards; }
+.effect-ultimate .ultimate-video { animation: kf-fade-in 0.2s ease-out; opacity: 1; }
+.effect-ultimate .ultimate-img { animation: kf-cut-in 0.8s cubic-bezier(0.05, 0.7, 0.1, 1) 0.3s; }
+
+/* Keyframes 关键帧定义 */
+@keyframes kf-shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+@keyframes kf-pop { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+@keyframes kf-recoil { 0% { transform: scale(1); } 20% { transform: scale(0.96); } 100% { transform: scale(1); } }
+@keyframes kf-pulse-cyan { 0% { box-shadow: 0 0 0 0 rgba(0, 188, 212, 0.7); } 100% { box-shadow: 0 0 20px 10px rgba(0, 188, 212, 0); } }
+@keyframes kf-fade-in-out { 0% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes kf-fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes kf-cut-in { 0% { left: -80%; opacity: 0; } 15% { left: -10%; opacity: 1; } 60% { left: 0%; opacity: 1; } 100% { left: 100%; opacity: 0; } }
