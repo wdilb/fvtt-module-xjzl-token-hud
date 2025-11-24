@@ -285,11 +285,12 @@ async function updateSingleToken(token) {
         card = null;
         HUD_STATE.tokens.delete(id);
     }
-
+    // 逻辑：优先取 Actor 图片，如果没有（比如默认神秘人），则回退使用 Token 图片
+    const actorImg = token.actor.img || token.document.texture.src;
     // 1. 卡片不存在：创建新卡片
     if (!card) {
         const data = {
-            id, name: token.name, img: token.document.texture.src,
+            id, name: token.name, img: token.document.texture.src, actorImg: actorImg,
             hpValue, hpMax, hpPercent,
             neiliValue, neiliMax, neiliPercent, hasNeili,
             rageDots, hasRage,
@@ -338,6 +339,12 @@ async function updateSingleToken(token) {
         const imgEl = card.querySelector('.hud-avatar');
         const newImg = token.document.texture.src;
         if (imgEl && imgEl.getAttribute('src') !== newImg) imgEl.src = newImg;
+
+        // 绝招立绘更新 (确保如果换了立绘，大招图也跟着变)
+        const ultImgEl = card.querySelector('.ultimate-img');
+        if (ultImgEl && ultImgEl.getAttribute('src') !== actorImg) {
+            ultImgEl.src = actorImg;
+        }
 
         // 2.3 数值文本更新
         const updateText = (selector, val) => {
