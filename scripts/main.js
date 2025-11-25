@@ -372,10 +372,10 @@ async function updateSingleToken(token) {
 
         // -> 怒气更新
         if (hasRage) {
-            const dotEls = card.querySelectorAll('.rage-dot');
-            dotEls.forEach((dot, index) => {
-                if (index < rageValue) dot.classList.add('active');
-                else dot.classList.remove('active');
+            const segEls  = card.querySelectorAll('.rage-segment');
+            segEls .forEach((seg, index) => {
+                if (index < rageValue) seg.classList.add('active');
+                else seg.classList.remove('active');
             });
 
             // 怒气过载特效 (>=5点)
