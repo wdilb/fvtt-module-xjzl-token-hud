@@ -543,6 +543,8 @@
     display: flex;
     justify-content: space-between;
     padding: 0 80px;
+    /* 原来的 .hud-center z-index 是 10，这里设为 50 确保它盖在头像和翅膀上面 */
+    z-index: 50;
 }
 
 #xjzl-player-hud .dock-category {
@@ -584,7 +586,10 @@
     transform: translateX(-50%) scale(0.8);
     width: 220px;
     max-height: 0;
-    background: rgba(20, 20, 25, 0.95);
+
+    /* 背景色加深，防止透出后面的文字太杂乱 */
+    background: rgba(15, 15, 20, 0.98);
+
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     backdrop-filter: blur(10px);
@@ -592,9 +597,14 @@
     opacity: 0;
     transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     pointer-events: none;
-    box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.9);
+
+    /* 增强阴影，营造“浮空”感 */
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 1);
+
     display: flex;
     flex-direction: column;
+
+    /* 确保内容本身也在高层 */
     z-index: 100;
 }
 
@@ -643,9 +653,12 @@
 #xjzl-player-hud .item-btn img {
     width: 28px;
     height: 28px;
-    object-fit: cover;
+    min-width: 28px;
+    /* 强制不压缩 */
+    object-fit: contain;
+    /* 改为 contain 可以显示完整图标，或者 cover 填满 */
     border-radius: 2px;
-    background: #000;
+    background: rgba(0, 0, 0, 0.3);
 }
 
 #xjzl-player-hud .item-btn .label {
