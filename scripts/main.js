@@ -12,7 +12,7 @@ const HUD_STATE = {
     // 记录 Token 上一次的数值(HP/内力/怒气)，用于计算动画方向 (涨/跌)
     // Key: TokenID, Value: { hp, neili, rage }
     tokens: new Map(),
-    
+
     // V13 兼容性：模板加载器引用
     loader: null,
     renderer: null
@@ -45,7 +45,7 @@ Hooks.once("init", async function () {
     game.settings.register("xjzl-token-hud", "onlyCombatants", {
         name: "仅显示战斗单位",
         hint: "开启后，只有加入战斗遭遇 (Combat Tracker) 的 Token 才会显示 HUD。",
-        scope: "world",      
+        scope: "world",
         config: true,
         type: Boolean,
         default: false,
@@ -113,10 +113,10 @@ Hooks.on("updateToken", (tokenDocument, changes, options, userId) => {
 
     // 定义我们需要关心的变更属性
     const relevantKeys = ["hidden", "texture", "name", "disposition", "actorData"];
-    
+
     // 快速检查：如果 changes 里不包含上述任何 key，直接跳过
     const needsUpdate = relevantKeys.some(k => k in changes);
-    
+
     if (!needsUpdate) return;
 
     if (tokenDocument.object) {
@@ -130,9 +130,9 @@ Hooks.on("updateToken", (tokenDocument, changes, options, userId) => {
  */
 Hooks.on("updateActor", (actor, changes, options, userId) => {
     // 使用 foundry.utils.hasProperty 进行深度检查，只关心 attributes 变化
-    const hasAttributeChange = foundry.utils.hasProperty(changes, "system.attributes");
+    const hasResourceChange = foundry.utils.hasProperty(changes, "system.resources");
 
-    if (!hasAttributeChange) return;
+    if (!hasResourceChange) return;
 
     // 刷新该 Actor 关联的所有 Token
     const tokens = actor.getActiveTokens();
@@ -168,14 +168,14 @@ Hooks.on("deleteCombat", (combat) => { // 战斗结束
  */
 function updateSidebarOffset(isCollapsed) {
     // 展开状态：侧边栏宽度(约300px) + 安全间距 = 360px
-    const EXPANDED_WIDTH = 360; 
-    
+    const EXPANDED_WIDTH = 360;
+
     // 折叠状态：侧边栏宽度(约32px) + 安全间距 = 60px
-    const COLLAPSED_WIDTH = 60; 
+    const COLLAPSED_WIDTH = 60;
 
     // 如果 isCollapsed 为 true，使用 60px；否则使用 360px
     const offset = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
-    
+
     // 修改 CSS 变量，触发 CSS 中的 transition 动画
     document.documentElement.style.setProperty('--hud-right-offset', `${offset}px`);
 }
@@ -196,10 +196,10 @@ async function createHUDContainer() {
 function updateAllTokens() {
     if (!canvas.tokens) return;
     const tokens = canvas.tokens.placeables;
-    
+
     // 更新所有存在的 Token
     tokens.forEach(token => updateSingleToken(token));
-    
+
     // 清理残留的卡片 (比如切换场景后)
     const currentIds = new Set(tokens.map(t => t.id));
     document.querySelectorAll('.hud-card').forEach(card => {
@@ -226,27 +226,29 @@ async function updateSingleToken(token) {
 
     // --- B. 数据提取 ---
     // 获取 Actor 属性数据 (根据具体的 System 结构可能需要调整)
-    const attributes = token.actor.system.attributes || {};
-    
+    const resources = token.actor.system.resources || {};
+
     // 1. HP 处理
-    const hp = attributes.hp;
-    if (!hp) return; // 无血条不显示
+    const hp = resources.hp;
+    if (!hp) return;
     const hpValue = hp.value || 0;
     const hpMax = hp.max || 1;
     const hpPercent = Math.max(0, Math.min(100, (hpValue / hpMax) * 100));
 
     // 2. 内力 (Neili) 处理
-    const neili = attributes.neili || { value: 0, max: 0 };
+    const neili = resources.mp || { value: 0, max: 0 };
     const neiliValue = neili.value || 0;
     const neiliMax = neili.max || 0;
     const hasNeili = neiliMax > 0;
     const neiliPercent = hasNeili ? Math.max(0, Math.min(100, (neiliValue / neiliMax) * 100)) : 0;
 
     // 3. 怒气 (Rage) 处理
-    const rage = attributes.rage || { value: 0, max: 0 };
+    const rage = resources.rage || { value: 0, max: 0 };
+    // 系统定义 rage.max 固定为 10，这里做一个兼容判断
     const hasRage = (rage.max > 0) || (rage.value !== undefined);
     const rageValue = Math.max(0, Math.min(10, rage.value || 0));
-    // 生成怒气点数组
+
+    // 怒气点生成
     const rageDots = Array.from({ length: 10 }, (_, i) => ({
         active: i < rageValue
     }));
@@ -256,14 +258,14 @@ async function updateSingleToken(token) {
     let type = 'neutral';
     if (disposition === 1) type = 'friend';      // 友方
     else if (disposition < 0) type = 'enemy';    // 敌方
-    
+
     // 暂不显示中立生物
-    if (type === 'neutral') { removeTokenCard(id); return; } 
+    if (type === 'neutral') { removeTokenCard(id); return; }
 
     const isEnemy = (type === 'enemy');
     const isGM = game.user.isGM;
     // 敌方单位对玩家隐藏具体数值，仅显示状态描述
-    const showExactHp = isGM || !isEnemy; 
+    const showExactHp = isGM || !isEnemy;
 
     // 5. 状态文本计算 (如: 濒临死亡)
     let statusLabel = "未知";
@@ -297,15 +299,15 @@ async function updateSingleToken(token) {
             type, isEnemy, showExactHp,
             statusLabel, statusColorClass
         };
-        
+
         const html = await HUD_STATE.renderer("modules/xjzl-token-hud/templates/hud-card.hbs", data);
         const containerId = isEnemy ? 'hud-enemies' : 'hud-friends';
         const container = document.getElementById(containerId);
-        
+
         if (container) {
             container.insertAdjacentHTML('beforeend', html);
             card = document.getElementById(`hud-token-${id}`);
-            
+
             // 强制重排后添加 active 类以触发 CSS 滑入动画
             requestAnimationFrame(() => {
                 if (card) card.classList.add('active');
@@ -313,8 +315,8 @@ async function updateSingleToken(token) {
             // 初始化状态缓存
             HUD_STATE.tokens.set(id, { hp: hpValue, neili: neiliValue, rage: rageValue });
         }
-    } 
-    
+    }
+
     // 2. 卡片已存在：局部更新
     if (card) {
         // 2.1 模糊/精确模式切换 (Fog of War for Stats)
@@ -335,7 +337,7 @@ async function updateSingleToken(token) {
         // 2.2 基础信息更新 (名字、头像)
         const nameEl = card.querySelector('.hud-name');
         if (nameEl && nameEl.innerText !== token.name) nameEl.innerText = token.name;
-        
+
         const imgEl = card.querySelector('.hud-avatar');
         const newImg = token.document.texture.src;
         if (imgEl && imgEl.getAttribute('src') !== newImg) imgEl.src = newImg;
@@ -367,13 +369,13 @@ async function updateSingleToken(token) {
         // 对比上一次的状态，决定播放什么动画
         const lastState = HUD_STATE.tokens.get(id) || { hp: hpValue, neili: neiliValue, rage: rageValue };
         const { hp: lastHp, neili: lastNeili, rage: lastRage } = lastState;
-        
+
         let animToPlay = null;
 
         // -> 怒气更新
         if (hasRage) {
-            const segEls  = card.querySelectorAll('.rage-segment');
-            segEls .forEach((seg, index) => {
+            const segEls = card.querySelectorAll('.rage-segment');
+            segEls.forEach((seg, index) => {
                 if (index < rageValue) seg.classList.add('active');
                 else seg.classList.remove('active');
             });
@@ -411,7 +413,7 @@ async function updateSingleToken(token) {
             }
             if (!animToPlay) animToPlay = 'effect-heal';
         } else {
-             if (hpGhost) hpGhost.style.width = `${hpPercent}%`;
+            if (hpGhost) hpGhost.style.width = `${hpPercent}%`;
         }
 
         // -> 内力更新 (逻辑同 HP)
@@ -467,10 +469,10 @@ function removeTokenCard(tokenId) {
 function triggerAnimation(element, className) {
     // 移除互斥的动画类，重置状态
     element.classList.remove('effect-shake', 'effect-heal', 'effect-neili-cast', 'effect-neili-surge', 'effect-ultimate');
-    
+
     // 强制浏览器重绘 (Reflow) 以重启动画
-    void element.offsetWidth; 
-    
+    void element.offsetWidth;
+
     element.classList.add(className);
 
     // 特殊处理：绝招视频播放
@@ -479,12 +481,12 @@ function triggerAnimation(element, className) {
         if (video) {
             video.currentTime = 0;
             // 捕获播放错误 (例如用户未交互导致无法自动播放)
-            video.play().catch(e => {});
+            video.play().catch(e => { });
         }
     }
-    
+
     // 动画结束后自动清理类名 (1.5s 是保守估计，对应最长动画时间)
     setTimeout(() => {
         if (element) element.classList.remove(className);
-    }, 1500); 
+    }, 1500);
 }
