@@ -79,19 +79,23 @@
 
     <!-- 4. 底座：万象森罗 -->
     <div class="hud-dock">
-        <!-- 常用招式 -->
+
+        <!-- Tab 1: 常用招式 (需要网格) -->
         <div class="dock-category">
             <div class="cat-btn" data-tooltip="常用招式"><i class="fas fa-fist-raised"></i></div>
             <div class="cat-content">
                 <div class="scroll-area">
-                    {{#each shortcuts}}
-                    <div class="item-btn move" data-action="use-move" data-item-id="{{item.id}}"
-                        data-move-id="{{move.id}}"
-                        data-tooltip="<div style='text-align:left; max-width:200px'><strong>{{move.name}}</strong><br><span style='color:#aaa; font-size:11px'>{{item.name}}</span><hr><div style='font-size:11px; color:#ddd'>{{moveDesc}}</div><hr><i class='fas fa-mouse-pointer'></i> 左键: 出招<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
-                        <img src="{{item.img}}">
-                        <span class="label">{{move.name}}</span>
+                    <!-- [新增] 包裹一层 grid 容器 -->
+                    <div class="simple-grid">
+                        {{#each shortcuts}}
+                        <div class="item-btn move" data-action="use-move" data-item-id="{{item.id}}"
+                            data-move-id="{{move.id}}"
+                            data-tooltip="<div style='text-align:left; max-width:200px'><strong>{{move.name}}</strong><br><span style='color:#aaa; font-size:11px'>{{item.name}}</span><hr><div style='font-size:11px; color:#ddd'>{{{moveDesc}}}</div><hr><i class='fas fa-mouse-pointer'></i> 左键: 出招<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
+                            <img src="{{item.img}}">
+                            <span class="label">{{move.name}}</span>
+                        </div>
+                        {{/each}}
                     </div>
-                    {{/each}}
                     {{#unless shortcuts}}
                     <div class="empty-tip" style="color:#666; text-align:center; padding:10px;">无常用招式</div>
                     {{/unless}}
@@ -99,39 +103,43 @@
             </div>
         </div>
 
-        <!-- 消耗品 -->
+        <!-- Tab 2: 消耗品 (需要网格) -->
         <div class="dock-category">
             <div class="cat-btn" data-tooltip="消耗品"><i class="fas fa-flask"></i></div>
             <div class="cat-content">
                 <div class="scroll-area">
-                    {{#each consumables}}
-                    <div class="item-btn" data-action="use-item" data-item-id="{{id}}"
-                        data-tooltip="<div style='text-align:left; max-width:200px'><strong>{{name}}</strong><br><span style='color:#aaa'>数量: {{system.quantity}}</span><hr><div style='font-size:11px; color:#ddd'>{{shortDesc}}</div><hr><i class='fas fa-mouse-pointer'></i> 左键: 使用<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
-                        <img src="{{img}}">
-                        <span class="qty">{{system.quantity}}</span>
-                        <span class="label">{{name}}</span>
+                    <!-- [新增] 包裹一层 grid 容器 -->
+                    <div class="simple-grid">
+                        {{#each consumables}}
+                        <div class="item-btn" data-action="use-item" data-item-id="{{id}}"
+                            data-tooltip="<div style='text-align:left; max-width:200px'><strong>{{name}}</strong><br><span style='color:#aaa'>数量: {{system.quantity}}</span><hr><div style='font-size:11px; color:#ddd'>{{{shortDesc}}}</div><hr><i class='fas fa-mouse-pointer'></i> 左键: 使用<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
+                            <img src="{{img}}">
+                            <span class="qty">{{system.quantity}}</span>
+                            <span class="label">{{name}}</span>
+                        </div>
+                        {{/each}}
                     </div>
-                    {{/each}}
                 </div>
             </div>
         </div>
 
-        <!-- 装备 -->
+        <!-- Tab 3: 装备 (分组堆叠 -> 组内网格) -->
         <div class="dock-category">
             <div class="cat-btn" data-tooltip="装备"><i class="fas fa-tshirt"></i></div>
             <div class="cat-content">
                 <div class="scroll-area">
+                    <!-- 这里直接遍历 group，不加 simple-grid，让 div 自动换行堆叠 -->
                     {{#each equipmentGroups}}
-                    <!-- 分组容器 -->
                     <div class="equip-group">
-                        <!-- 分组标题 (点击折叠) -->
+                        <!-- 标题栏 -->
                         <div class="group-header" title="点击折叠/展开">
                             <span class="g-label">{{label}}</span>
-                            <span class="g-count">{{items.length}}</span>
-                            <i class="fas fa-chevron-down g-icon"></i>
+                            <div class="header-right">
+                                <span class="g-count">{{items.length}}</span>
+                                <i class="fas fa-chevron-down g-icon"></i>
+                            </div>
                         </div>
-
-                        <!-- 物品网格 -->
+                        <!-- 组内物品 -->
                         <div class="group-items">
                             {{#each items}}
                             <div class="item-btn {{#if system.equipped}}equipped{{/if}}" data-action="toggle-equip"
@@ -145,7 +153,6 @@
                         </div>
                     </div>
                     {{/each}}
-
                     {{#unless equipmentGroups}}
                     <div class="empty-tip" style="color:#666; text-align:center; padding:10px;">暂无装备</div>
                     {{/unless}}
@@ -153,7 +160,7 @@
             </div>
         </div>
 
-        <!-- 属性检定 -->
+        <!-- Tab 4: 属性  -->
         <div class="dock-category">
             <div class="cat-btn" data-tooltip="属性/技能"><i class="fas fa-dice-d20"></i></div>
             <div class="cat-content">

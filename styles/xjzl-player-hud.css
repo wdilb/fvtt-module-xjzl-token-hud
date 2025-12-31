@@ -1,7 +1,7 @@
 /* -----------------------------------------------------------
    Player Control HUD (PCH) - 样式表
    Scope ID: #xjzl-player-hud
-   版本: Grid Layout & Final Polish
+   版本: Final Vertical Stack & Groups
    ----------------------------------------------------------- */
 
 /* 容器定位 */
@@ -501,7 +501,7 @@
     margin: 0 !important;
 }
 
-/* --- 3. 抽屉底座 (Dock) & 网格背包 --- */
+/* --- 3. 抽屉底座 (Dock) --- */
 #xjzl-player-hud .hud-dock {
     position: absolute;
     bottom: -15px;
@@ -579,14 +579,12 @@
     padding: 10px;
 }
 
-/* 网格滚动区 */
+/* 滚动区基础设置 (取消全局 Grid，允许垂直堆叠) */
 #xjzl-player-hud .scroll-area {
     max-height: 350px;
     overflow-y: auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    gap: 8px;
     padding: 2px;
+    display: block;
 }
 
 #xjzl-player-hud .scroll-area::-webkit-scrollbar {
@@ -597,7 +595,95 @@
     background: #555;
 }
 
-/* 物品卡片 (垂直布局) */
+/* [新增] 纯平铺网格容器 (用于招式、消耗品) */
+#xjzl-player-hud .simple-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 8px;
+}
+
+/* --- 装备分组样式 (Vertical Stack) --- */
+#xjzl-player-hud .equip-group {
+    width: 100%;
+    margin-bottom: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+#xjzl-player-hud .group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    font-size: 12px;
+    color: #ddd;
+    font-family: sans-serif;
+    transition: background 0.2s;
+}
+
+#xjzl-player-hud .group-header:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffd700;
+}
+
+#xjzl-player-hud .g-label {
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+#xjzl-player-hud .header-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#xjzl-player-hud .g-count {
+    font-size: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #aaa;
+    padding: 1px 6px;
+    border-radius: 10px;
+}
+
+#xjzl-player-hud .g-icon {
+    transition: transform 0.2s;
+    font-size: 10px;
+    color: #888;
+}
+
+/* 组内网格 (Grid inside Group) */
+#xjzl-player-hud .group-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 8px;
+    padding: 8px;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s;
+    max-height: 1000px;
+    opacity: 1;
+}
+
+/* 折叠状态 */
+#xjzl-player-hud .equip-group.collapsed .group-items {
+    max-height: 0;
+    opacity: 0;
+    padding: 0 8px;
+    pointer-events: none;
+    margin: 0;
+}
+
+#xjzl-player-hud .equip-group.collapsed .g-icon {
+    transform: rotate(-90deg);
+}
+
+#xjzl-player-hud .equip-group.collapsed {
+    margin-bottom: 2px;
+}
+
+/* --- 物品卡片 --- */
 #xjzl-player-hud .item-btn {
     display: flex;
     flex-direction: column;
@@ -673,77 +759,6 @@
     border-radius: 50%;
     padding: 2px;
     z-index: 2;
-}
-
-/* --- 装备分组样式 --- */
-
-.equip-group {
-    width: 100%;
-    margin-bottom: 4px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.group-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 4px 8px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    color: #bbb;
-    font-family: sans-serif;
-    transition: background 0.2s;
-}
-
-.group-header:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffd700;
-}
-
-.g-label {
-    font-weight: bold;
-}
-
-.g-count {
-    margin-left: auto;
-    margin-right: 8px;
-    font-size: 10px;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 0 5px;
-    border-radius: 8px;
-}
-
-.g-icon {
-    transition: transform 0.2s;
-    font-size: 10px;
-}
-
-/* 组内网格 (继承之前的 Grid 逻辑) */
-.group-items {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    gap: 8px;
-    padding: 6px 2px;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s;
-    max-height: 500px;
-    /* 足够大以容纳内容 */
-    opacity: 1;
-}
-
-/* 折叠状态 */
-.equip-group.collapsed .group-items {
-    max-height: 0;
-    opacity: 0;
-    padding: 0 2px;
-    /* 收起padding防止占位 */
-    pointer-events: none;
-}
-
-.equip-group.collapsed .g-icon {
-    transform: rotate(-90deg);
 }
 
 #xjzl-player-hud .attr-grid {
