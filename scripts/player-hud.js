@@ -1,5 +1,8 @@
 /**
  * Player Control HUD Logic
+ * 适配: FVTT V13 & XJZL-System
+ * 版本: Final (集成奇珍装备逻辑)
+ * 作者: Tiwelee
  */
 export class PlayerHUD {
 
@@ -52,7 +55,6 @@ export class PlayerHUD {
 
         try {
             const data = await this.getData(actor);
-            // V13 兼容写法
             const renderer = foundry.applications?.handlebars?.renderTemplate || globalThis.renderTemplate;
             const html = await renderer("modules/xjzl-token-hud/templates/hud-player.hbs", data);
 
@@ -60,7 +62,6 @@ export class PlayerHUD {
                 const temp = document.createElement('div');
                 temp.innerHTML = html;
                 const newEl = temp.firstElementChild;
-                // 保留之前的折叠状态
                 if (hudEl.classList.contains('collapsed')) {
                     newEl.classList.add('collapsed');
                 }
@@ -76,7 +77,6 @@ export class PlayerHUD {
 
         } catch (err) {
             console.error("PlayerHUD Render Error:", err);
-            // 出错时不贸然移除，方便调试
         }
     }
 
@@ -158,7 +158,6 @@ export class PlayerHUD {
         const consumables = (actor.itemTypes?.consumable || []).map(processItem);
 
         // D. 装备分组逻辑
-        // 1. 定义分类配置
         const typeMapping = {
             weapon: { label: "武器", items: [] },
             head: { label: game.i18n.localize("XJZL.Armor.Type.Head") || "头饰", items: [] },
@@ -173,7 +172,6 @@ export class PlayerHUD {
             other: { label: "其他装备", items: [] }
         };
 
-        // 2. 遍历并归类
         const allEquips = [
             ...(actor.itemTypes?.weapon || []),
             ...(actor.itemTypes?.armor || []),
@@ -199,7 +197,6 @@ export class PlayerHUD {
             }
         }
 
-        // 3. 转换为数组 (Filter empty)
         const equipmentGroups = Object.entries(typeMapping)
             .filter(([key, group]) => group.items.length > 0)
             .map(([key, group]) => ({
@@ -249,7 +246,7 @@ export class PlayerHUD {
 
             shortcuts,
             consumables,
-            equipmentGroups, // [修复] 这里返回正确的分组数据，移除了 equipments
+            equipmentGroups,
 
             stats: [
                 { key: "liliang", label: "力量" }, { key: "shenfa", label: "身法" },
@@ -323,19 +320,67 @@ export class PlayerHUD {
             });
         });
 
-        // 4. 装备 (左键/右键)
+        // 4. 装备 (左键: 穿脱(含奇珍逻辑) | 右键: 发送)
         html.querySelectorAll('[data-action="toggle-equip"]').forEach(el => {
-            el.addEventListener("click", async (ev) => {
-                ev.preventDefault(); ev.stopPropagation();
-                const itemId = ev.currentTarget.dataset.itemId;
-                const item = actor.items.get(itemId);
-                if (item) await item.toggleEquip();
-            });
+            // 右键发送
             el.addEventListener("contextmenu", async (ev) => {
                 ev.preventDefault(); ev.stopPropagation();
                 const itemId = ev.currentTarget.dataset.itemId;
                 const item = actor.items.get(itemId);
                 if (item) await item.postToChat();
+            });
+
+            // 左键穿脱
+            el.addEventListener("click", async (ev) => {
+                ev.preventDefault(); ev.stopPropagation();
+                const itemId = ev.currentTarget.dataset.itemId;
+                const item = actor.items.get(itemId);
+                if (!item) return;
+
+                // 4.1 卸下直接执行
+                if (item.system.equipped) {
+                    return await item.toggleEquip();
+                }
+
+                // 4.2 奇珍装备逻辑 (需选穴位)
+                if (item.type === "qizhen") {
+                    // 获取可用穴位
+                    const availableSlots = actor.getAvailableAcupoints(); // 调用 Actor 方法
+
+                    if (!availableSlots || availableSlots.length === 0) {
+                        return ui.notifications.warn("没有可用的已打通穴位。");
+                    }
+
+                    // 构建弹窗内容
+                    const content = `
+                    <div class="form-group">
+                        <label>选择放入穴位:</label>
+                        <div class="form-fields">
+                            <select name="acupoint" style="width: 100%; min-width: 250px; height: 30px; font-size: 1.1em; color: var(--color-text-dark-primary);">
+                                ${availableSlots.map(slot => `<option value="${slot.key}">${slot.label}</option>`).join("")}
+                            </select>
+                        </div>
+                    </div>`;
+
+                    // 弹出 V2 Dialog
+                    try {
+                        const acupoint = await foundry.applications.api.DialogV2.prompt({
+                            window: { title: `装备: ${item.name}`, icon: "fas fa-gem" },
+                            content: content,
+                            ok: {
+                                label: "放入",
+                                callback: (event, button) => new FormData(button.form).get("acupoint")
+                            }
+                        });
+
+                        if (acupoint) await item.toggleEquip(acupoint);
+                    } catch (e) {
+                        // 用户取消
+                    }
+                } else {
+                    // 4.3 普通装备逻辑
+                    await item.toggleEquip();
+                }
             });
         });
 
@@ -348,7 +393,7 @@ export class PlayerHUD {
             });
         }
 
-        // 6. 折叠HUD
+        // 6. 折叠 HUD
         const toggleBtn = html.querySelector('[data-action="toggle-collapse"]');
         if (toggleBtn) {
             toggleBtn.addEventListener("click", (ev) => {
