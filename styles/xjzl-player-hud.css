@@ -1,15 +1,15 @@
 /* -----------------------------------------------------------
-   Player Control HUD (PCH) - 样式表 (双翼拱月版)
+   Player Control HUD (PCH) - 样式表 (Final Fix)
    Scope ID: #xjzl-player-hud
    ----------------------------------------------------------- */
 
+/* 容器定位于屏幕底部中央，避开 Hotbar */
 #xjzl-player-hud {
     position: fixed;
-    bottom: 90px;
+    bottom: 100px;
     left: 50%;
     transform: translateX(-50%);
     width: 800px;
-    /* 稍微再宽一点，给圆环留空间 */
     height: 160px;
     z-index: 60;
     font-family: 'Ma Shan Zheng', cursive;
@@ -18,11 +18,12 @@
     transition: bottom 0.3s ease;
 }
 
+/* 恢复内部交互 */
 #xjzl-player-hud * {
     pointer-events: auto;
 }
 
-/* 折叠模式 */
+/* 折叠模式：下沉隐藏 */
 #xjzl-player-hud.collapsed {
     bottom: -150px;
 }
@@ -33,10 +34,9 @@
 
 
 /* --- 1. 中庭 (Center) --- */
-.hud-center {
+#xjzl-player-hud .hud-center {
     position: absolute;
     bottom: 30px;
-    /* 立绘底座高度 */
     left: 50%;
     transform: translateX(-50%);
     width: 140px;
@@ -47,14 +47,13 @@
     z-index: 10;
 }
 
-.avatar-wrapper {
+#xjzl-player-hud .avatar-wrapper {
     position: relative;
     width: 120px;
     height: 120px;
-    /* 核心立绘尺寸 */
 }
 
-.avatar-frame {
+#xjzl-player-hud .avatar-frame {
     width: 100%;
     height: 100%;
     border-radius: 50%;
@@ -67,18 +66,18 @@
     transition: transform 0.2s;
 }
 
-.avatar-frame:hover {
+#xjzl-player-hud .avatar-frame:hover {
     transform: scale(1.02);
 }
 
-.avatar-img {
+#xjzl-player-hud .avatar-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
 /* 呼吸光环 */
-.aura-ring {
+#xjzl-player-hud .aura-ring {
     position: absolute;
     top: 0;
     left: 0;
@@ -90,37 +89,27 @@
     animation: kf-breathe 3s infinite alternate;
 }
 
-.aura-ring.yin {
+#xjzl-player-hud .aura-ring.yin {
     color: #d500f9;
 }
 
-.aura-ring.yang {
+#xjzl-player-hud .aura-ring.yang {
     color: #ff3d00;
 }
 
-.aura-ring.taiji {
+#xjzl-player-hud .aura-ring.taiji {
     color: #fff;
 }
 
-@keyframes kf-breathe {
-    0% {
-        opacity: 0.3;
-    }
-
-    100% {
-        opacity: 0.8;
-    }
-}
-
-/* 境界印章 - 移到右上角肩膀处 */
-.realm-seal {
+/* 境界印章 (肩章式) */
+#xjzl-player-hud .realm-seal {
     position: absolute;
-    top: 5px;
-    right: -15px;
+    top: 0px;
+    right: -10px;
     background: linear-gradient(135deg, #b71c1c, #880e4f);
     color: #fff;
     padding: 1px 6px;
-    font-size: 13px;
+    font-size: 12px;
     border-radius: 4px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
     transform: rotate(10deg);
@@ -129,8 +118,8 @@
     text-shadow: 1px 1px 0 #000;
 }
 
-/* 架招 Badge - 顶部居中 */
-.stance-badge {
+/* 架招 Badge */
+#xjzl-player-hud .stance-badge {
     position: absolute;
     top: -25px;
     left: 50%;
@@ -148,13 +137,13 @@
     z-index: 15;
 }
 
-.stance-badge:hover {
+#xjzl-player-hud .stance-badge:hover {
     background: #b71c1c;
     color: #fff;
     border-color: #fff;
 }
 
-.toggle-hud-btn {
+#xjzl-player-hud .toggle-hud-btn {
     position: absolute;
     top: -45px;
     width: 30px;
@@ -168,185 +157,194 @@
 }
 
 
-/* --- [新] 怒气环绕系统 (Rage Ring) --- */
-.rage-ring-container {
+/* --- [新] 怒气环绕系统 --- */
+#xjzl-player-hud .rage-ring-container {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 160px;
     height: 160px;
-    /* 比头像大一圈 */
     border-radius: 50%;
     pointer-events: none;
     z-index: 4;
 }
 
-/* 怒气宝珠 */
-.rage-orb {
+#xjzl-player-hud .rage-orb {
     position: absolute;
     width: 8px;
     height: 12px;
-    /* 长条形宝石 */
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.15);
     left: 50%;
     top: 50%;
-    /* 核心算法: 旋转并在Y轴推出去
-       -105deg 是起始角度 (左下)
-       + (var(--i) * 23deg) 是间距，10个点跨越下方约 210度
-       translateY(72px) 是半径距离
-    */
+    /* 旋转计算：-115deg 起始，每个间隔 25deg，半径 74px */
     transform: translate(-50%, -50%) rotate(calc(-115deg + (var(--i) * 25deg))) translateY(74px);
     border-radius: 2px;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* 怒气激活 - 沿用之前的渐变色逻辑 */
-.rage-orb.active {
+#xjzl-player-hud .rage-orb.active {
     background: var(--seg-color, #ffd700);
     box-shadow: 0 0 8px var(--seg-color, #ffd700);
     border-color: #fff;
     height: 14px;
-    /* 激活变长一点 */
     width: 9px;
 }
 
-/* 颜色定义 (复用之前的逻辑) */
-.rage-orb:nth-child(1).active {
+/* 怒气渐变色定义 */
+#xjzl-player-hud .rage-orb:nth-child(1).active {
     --seg-color: #b9f6ca;
 }
 
-.rage-orb:nth-child(2).active {
+#xjzl-player-hud .rage-orb:nth-child(2).active {
     --seg-color: #69f0ae;
 }
 
-.rage-orb:nth-child(3).active {
+#xjzl-player-hud .rage-orb:nth-child(3).active {
     --seg-color: #00e676;
 }
 
-.rage-orb:nth-child(4).active {
+#xjzl-player-hud .rage-orb:nth-child(4).active {
     --seg-color: #00c853;
 }
 
-.rage-orb:nth-child(5).active {
+#xjzl-player-hud .rage-orb:nth-child(5).active {
     --seg-color: #64dd17;
 }
 
-.rage-orb:nth-child(6).active {
+#xjzl-player-hud .rage-orb:nth-child(6).active {
     --seg-color: #76ff03;
 }
 
-.rage-orb:nth-child(7).active {
+#xjzl-player-hud .rage-orb:nth-child(7).active {
     --seg-color: #ffff00;
 }
 
-.rage-orb:nth-child(8).active {
+#xjzl-player-hud .rage-orb:nth-child(8).active {
     --seg-color: #ffd600;
 }
 
-.rage-orb:nth-child(9).active {
+#xjzl-player-hud .rage-orb:nth-child(9).active {
     --seg-color: #ffab00;
 }
 
-.rage-orb:nth-child(10).active {
+#xjzl-player-hud .rage-orb:nth-child(10).active {
     --seg-color: #ff3d00;
     animation: kf-pulse-orb 0.5s infinite alternate;
 }
 
-@keyframes kf-pulse-orb {
-    from {
-        box-shadow: 0 0 5px #ff3d00;
-    }
 
-    to {
-        box-shadow: 0 0 15px #ff3d00, 0 0 5px #fff;
-    }
-}
-
-
-/* --- [新] 怒气核心 (输入框) --- */
-.rage-core {
+/* --- [新] 怒气核心 (对齐修复版) --- */
+#xjzl-player-hud .rage-core {
     position: absolute;
     bottom: -15px;
     left: 50%;
     transform: translateX(-50%);
     width: 36px;
     height: 36px;
-    background: radial-gradient(circle, #222, #000);
+    /* 容器宽度只有 36px */
+
+    background: radial-gradient(circle, #222 30%, #000 100%);
     border: 2px solid #444;
     border-radius: 50%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+
     z-index: 20;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
     transition: border-color 0.2s;
+
+    /* 关键：设置为隐藏溢出，防止输入框撑大圆圈 */
+    overflow: hidden;
 }
 
-.rage-core:hover {
+#xjzl-player-hud .rage-core:hover {
     border-color: #ff9100;
     box-shadow: 0 0 15px rgba(255, 145, 0, 0.4);
 }
 
-.rage-core i {
+/* 装饰图标：固定在顶部 */
+#xjzl-player-hud .rage-core i {
+    position: absolute;
+    top: 4px;
+    left: 0;
+    width: 100%;
+    /* 宽度占满，方便 text-align 居中 */
+    text-align: center;
+
     font-size: 10px;
     color: #ff6d00;
-    margin-top: -2px;
+    opacity: 0.9;
+    line-height: 1;
+    pointer-events: none;
 }
 
-/* 核心里的输入框 */
-input.rage-input {
-    width: 100%;
-    text-align: center;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #fff;
-    font-weight: bold;
-    font-size: 14px;
-    font-family: 'Roboto Condensed', sans-serif;
-    padding: 0;
-    margin: 0;
-}
-
-
-/* --- 2. 左右翼 (Wings) - 顶部对齐 --- */
-.hud-wing {
+/* 输入框：绝对定位在底部 */
+/* 注意：这里使用 input.rage-input 提高优先级，覆盖 input.res-input 的样式 */
+#xjzl-player-hud input.rage-input {
     position: absolute;
-    /* [核心修改] 顶部对齐：现在用 top 定位，基于 hud-center 的顶部 */
-    /* 计算：hud-center高140px，居中。我们希望翼的顶部和头像顶部（约20px处）对齐 */
+    bottom: 2px;
+    left: 0;
+
+    /* 1. 宽度强制设为 100% (即 36px)，跟父容器一样宽 */
+    width: 100% !important;
+    height: 18px !important;
+
+    /* 2. 强制文本居中 (覆盖掉 res-input 的 right) */
+    text-align: center !important;
+
+    /* 3. 字体与行高 */
+    line-height: 18px !important;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 15px !important;
+    font-weight: bold;
+    color: #fff;
+
+    /* 4. 清除干扰 */
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* 聚焦时的高亮 */
+#xjzl-player-hud input.rage-input:focus {
+    color: #ffd700;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+
+/* --- 2. 左右翼 (Wings) --- */
+#xjzl-player-hud .hud-wing {
+    position: absolute;
     top: 25px;
     width: 250px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    z-index: 5;
 }
 
-.hud-wing.left {
-    right: 56%;
-    /* 离中心远一点，避开怒气环 */
+/* [修改] 左右距离拉大到 62%，彻底避开圆环 */
+#xjzl-player-hud .hud-wing.left {
+    right: 62%;
     align-items: flex-end;
-    /* 向右对齐，紧贴圆环 */
 }
 
-.hud-wing.right {
-    left: 56%;
+#xjzl-player-hud .hud-wing.right {
+    left: 62%;
     align-items: flex-start;
-    /* 向左对齐，紧贴圆环 */
 }
 
-
-/* 战斗属性矩阵 (左侧) */
-.combat-stat-grid {
+/* 战斗属性 */
+#xjzl-player-hud .combat-stat-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 6px;
     width: 100%;
 }
 
-.c-stat {
+#xjzl-player-hud .c-stat {
     background: linear-gradient(90deg, rgba(0, 0, 0, 0.8), rgba(40, 40, 40, 0.8));
     padding: 4px 10px;
     border-radius: 4px;
@@ -359,24 +357,21 @@ input.rage-input {
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     height: 32px;
-    /* 固定高度 */
 }
 
-/* 右边那列文字靠右 */
-.c-stat .label {
+#xjzl-player-hud .c-stat .label {
     opacity: 0.8;
 }
 
-.c-stat .val {
+#xjzl-player-hud .c-stat .val {
     font-family: 'Roboto Condensed', sans-serif;
     font-weight: bold;
     font-size: 16px;
     color: #fff;
 }
 
-
-/* 资源条 (右侧) */
-.res-bar {
+/* 资源条 */
+#xjzl-player-hud .res-bar {
     width: 100%;
     height: 22px;
     background: rgba(0, 0, 0, 0.7);
@@ -388,20 +383,20 @@ input.rage-input {
     margin-bottom: 5px;
 }
 
-.res-bar.hp .bar-fill {
+#xjzl-player-hud .res-bar.hp .bar-fill {
     background: linear-gradient(90deg, #b71c1c, #ff5252);
 }
 
-.res-bar.mp .bar-fill {
+#xjzl-player-hud .res-bar.mp .bar-fill {
     background: linear-gradient(90deg, #0d47a1, #2196f3);
 }
 
-.bar-fill {
+#xjzl-player-hud .bar-fill {
     height: 100%;
     transition: width 0.3s;
 }
 
-.bar-text {
+#xjzl-player-hud .bar-text {
     position: absolute;
     top: 0;
     left: 0;
@@ -419,8 +414,7 @@ input.rage-input {
     gap: 2px;
 }
 
-/* 隐形输入框 */
-input.res-input {
+#xjzl-player-hud input.res-input {
     background: transparent;
     border: none;
     outline: none;
@@ -434,36 +428,33 @@ input.res-input {
     transition: border-color 0.2s;
 }
 
-input.res-input:hover,
-input.res-input:focus {
+#xjzl-player-hud input.res-input:hover,
+#xjzl-player-hud input.res-input:focus {
     border-bottom: 1px solid rgba(255, 255, 255, 0.5);
     background: rgba(0, 0, 0, 0.2);
 }
 
 
 /* --- 3. 抽屉底座 (Dock) --- */
-.hud-dock {
+#xjzl-player-hud .hud-dock {
     position: absolute;
     bottom: -15px;
     left: 50%;
     transform: translateX(-50%);
     width: 400px;
-    /* 加宽避开怒气环 */
     height: 50px;
     display: flex;
     justify-content: space-between;
     padding: 0 80px;
-    /* 中间留出 160px 给怒气环和核心 */
 }
 
-/* Dock 样式复用之前的，无需更改 */
-.dock-category {
+#xjzl-player-hud .dock-category {
     position: relative;
     width: 45px;
     height: 45px;
 }
 
-.cat-btn {
+#xjzl-player-hud .cat-btn {
     width: 45px;
     height: 45px;
     border-radius: 50%;
@@ -481,7 +472,7 @@ input.res-input:focus {
     z-index: 20;
 }
 
-.cat-btn:hover {
+#xjzl-player-hud .cat-btn:hover {
     background: #444;
     color: #fff;
     transform: translateY(-3px);
@@ -489,7 +480,7 @@ input.res-input:focus {
     box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
 }
 
-.cat-content {
+#xjzl-player-hud .cat-content {
     position: absolute;
     bottom: 30px;
     left: 50%;
@@ -510,7 +501,7 @@ input.res-input:focus {
     z-index: 100;
 }
 
-.dock-category:hover .cat-content {
+#xjzl-player-hud .dock-category:hover .cat-content {
     bottom: 60px;
     max-height: 350px;
     opacity: 1;
@@ -519,7 +510,7 @@ input.res-input:focus {
     padding: 10px;
 }
 
-.scroll-area {
+#xjzl-player-hud .scroll-area {
     max-height: 300px;
     overflow-y: auto;
     display: flex;
@@ -527,15 +518,15 @@ input.res-input:focus {
     gap: 4px;
 }
 
-.scroll-area::-webkit-scrollbar {
+#xjzl-player-hud .scroll-area::-webkit-scrollbar {
     width: 4px;
 }
 
-.scroll-area::-webkit-scrollbar-thumb {
+#xjzl-player-hud .scroll-area::-webkit-scrollbar-thumb {
     background: #555;
 }
 
-.item-btn {
+#xjzl-player-hud .item-btn {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -547,12 +538,12 @@ input.res-input:focus {
     border: 1px solid transparent;
 }
 
-.item-btn:hover {
+#xjzl-player-hud .item-btn:hover {
     background: rgba(255, 255, 255, 0.15);
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-.item-btn img {
+#xjzl-player-hud .item-btn img {
     width: 28px;
     height: 28px;
     object-fit: cover;
@@ -560,12 +551,12 @@ input.res-input:focus {
     background: #000;
 }
 
-.item-btn .label {
+#xjzl-player-hud .item-btn .label {
     font-size: 14px;
     color: #eee;
 }
 
-.item-btn .qty {
+#xjzl-player-hud .item-btn .qty {
     margin-left: auto;
     font-size: 12px;
     color: #888;
@@ -574,23 +565,23 @@ input.res-input:focus {
     border-radius: 4px;
 }
 
-.item-btn.equipped {
+#xjzl-player-hud .item-btn.equipped {
     border: 1px solid #00e676;
     background: rgba(0, 230, 118, 0.1);
 }
 
-.equip-mark {
+#xjzl-player-hud .equip-mark {
     margin-left: auto;
     color: #00e676;
 }
 
-.attr-grid {
+#xjzl-player-hud .attr-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 6px;
 }
 
-.attr-btn {
+#xjzl-player-hud .attr-btn {
     text-align: center;
     background: #333;
     padding: 6px 0;
@@ -602,14 +593,34 @@ input.res-input:focus {
     transition: all 0.2s;
 }
 
-.attr-btn:hover {
+#xjzl-player-hud .attr-btn:hover {
     background: #555;
     color: #ffd700;
     border-color: #ffd700;
 }
 
-.attr-btn.skill {
+#xjzl-player-hud .attr-btn.skill {
     color: #888;
     font-size: 13px;
     border-style: dashed;
+}
+
+@keyframes kf-breathe {
+    0% {
+        opacity: 0.3;
+    }
+
+    100% {
+        opacity: 0.8;
+    }
+}
+
+@keyframes kf-pulse-orb {
+    from {
+        box-shadow: 0 0 5px #ff3d00;
+    }
+
+    to {
+        box-shadow: 0 0 15px #ff3d00, 0 0 5px #fff;
+    }
 }

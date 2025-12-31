@@ -1,6 +1,12 @@
+<!-- 
+  Player Control HUD (PCH) - HTML 模板
+  布局逻辑: 双翼拱月 (Double Wing Arching Moon)
+  版本: V13 适配版
+-->
 <div id="xjzl-player-hud">
 
-    <!-- 1. 左翼：战阵四维 -->
+    <!-- 1. 左翼：战阵四维 (纯展示) -->
+    <!-- 通过 top 属性与头像顶部对齐 -->
     <div class="hud-wing left">
         <div class="combat-stat-grid">
             {{#each leftStats}}
@@ -14,59 +20,65 @@
 
     <!-- 2. 中庭：本我 (核心区域) -->
     <div class="hud-center">
-        <!-- 架招 Badge (顶端悬浮) -->
+
+        <!-- 架招 Badge (顶端悬浮，点击取消) -->
         {{#if stanceName}}
         <div class="stance-badge" data-action="stop-stance" title="点击解除架招">
             <i class="fas fa-shield-alt"></i> {{stanceName}}
         </div>
         {{/if}}
 
-        <!-- 核心容器 -->
+        <!-- 核心立绘容器 -->
         <div class="avatar-wrapper">
-            <!-- 立绘 -->
+            <!-- 头像框 -->
             <div class="avatar-frame">
                 <img src="{{actorImg}}" class="avatar-img">
+                <!-- 内功呼吸光环 -->
                 <div class="aura-ring {{neigongElement}}"></div>
             </div>
 
-            <!-- 境界印章 (右上角悬浮) -->
+            <!-- 境界印章 (右上角肩章) -->
             {{#if realmName}}
             <div class="realm-seal">{{realmName}}</div>
             {{/if}}
 
-            <!-- [新] 怒气环绕系统 -->
+            <!-- 怒气环绕系统 (半圆排列) -->
             <div class="rage-ring-container">
-                <!-- 怒气点 (半圆排列) -->
                 {{#each rageDots}}
+                <!-- index 用于 CSS 计算旋转角度 -->
                 <div class="rage-orb {{#if this.active}}active{{/if}}" style="--i:{{@index}}"></div>
                 {{/each}}
             </div>
 
-            <!-- [新] 怒气核心 (输入框) -->
+            <!-- 怒气核心 (底部输入框) -->
             <div class="rage-core" title="当前怒气">
+                <!-- 装饰图标 (绝对定位在顶部) -->
                 <i class="fas fa-fire"></i>
+                <!-- 输入框 (绝对定位在底部，确保居中) -->
                 <input type="text" class="res-input rage-input" data-target="system.resources.rage.value"
                     value="{{rage.value}}">
             </div>
         </div>
 
+        <!-- 折叠/展开按钮 -->
         <div class="toggle-hud-btn" data-action="toggle-collapse">
             <i class="fas fa-chevron-down"></i>
         </div>
     </div>
 
-    <!-- 3. 右翼：气血内力 -->
+    <!-- 3. 右翼：气血内力 (可编辑) -->
     <div class="hud-wing right">
-        <!-- HP -->
+        <!-- HP 条 -->
         <div class="res-bar hp">
             <div class="bar-fill" style="width: {{hpPercent}}%;"></div>
             <div class="bar-text">
+                <!-- data-target 用于 JS 自动绑定更新 -->
                 <input type="text" class="res-input" data-target="system.resources.hp.value" value="{{hp.value}}">
                 <span class="sep">/</span>
                 <span class="max">{{hp.max}}</span>
             </div>
         </div>
-        <!-- MP (内力) -->
+        <!-- MP 条 -->
         <div class="res-bar mp">
             <div class="bar-fill" style="width: {{mpPercent}}%;"></div>
             <div class="bar-text">
@@ -77,10 +89,9 @@
         </div>
     </div>
 
-    <!-- 4. 底座：万象森罗 (保持不变) -->
+    <!-- 4. 底座：万象森罗 (操作按钮) -->
     <div class="hud-dock">
-        <!-- ... (底座代码不需要动，和之前一样) ... -->
-        <!-- 为了节省篇幅，这里省略底座的重复代码，请保留原来的底座代码 -->
+        <!-- 常用招式 -->
         <div class="dock-category">
             <div class="cat-btn"><i class="fas fa-fist-raised"></i></div>
             <div class="cat-content">
@@ -98,6 +109,8 @@
                 </div>
             </div>
         </div>
+
+        <!-- 消耗品 -->
         <div class="dock-category">
             <div class="cat-btn"><i class="fas fa-flask"></i></div>
             <div class="cat-content">
@@ -111,6 +124,8 @@
                 </div>
             </div>
         </div>
+
+        <!-- 装备 -->
         <div class="dock-category">
             <div class="cat-btn"><i class="fas fa-tshirt"></i></div>
             <div class="cat-content">
@@ -125,6 +140,8 @@
                 </div>
             </div>
         </div>
+
+        <!-- 属性检定 -->
         <div class="dock-category">
             <div class="cat-btn"><i class="fas fa-dice-d20"></i></div>
             <div class="cat-content">

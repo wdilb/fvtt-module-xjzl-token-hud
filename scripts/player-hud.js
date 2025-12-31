@@ -1,21 +1,31 @@
 /**
  * Player Control HUD Logic
  * 适配: FVTT V13
+ * 作者: Tiwelee
  */
 export class PlayerHUD {
+
+    // 初始化监听器
     static init() {
+        // 监听 Token 选中/控制变化
         Hooks.on("controlToken", () => this.renderHUD());
+
+        // 监听数据变化 (实时刷新)
         Hooks.on("updateActor", (actor) => {
             if (this.currentActor && this.currentActor.id === actor.id) this.renderHUD();
         });
         Hooks.on("updateItem", (item) => {
             if (this.currentActor && this.currentActor.id === item.parent?.id) this.renderHUD();
         });
+
+        // 战斗轮次更新 (刷新先攻等)
         Hooks.on("updateCombat", () => this.renderHUD());
     }
 
+    // 获取当前控制的 Actor (必须是 Owner)
     static get currentActor() {
         const tokens = canvas.tokens.controlled;
+        // 必须选中且只选中 1 个，且必须是拥有者权限
         if (tokens.length !== 1) return null;
         const token = tokens[0];
         if (!token.actor) return null;
@@ -23,36 +33,44 @@ export class PlayerHUD {
         return token.actor;
     }
 
+    // 渲染 HUD 主逻辑
     static async renderHUD() {
         const actor = this.currentActor;
         const hudEl = document.getElementById("xjzl-player-hud");
 
+        // 1. 如果没有选中有效 Actor，移除 HUD 并退出
         if (!actor) {
             if (hudEl) hudEl.remove();
             return;
         }
 
         try {
+            // 2. 准备数据
             const data = await this.getData(actor);
+
+            // 3. 渲染模板 (V13 兼容写法)
             const renderer = foundry.applications?.handlebars?.renderTemplate || globalThis.renderTemplate;
             const html = await renderer("modules/xjzl-token-hud/templates/hud-player.hbs", data);
 
+            // 4. 插入 DOM
             if (hudEl) {
-                // 如果只是更新数据，为了不打断输入焦点的体验，我们最好只更新内容
-                // 但为了代码简单，这里先做整体替换。如果输入时会断触，需要做更复杂的 diff 更新
+                // 如果已存在，使用 replaceWith 进行替换
+                // 同时尝试保留折叠状态
                 const temp = document.createElement('div');
                 temp.innerHTML = html;
+                const newEl = temp.firstElementChild;
 
-                // 保持折叠状态
                 if (hudEl.classList.contains('collapsed')) {
-                    temp.firstElementChild.classList.add('collapsed');
+                    newEl.classList.add('collapsed');
                 }
 
-                hudEl.replaceWith(temp.firstElementChild);
+                hudEl.replaceWith(newEl);
             } else {
+                // 如果不存在，插入到 body
                 document.body.insertAdjacentHTML('beforeend', html);
             }
 
+            // 5. 重新获取 DOM 并绑定事件
             const newHudEl = document.getElementById("xjzl-player-hud");
             if (newHudEl) {
                 this.activateListeners(newHudEl, actor);
@@ -64,6 +82,7 @@ export class PlayerHUD {
         }
     }
 
+    // 数据准备
     static async getData(actor) {
         const sys = actor.system;
         const res = sys.resources || {};
@@ -75,9 +94,10 @@ export class PlayerHUD {
         const rage = res.rage || { value: 0 };
         const rageVal = Math.max(0, Math.min(10, rage.value));
 
-        // B. 常用招式
+        // B. 常用招式 (Pinned Moves)
         const pinnedList = actor.getFlag("xjzl-system", "pinnedMoves") || [];
         const shortcuts = [];
+
         if (Array.isArray(pinnedList)) {
             for (const str of pinnedList) {
                 if (typeof str !== 'string') continue;
@@ -85,7 +105,9 @@ export class PlayerHUD {
                 const item = actor.items.get(itemId);
                 if (item) {
                     const move = item.system.moves?.find(m => m.id === moveId);
-                    if (move) shortcuts.push({ item, move });
+                    if (move) {
+                        shortcuts.push({ item, move });
+                    }
                 }
             }
         }
@@ -113,10 +135,8 @@ export class PlayerHUD {
         }
 
         // E. 境界名称 (本地化读取)
-        const realmLevel = sys.cultivation?.realmLevel ?? 0; // 默认为0
-        // 尝试获取翻译，如果没有 key 则回退到 "XJZL.Realm.0"
+        const realmLevel = sys.cultivation?.realmLevel ?? 0;
         const realmKey = `XJZL.Realm.${realmLevel}`;
-        // 使用 game.i18n.localize 读取系统里的翻译
         const realmName = game.i18n.localize(realmKey);
 
         return {
@@ -125,25 +145,25 @@ export class PlayerHUD {
             neigongElement,
             stanceName,
 
-            // 资源 (用于 Input)
-            hp, mp, rage,
-            rageVal,
+            // 资源百分比
+            hp, mp, rage, rageVal, // 传递原始对象供 input 使用
             hpPercent: (hp.value / hp.max) * 100,
             mpPercent: (mp.value / mp.max) * 100,
             rageDots: Array.from({ length: 10 }, (_, i) => ({ active: i < rageVal })),
 
-            // [修改] 左侧显示的四个属性
+            // 左侧四维 (纯展示)
             leftStats: [
-                { label: "格挡", icon: "fas fa-shield-alt", value: combat.blockTotal || 0 },
-                { label: "闪避", icon: "fas fa-running", value: combat.dodgeTotal || 0 },
-                { label: "看破", icon: "fas fa-eye", value: combat.kanpoTotal || 0 },
-                { label: "速度", icon: "fas fa-wind", value: combat.speedTotal || 0 }
+                { label: "格挡", value: combat.blockTotal || 0 },
+                { label: "闪避", value: combat.dodgeTotal || 0 },
+                { label: "看破", value: combat.kanpoTotal || 0 },
+                { label: "速度", value: combat.speedTotal || 0 }
             ],
 
             shortcuts,
             consumables,
             equipments,
 
+            // 属性列表 (用于按钮)
             stats: [
                 { key: "liliang", label: "力量" },
                 { key: "shenfa", label: "身法" },
@@ -152,29 +172,32 @@ export class PlayerHUD {
                 { key: "qigan", label: "气感" },
                 { key: "shencai", label: "神采" },
                 { key: "wuxing", label: "悟性" }
-            ]
+            ],
+
+            isCollapsed: false
         };
     }
 
+    // 事件绑定
     static activateListeners(html, actor) {
         if (!html) return;
 
-        // 资源输入框监听 (HP/MP/Rage)
+        // 0. 资源输入框监听 (HP/MP/Rage)
         html.querySelectorAll('input.res-input').forEach(input => {
-            // 聚焦时选中所有文本，方便修改
+            // 聚焦时选中所有文本
             input.addEventListener("focus", ev => ev.currentTarget.select());
-
             // 变更时更新 Actor
             input.addEventListener("change", async (ev) => {
                 ev.preventDefault();
-                const target = ev.currentTarget.dataset.target; // system.resources.hp.value
+                ev.stopPropagation();
+                const target = ev.currentTarget.dataset.target;
                 const value = Number(ev.currentTarget.value);
                 if (!target || isNaN(value)) return;
                 await actor.update({ [target]: value });
             });
         });
 
-        // 1. 属性检定 (底部按钮)
+        // 1. 属性检定
         html.querySelectorAll('[data-action="roll-stat"]').forEach(el => {
             el.addEventListener("click", async (ev) => {
                 ev.preventDefault();
@@ -195,7 +218,7 @@ export class PlayerHUD {
             });
         });
 
-        // 3. 使用物品
+        // 3. 使用物品 (消耗品)
         html.querySelectorAll('[data-action="use-item"]').forEach(el => {
             el.addEventListener("click", async (ev) => {
                 ev.preventDefault();
