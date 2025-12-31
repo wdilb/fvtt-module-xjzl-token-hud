@@ -137,7 +137,9 @@ export class PlayerHUD {
             const stMove = stItem?.system.moves?.find(m => m.id === sys.martial.stance);
             if (stMove) {
                 stanceName = stMove.name;
-                stanceDesc = stMove.description || "暂无描述";
+                // 拼接架招描述与操作提示
+                const rawDesc = stMove.description || "暂无描述";
+                stanceDesc = `${rawDesc}<hr><div style="text-align:center; color:#ffd700; margin-top:4px"><i class="fas fa-hand-pointer"></i> 点击解除架招</div>`;
             }
         }
 

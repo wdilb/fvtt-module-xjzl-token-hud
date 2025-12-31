@@ -1,6 +1,7 @@
 /* -----------------------------------------------------------
    Player Control HUD (PCH) - 样式表
    Scope ID: #xjzl-player-hud
+   版本: Final Fix
    ----------------------------------------------------------- */
 
 /* 容器定位 */
@@ -18,7 +19,7 @@
     transition: bottom 0.3s ease;
 }
 
-/* 恢复交互 */
+/* 恢复内部交互 */
 #xjzl-player-hud * {
     pointer-events: auto;
 }

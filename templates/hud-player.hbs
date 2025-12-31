@@ -1,6 +1,6 @@
 <!-- 
   Player Control HUD (PCH) - 模板文件
-  版本: Final Fix (护体修复/怒气对齐/原生Tooltip)
+  版本: Final (包含护体修复、怒气对齐、架招提示优化)
 -->
 <div id="xjzl-player-hud">
 
@@ -21,6 +21,7 @@
 
         <!-- 架招 Badge (顶端悬浮) -->
         {{#if stanceName}}
+        <!-- 这里的 stanceDesc 已经在 JS 里拼好了“点击解除”的提示 -->
         <div class="stance-badge" data-action="stop-stance" data-tooltip="{{stanceDesc}}" data-tooltip-direction="UP">
             <i class="fas fa-shield-alt"></i> {{stanceName}}
         </div>
@@ -64,7 +65,7 @@
     <!-- 3. 右翼：气血内力 -->
     <div class="hud-wing right">
 
-        <!-- [结构修复] HP组: 使用 group 包裹，将护体徽章移出 res-bar 防止截断 -->
+        <!-- HP组: 使用 group 包裹，护体徽章外置防止截断 -->
         <div class="bar-group">
 
             <!-- 护体数值徽章 (浮动在上方) -->
