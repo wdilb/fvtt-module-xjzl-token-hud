@@ -132,11 +132,15 @@ export class PlayerHUD {
         }
 
         let stanceName = null;
+        let stanceDesc = null;
         if (sys.martial?.stanceActive && sys.martial.stanceItemId) {
-            const stItem = actor.items.get(sys.martial.stanceItemId);
-            const stMove = stItem?.system.moves?.find(m => m.id === sys.martial.stance);
-            if (stMove) stanceName = stMove.name;
+        const stItem = actor.items.get(sys.martial.stanceItemId);
+        const stMove = stItem?.system.moves?.find(m => m.id === sys.martial.stance);
+        if (stMove) {
+            stanceName = stMove.name;
+            stanceDesc = stMove.description || "暂无描述";
         }
+    }
 
         // E. 境界名称 (本地化读取)
         const realmLevel = sys.cultivation?.realmLevel ?? 0;
@@ -148,6 +152,7 @@ export class PlayerHUD {
             realmName,
             neigongElement,
             stanceName,
+            stanceDesc,
 
             // 资源百分比
             hp, mp, rage, rageVal, // 传递原始对象供 input 使用

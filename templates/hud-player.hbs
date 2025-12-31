@@ -23,8 +23,11 @@
 
         <!-- 架招 Badge (顶端悬浮，点击取消) -->
         {{#if stanceName}}
-        <div class="stance-badge" data-action="stop-stance" title="点击解除架招">
+        <div class="stance-badge" data-action="stop-stance" data-tooltip="{{stanceDesc}}" data-tooltip-direction="UP">
+
             <i class="fas fa-shield-alt"></i> {{stanceName}}
+            <!-- 提示语可以放在 tooltip 里，这里就不写 title 属性了，防止冲突 -->
+            <span class="sub-text">(点击解除)</span>
         </div>
         {{/if}}
 

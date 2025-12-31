@@ -167,6 +167,20 @@
     cursor: pointer;
 }
 
+#xjzl-player-hud .stance-badge .sub-text {
+    font-size: 10px;
+    color: #aaa;
+    margin-left: 4px;
+    display: none;
+    /* 默认隐藏，太占地了 */
+}
+
+#xjzl-player-hud .stance-badge:hover .sub-text {
+    display: inline;
+    /* 悬停时显示提示 */
+    color: #fff;
+}
+
 
 /* --- [新] 怒气环绕系统 --- */
 #xjzl-player-hud .rage-ring-container {
@@ -477,53 +491,62 @@
 /* 2. 护体数值徽章 (悬浮胶囊) */
 #xjzl-player-hud .huti-badge {
     position: absolute;
-    top: -8px;
-    /* 悬浮在血条上方一点点，或者设为 2px 放在血条内部 */
+    /* 关键：调整位置，避免太靠边被父容器切掉 */
+    top: -10px;
     left: 10px;
-    /* 靠左显示 */
 
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
     padding: 0 6px;
-    height: 16px;
+    height: 18px;
+    /* 稍微增高一点 */
 
-    /* 胶囊样式 */
-    background: rgba(0, 100, 150, 0.8);
+    background: rgba(0, 100, 150, 0.9);
     border: 1px solid #4fc3f7;
     border-radius: 8px;
 
-    /* 因为父容器 .res-bar 被 skew 了 -15deg，我们需要反向 skew 回来 */
+    /* 反向 skew */
     transform: skewX(15deg);
-    z-index: 10;
+    z-index: 20;
+    /* 提高层级，确保在最上层 */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+
+    /* 关键：允许子元素溢出 (虽然这里不需要溢出，但防止意外) */
+    overflow: visible;
 }
 
 #xjzl-player-hud .huti-badge i {
-    font-size: 10px;
+    font-size: 11px;
     color: #4fc3f7;
 }
 
 /* 护体输入框专用样式 */
 #xjzl-player-hud input.huti-input {
-    width: 25px !important;
-    height: 14px !important;
-    line-height: 14px !important;
-    font-size: 11px !important;
+    width: 30px !important;
+    /* 稍微加宽 */
+    height: 100% !important;
+    /* 占满父容器高度 */
+
+    line-height: 18px !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    font-family: 'Roboto Condensed', sans-serif !important;
     text-align: center !important;
-    color: #e1f5fe !important;
-    border-bottom: none !important;
-    /* 去掉下划线 */
-    padding: 0 !important;
-    margin: 0 !important;
+
+    color: #fff !important;
     background: transparent !important;
     border: none !important;
     outline: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
 }
 
 #xjzl-player-hud input.huti-input:focus {
-    color: #fff !important;
-    background: rgba(255, 255, 255, 0.2) !important;
+    color: #ffd700 !important;
+    background: rgba(0, 0, 0, 0.2) !important;
 }
 
 
