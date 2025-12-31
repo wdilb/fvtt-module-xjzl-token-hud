@@ -93,6 +93,10 @@ export class PlayerHUD {
         const mp = res.mp || { value: 0, max: 1 };
         const rage = res.rage || { value: 0 };
         const rageVal = Math.max(0, Math.min(10, rage.value));
+        // 护体真气计算
+        // 逻辑：基于 HP 上限计算百分比，最大 100%
+        const hutiValue = res.huti || 0;
+        const hutiPercent = hp.max ? Math.min(100, (hutiValue / hp.max) * 100) : 0;
 
         // B. 常用招式 (Pinned Moves)
         const pinnedList = actor.getFlag("xjzl-system", "pinnedMoves") || [];
@@ -150,6 +154,8 @@ export class PlayerHUD {
             hpPercent: (hp.value / hp.max) * 100,
             mpPercent: (mp.value / mp.max) * 100,
             rageDots: Array.from({ length: 10 }, (_, i) => ({ active: i < rageVal })),
+            hutiValue,
+            hutiPercent,
 
             // 左侧四维 (纯展示)
             leftStats: [
@@ -181,6 +187,13 @@ export class PlayerHUD {
     // 事件绑定
     static activateListeners(html, actor) {
         if (!html) return;
+
+        // 点击头像打开角色卡
+        html.querySelector('[data-action="open-sheet"]')?.addEventListener("click", (ev) => {
+            ev.preventDefault();
+            // 这里的 actor 是 token.actor，会自动判断是本体还是复制体
+            actor.sheet.render(true);
+        });
 
         // 0. 资源输入框监听 (HP/MP/Rage)
         html.querySelectorAll('input.res-input').forEach(input => {

@@ -31,9 +31,8 @@
         <!-- 核心立绘容器 -->
         <div class="avatar-wrapper">
             <!-- 头像框 -->
-            <div class="avatar-frame">
+            <div class="avatar-frame clickable" data-action="open-sheet" title="点击打开角色面板">
                 <img src="{{actorImg}}" class="avatar-img">
-                <!-- 内功呼吸光环 -->
                 <div class="aura-ring {{neigongElement}}"></div>
             </div>
 
@@ -71,12 +70,23 @@
         <!-- HP 条 -->
         <div class="res-bar hp">
             <div class="bar-fill" style="width: {{hpPercent}}%;"></div>
+            <!-- 护体真气光罩 (覆盖层) -->
+            <!-- style="width: {{hutiPercent}}%" 控制长度 -->
+            <div class="bar-shield" style="width: {{hutiPercent}}%;"></div>
             <div class="bar-text">
                 <!-- data-target 用于 JS 自动绑定更新 -->
                 <input type="text" class="res-input" data-target="system.resources.hp.value" value="{{hp.value}}">
                 <span class="sep">/</span>
                 <span class="max">{{hp.max}}</span>
             </div>
+            <!-- 4. 护体数值徽章 (浮动显示) -->
+            {{#if hutiValue}}
+            <div class="huti-badge" title="护体真气">
+                <i class="fas fa-shield-alt"></i>
+                <input type="text" class="res-input huti-input" data-target="system.resources.huti"
+                    value="{{hutiValue}}">
+            </div>
+            {{/if}}
         </div>
         <!-- MP 条 -->
         <div class="res-bar mp">
