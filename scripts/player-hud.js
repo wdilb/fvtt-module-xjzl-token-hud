@@ -231,6 +231,16 @@ export class PlayerHUD {
                 const item = actor.items.get(itemId);
                 if (item) await item.roll(moveId);
             });
+
+            // 右键: 发送详情
+            el.addEventListener("contextmenu", async (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                const { itemId, moveId } = ev.currentTarget.dataset;
+                const item = actor.items.get(itemId);
+                // 调用你 Item 类里写好的方法
+                if (item) await item.postMoveToChat(moveId);
+            });
         });
 
         // 3. 使用物品 (消耗品)
@@ -242,6 +252,16 @@ export class PlayerHUD {
                 const item = actor.items.get(itemId);
                 if (item) await item.use();
             });
+
+            // 右键: 发送详情
+            el.addEventListener("contextmenu", async (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                const itemId = ev.currentTarget.dataset.itemId;
+                const item = actor.items.get(itemId);
+                if (item) await item.postToChat();
+            });
+            
         });
 
         // 4. 装备/卸下
@@ -252,6 +272,15 @@ export class PlayerHUD {
                 const itemId = ev.currentTarget.dataset.itemId;
                 const item = actor.items.get(itemId);
                 if (item) await item.toggleEquip();
+            });
+
+            // 右键
+            el.addEventListener("contextmenu", async (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                const itemId = ev.currentTarget.dataset.itemId;
+                const item = actor.items.get(itemId);
+                if (item) await item.postToChat();
             });
         });
 

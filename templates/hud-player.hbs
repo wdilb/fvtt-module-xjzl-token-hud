@@ -110,7 +110,8 @@
                 <div class="scroll-area">
                     {{#each shortcuts}}
                     <div class="item-btn move" data-action="use-move" data-item-id="{{item.id}}"
-                        data-move-id="{{move.id}}" data-tooltip="<strong>{{move.name}}</strong><br>{{item.name}}">
+                        data-move-id="{{move.id}}"
+                        data-tooltip="<div style='text-align:left'><strong>{{move.name}}</strong><br><span style='color:#aaa'>{{item.name}}</span><hr><i class='fas fa-mouse-pointer'></i> 左键: 出招<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
                         <img src="{{item.img}}">
                         <span class="label">{{move.name}}</span>
                     </div>
@@ -129,7 +130,7 @@
                 <div class="scroll-area">
                     {{#each consumables}}
                     <div class="item-btn" data-action="use-item" data-item-id="{{id}}"
-                        data-tooltip="<strong>{{name}}</strong><br>数量: {{system.quantity}}">
+                        data-tooltip="<div style='text-align:left'><strong>{{name}}</strong><br>数量: {{system.quantity}}<hr><i class='fas fa-mouse-pointer'></i> 左键: 使用<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
                         <img src="{{img}}">
                         <span class="qty">{{system.quantity}}</span>
                     </div>
@@ -145,7 +146,8 @@
                 <div class="scroll-area">
                     {{#each equipments}}
                     <div class="item-btn {{#if system.equipped}}equipped{{/if}}" data-action="toggle-equip"
-                        data-item-id="{{id}}" data-tooltip="{{name}}">
+                        data-item-id="{{id}}"
+                        data-tooltip="<div style='text-align:left'><strong>{{name}}</strong><hr><i class='fas fa-mouse-pointer'></i> 左键: 穿戴<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
                         <img src="{{img}}">
                         {{#if system.equipped}}<i class="fas fa-check equip-mark"></i>{{/if}}
                     </div>
