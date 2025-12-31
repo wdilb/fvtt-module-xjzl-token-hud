@@ -1,12 +1,14 @@
 /**
  * Player Control HUD Logic
+ * 适配: FVTT V13 & XJZL-System
+ * 作者: Tiwelee
  */
 export class PlayerHUD {
-    
+
     // 初始化监听器
     static init() {
         Hooks.on("controlToken", () => this.renderHUD());
-        
+
         // 监听数据变化 (实时刷新)
         Hooks.on("updateActor", (actor) => {
             if (this.currentActor && this.currentActor.id === actor.id) this.renderHUD();
@@ -20,21 +22,24 @@ export class PlayerHUD {
     // 获取当前控制的 Actor
     static get currentActor() {
         const tokens = canvas.tokens.controlled;
-        if (tokens.length !== 1) return null; 
+        if (tokens.length !== 1) return null;
         const token = tokens[0];
         if (!token.actor) return null;
-        if (!token.actor.isOwner) return null; 
+        if (!token.actor.isOwner) return null;
         return token.actor;
     }
 
     // 辅助方法：清洗HTML并截取文本 (用于Tooltip)
     static cleanDescription(htmlContent) {
-        if (!htmlContent) return "暂无描述";
+        if (!htmlContent) return ""; // 为空返回空字符串，方便拼接
         const temp = document.createElement("div");
         temp.innerHTML = htmlContent;
         let text = temp.textContent || temp.innerText || "";
-        if (text.length > 50) {
-            text = text.substring(0, 50) + "...";
+        // 移除多余的空白符
+        text = text.trim();
+        // 截取长度 (稍微放宽一点，因为现在有两个字段拼接)
+        if (text.length > 80) {
+            text = text.substring(0, 80) + "...";
         }
         return text;
     }
@@ -73,7 +78,7 @@ export class PlayerHUD {
 
         } catch (err) {
             console.error("PlayerHUD Render Error:", err);
-            if (hudEl) hudEl.remove(); 
+            if (hudEl) hudEl.remove();
         }
     }
 
@@ -81,8 +86,8 @@ export class PlayerHUD {
     static async getData(actor) {
         const sys = actor.system;
         const res = sys.resources || {};
-        const combat = sys.combat || {}; 
-        
+        const combat = sys.combat || {};
+
         const hp = res.hp || { value: 0, max: 1 };
         const mp = res.mp || { value: 0, max: 1 };
         const rage = res.rage || { value: 0 };
@@ -91,15 +96,36 @@ export class PlayerHUD {
         const hutiValue = res.huti || 0;
         const hutiPercent = hp.max ? Math.min(100, (hutiValue / hp.max) * 100) : 0;
 
-        // 预处理 Item 数据的函数
+        // [核心修正] 预处理 Item 数据的函数
         const processItem = (item) => {
-            const rawDesc = item.system.description?.value || "";
+            // 1. 读取描述 (修正：xjzl-system 中 description 是直接字符串)
+            let descStr = item.system.description || "";
+            // 兼容性保护：万一有的物品还是对象结构
+            if (typeof descStr === 'object') descStr = descStr.value || "";
+
+            // 2. 读取自动化说明
+            const autoNote = item.system.automationNote || "";
+
+            // 3. 拼接与清洗
+            let cleanDesc = this.cleanDescription(descStr);
+            if (autoNote) {
+                const cleanNote = this.cleanDescription(autoNote);
+                // 如果有描述，换行加说明；如果没有描述，直接显示说明
+                if (cleanDesc) {
+                    cleanDesc += `<br><span style='color:#00e676'>[机]: ${cleanNote}</span>`;
+                } else {
+                    cleanDesc = `<span style='color:#00e676'>[机]: ${cleanNote}</span>`;
+                }
+            }
+            // 保底
+            if (!cleanDesc) cleanDesc = "暂无描述";
+
             return {
                 id: item.id,
                 name: item.name,
                 img: item.img,
                 system: item.system,
-                shortDesc: this.cleanDescription(rawDesc)
+                shortDesc: cleanDesc // 这里现在包含 HTML 标签 (<br>, <span>)，模板里需要用 {{{}}}
             };
         };
 
@@ -114,10 +140,25 @@ export class PlayerHUD {
                 if (item) {
                     const move = item.system.moves?.find(m => m.id === moveId);
                     if (move) {
-                        shortcuts.push({ 
-                            item, 
-                            move, 
-                            moveDesc: this.cleanDescription(move.description) 
+                        // [核心修正] 招式描述 + 自动化说明
+                        let moveDescStr = move.description || "";
+                        const moveAutoNote = move.automationNote || "";
+
+                        let cleanMoveDesc = this.cleanDescription(moveDescStr);
+                        if (moveAutoNote) {
+                            const cleanNote = this.cleanDescription(moveAutoNote);
+                            if (cleanMoveDesc) {
+                                cleanMoveDesc += `<br><span style='color:#00e676'>[机]: ${cleanNote}</span>`;
+                            } else {
+                                cleanMoveDesc = `<span style='color:#00e676'>[机]: ${cleanNote}</span>`;
+                            }
+                        }
+                        if (!cleanMoveDesc) cleanMoveDesc = "暂无描述";
+
+                        shortcuts.push({
+                            item,
+                            move,
+                            moveDesc: cleanMoveDesc
                         });
                     }
                 }
@@ -162,7 +203,7 @@ export class PlayerHUD {
             hpPercent: (hp.value / hp.max) * 100,
             mpPercent: (mp.value / mp.max) * 100,
             rageDots: Array.from({ length: 10 }, (_, i) => ({ active: i < rageVal })),
-            
+
             leftStats: [
                 { label: "格挡", value: combat.blockTotal || 0 },
                 { label: "闪避", value: combat.dodgeTotal || 0 },
@@ -170,14 +211,14 @@ export class PlayerHUD {
                 { label: "速度", value: combat.speedTotal || 0 }
             ],
             shortcuts, consumables, equipments,
-            
+
             stats: [
                 { key: "liliang", label: "力量" }, { key: "shenfa", label: "身法" },
                 { key: "tipo", label: "体魄" }, { key: "neixi", label: "内息" },
                 { key: "qigan", label: "气感" }, { key: "shencai", label: "神采" },
                 { key: "wuxing", label: "悟性" }
             ],
-            isCollapsed: false 
+            isCollapsed: false
         };
     }
 
@@ -249,7 +290,7 @@ export class PlayerHUD {
                 ev.preventDefault(); ev.stopPropagation();
                 const itemId = ev.currentTarget.dataset.itemId;
                 const item = actor.items.get(itemId);
-                if (item) await item.toggleEquip(); 
+                if (item) await item.toggleEquip();
             });
             el.addEventListener("contextmenu", async (ev) => {
                 ev.preventDefault(); ev.stopPropagation();
@@ -267,7 +308,7 @@ export class PlayerHUD {
                 await actor.stopStance();
             });
         }
-        
+
         // 6. 折叠
         const toggleBtn = html.querySelector('[data-action="toggle-collapse"]');
         if (toggleBtn) {
