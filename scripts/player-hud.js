@@ -1,7 +1,5 @@
 /**
  * Player Control HUD Logic
- * 适配: FVTT V13 & XJZL-System
- * 作者: Tiwelee
  */
 export class PlayerHUD {
 
@@ -31,13 +29,11 @@ export class PlayerHUD {
 
     // 辅助方法：清洗HTML并截取文本 (用于Tooltip)
     static cleanDescription(htmlContent) {
-        if (!htmlContent) return ""; // 为空返回空字符串，方便拼接
+        if (!htmlContent) return "";
         const temp = document.createElement("div");
         temp.innerHTML = htmlContent;
         let text = temp.textContent || temp.innerText || "";
-        // 移除多余的空白符
         text = text.trim();
-        // 截取长度 (稍微放宽一点，因为现在有两个字段拼接)
         if (text.length > 80) {
             text = text.substring(0, 80) + "...";
         }
@@ -56,6 +52,7 @@ export class PlayerHUD {
 
         try {
             const data = await this.getData(actor);
+            // V13 兼容写法
             const renderer = foundry.applications?.handlebars?.renderTemplate || globalThis.renderTemplate;
             const html = await renderer("modules/xjzl-token-hud/templates/hud-player.hbs", data);
 
@@ -63,6 +60,7 @@ export class PlayerHUD {
                 const temp = document.createElement('div');
                 temp.innerHTML = html;
                 const newEl = temp.firstElementChild;
+                // 保留之前的折叠状态
                 if (hudEl.classList.contains('collapsed')) {
                     newEl.classList.add('collapsed');
                 }
@@ -78,7 +76,7 @@ export class PlayerHUD {
 
         } catch (err) {
             console.error("PlayerHUD Render Error:", err);
-            if (hudEl) hudEl.remove();
+            // 出错时不贸然移除，方便调试
         }
     }
 
@@ -96,28 +94,21 @@ export class PlayerHUD {
         const hutiValue = res.huti || 0;
         const hutiPercent = hp.max ? Math.min(100, (hutiValue / hp.max) * 100) : 0;
 
-        // [核心修正] 预处理 Item 数据的函数
+        // 预处理 Item 数据的函数
         const processItem = (item) => {
-            // 1. 读取描述 (修正：xjzl-system 中 description 是直接字符串)
             let descStr = item.system.description || "";
-            // 兼容性保护：万一有的物品还是对象结构
             if (typeof descStr === 'object') descStr = descStr.value || "";
-
-            // 2. 读取自动化说明
             const autoNote = item.system.automationNote || "";
 
-            // 3. 拼接与清洗
             let cleanDesc = this.cleanDescription(descStr);
             if (autoNote) {
                 const cleanNote = this.cleanDescription(autoNote);
-                // 如果有描述，换行加说明；如果没有描述，直接显示说明
                 if (cleanDesc) {
                     cleanDesc += `<br><span style='color:#00e676'>[机]: ${cleanNote}</span>`;
                 } else {
                     cleanDesc = `<span style='color:#00e676'>[机]: ${cleanNote}</span>`;
                 }
             }
-            // 保底
             if (!cleanDesc) cleanDesc = "暂无描述";
 
             return {
@@ -125,7 +116,7 @@ export class PlayerHUD {
                 name: item.name,
                 img: item.img,
                 system: item.system,
-                shortDesc: cleanDesc // 这里现在包含 HTML 标签 (<br>, <span>)，模板里需要用 {{{}}}
+                shortDesc: cleanDesc
             };
         };
 
@@ -140,10 +131,8 @@ export class PlayerHUD {
                 if (item) {
                     const move = item.system.moves?.find(m => m.id === moveId);
                     if (move) {
-                        // [核心修正] 招式描述 + 自动化说明
                         let moveDescStr = move.description || "";
                         const moveAutoNote = move.automationNote || "";
-
                         let cleanMoveDesc = this.cleanDescription(moveDescStr);
                         if (moveAutoNote) {
                             const cleanNote = this.cleanDescription(moveAutoNote);
@@ -165,26 +154,26 @@ export class PlayerHUD {
             }
         }
 
-        // C. 物品分类
+        // C. 物品分类 (消耗品直接处理)
         const consumables = (actor.itemTypes?.consumable || []).map(processItem);
-        // 装备分组逻辑
-        // 1. 定义分类配置 (顺序即显示顺序)
+
+        // D. 装备分组逻辑
+        // 1. 定义分类配置
         const typeMapping = {
-            weapon: { label: "武器", items: [] }, // 武器
-            // 防具子类型映射 (根据你的系统定义)
-            head: { label: game.i18n.localize("XJZL.Armor.Type.Head"), items: [] },
-            earring: { label: game.i18n.localize("XJZL.Armor.Type.Earring"), items: [] },
-            necklace: { label: game.i18n.localize("XJZL.Armor.Type.Necklace"), items: [] },
-            top: { label: game.i18n.localize("XJZL.Armor.Type.Top"), items: [] },
-            bottom: { label: game.i18n.localize("XJZL.Armor.Type.Bottom"), items: [] },
-            shoes: { label: game.i18n.localize("XJZL.Armor.Type.Shoes"), items: [] },
-            ring: { label: game.i18n.localize("XJZL.Armor.Type.Ring"), items: [] },
-            accessory: { label: game.i18n.localize("XJZL.Armor.Type.Accessory"), items: [] },
-            qizhen: { label: "奇珍", items: [] }, // 奇珍异宝
+            weapon: { label: "武器", items: [] },
+            head: { label: game.i18n.localize("XJZL.Armor.Type.Head") || "头饰", items: [] },
+            top: { label: game.i18n.localize("XJZL.Armor.Type.Top") || "上衣", items: [] },
+            bottom: { label: game.i18n.localize("XJZL.Armor.Type.Bottom") || "下装", items: [] },
+            shoes: { label: game.i18n.localize("XJZL.Armor.Type.Shoes") || "鞋子", items: [] },
+            necklace: { label: game.i18n.localize("XJZL.Armor.Type.Necklace") || "项链", items: [] },
+            ring: { label: game.i18n.localize("XJZL.Armor.Type.Ring") || "戒指", items: [] },
+            earring: { label: game.i18n.localize("XJZL.Armor.Type.Earring") || "耳环", items: [] },
+            accessory: { label: game.i18n.localize("XJZL.Armor.Type.Accessory") || "饰品", items: [] },
+            qizhen: { label: "奇珍", items: [] },
             other: { label: "其他装备", items: [] }
         };
 
-        // 2. 遍历所有装备并归类
+        // 2. 遍历并归类
         const allEquips = [
             ...(actor.itemTypes?.weapon || []),
             ...(actor.itemTypes?.armor || []),
@@ -199,7 +188,6 @@ export class PlayerHUD {
             } else if (item.type === "qizhen") {
                 typeMapping.qizhen.items.push(processed);
             } else if (item.type === "armor") {
-                // 读取防具的具体部位 (system.type)
                 const subType = item.system.type;
                 if (typeMapping[subType]) {
                     typeMapping[subType].items.push(processed);
@@ -211,19 +199,17 @@ export class PlayerHUD {
             }
         }
 
-        // 3. 转换为数组供模板遍历 (只保留有物品的组)
-        // 增加 isCollapsed 状态，默认全部展开 (false)
+        // 3. 转换为数组 (Filter empty)
         const equipmentGroups = Object.entries(typeMapping)
             .filter(([key, group]) => group.items.length > 0)
             .map(([key, group]) => ({
                 key: key,
                 label: group.label,
                 items: group.items,
-                // 这里可以从 Flags 读取记忆状态，暂且默认展开
                 isCollapsed: false
             }));
 
-        // D. 内功与架招
+        // E. 内功与架招
         let neigongElement = "none";
         if (sys.martial?.active_neigong) {
             const ng = actor.items.get(sys.martial.active_neigong);
@@ -260,7 +246,10 @@ export class PlayerHUD {
                 { label: "看破", value: combat.kanpoTotal || 0 },
                 { label: "速度", value: combat.speedTotal || 0 }
             ],
-            shortcuts, consumables, equipments,
+
+            shortcuts,
+            consumables,
+            equipmentGroups, // [修复] 这里返回正确的分组数据，移除了 equipments
 
             stats: [
                 { key: "liliang", label: "力量" }, { key: "shenfa", label: "身法" },
@@ -359,7 +348,7 @@ export class PlayerHUD {
             });
         }
 
-        // 6. 折叠
+        // 6. 折叠HUD
         const toggleBtn = html.querySelector('[data-action="toggle-collapse"]');
         if (toggleBtn) {
             toggleBtn.addEventListener("click", (ev) => {
@@ -371,12 +360,9 @@ export class PlayerHUD {
         // 7. 装备分组折叠/展开
         html.querySelectorAll('.group-header').forEach(header => {
             header.addEventListener("click", (ev) => {
-                ev.preventDefault();
-                ev.stopPropagation();
-                // 切换 collapsed 类
+                ev.preventDefault(); ev.stopPropagation();
                 const group = header.closest('.equip-group');
                 group.classList.toggle('collapsed');
-                // (可选) 这里可以保存 Flag 记忆玩家的折叠偏好
             });
         });
     }
