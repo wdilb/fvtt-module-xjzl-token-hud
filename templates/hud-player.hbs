@@ -164,13 +164,62 @@
         <div class="dock-category">
             <div class="cat-btn" data-tooltip="属性/技能"><i class="fas fa-dice-d20"></i></div>
             <div class="cat-content">
-                <div class="attr-grid">
-                    {{#each stats}}
-                    <div class="attr-btn" data-action="roll-stat" data-key="{{key}}">{{label}}</div>
+                <div class="scroll-area">
+
+                    {{!-- 1. 七维属性分组 --}}
+                    {{#each skillGroups}}
+                    <div class="equip-group skill-group-wrapper"> <!-- 复用 equip-group 样式 -->
+
+                        <!-- 标题栏: 点击检定属性 (不再折叠，而是直接检定) -->
+                        <!-- 技巧: 为了让标题能检定，我们把折叠按钮单独放右边，或者把整个条做成折叠，里面放个检定按钮 -->
+                        <!-- 方案: 标题栏左侧检定属性，右侧折叠箭头 -->
+                        <div class="group-header">
+                            <div class="header-left" data-action="roll-stat" data-key="{{key}}" title="点击检定: {{label}}">
+                                <i class="fas fa-dice-d20" style="font-size:10px; margin-right:4px; color:#ffd700"></i>
+                                <span class="g-label">{{label}}</span>
+                                <span class="g-val"
+                                    style="color:#00e676; margin-left:4px; font-weight:bold">{{value}}</span>
+                            </div>
+                            <!-- 右侧专门用于折叠 -->
+                            <div class="header-right toggle-trigger" title="折叠/展开技能">
+                                <i class="fas fa-chevron-down g-icon"></i>
+                            </div>
+                        </div>
+
+                        <!-- 技能列表 (网格) -->
+                        <div class="group-items skill-grid">
+                            {{#each skills}}
+                            <div class="skill-btn" data-action="roll-stat" data-key="{{key}}"
+                                data-tooltip="点击检定: {{label}}">
+                                <span class="s-name">{{label}}</span>
+                                <span class="s-val">{{value}}</span>
+                            </div>
+                            {{/each}}
+                        </div>
+                    </div>
                     {{/each}}
-                    <div class="attr-btn skill" data-action="roll-stat" data-key="qinggong">轻功</div>
-                    <div class="attr-btn skill" data-action="roll-stat" data-key="jianding">鉴定</div>
-                    <div class="attr-btn skill" data-action="roll-stat" data-key="tancha">探查</div>
+
+                    {{!-- 2. 技艺分组 (如果有) --}}
+                    {{#if learnedArts.length}}
+                    <div class="equip-group collapsed"> <!-- 默认折叠 -->
+                        <div class="group-header toggle-trigger" title="点击展开技艺">
+                            <span class="g-label">技艺</span>
+                            <div class="header-right">
+                                <span class="g-count">{{learnedArts.length}}</span>
+                                <i class="fas fa-chevron-down g-icon"></i>
+                            </div>
+                        </div>
+                        <div class="group-items skill-grid">
+                            {{#each learnedArts}}
+                            <div class="skill-btn art" data-action="roll-stat" data-key="{{key}}">
+                                <span class="s-name">{{label}}</span>
+                                <span class="s-val">Lv.{{value}}</span>
+                            </div>
+                            {{/each}}
+                        </div>
+                    </div>
+                    {{/if}}
+
                 </div>
             </div>
         </div>

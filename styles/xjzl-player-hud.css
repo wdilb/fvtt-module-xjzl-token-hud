@@ -820,3 +820,71 @@
         opacity: 0.7;
     }
 }
+
+/* --- 技能列表样式 --- */
+
+/* 头部左侧 (属性检定区) */
+#xjzl-player-hud .header-left {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    flex: 1;
+}
+
+#xjzl-player-hud .header-left:hover .g-label {
+    color: #fff;
+    text-shadow: 0 0 5px #ffd700;
+}
+
+/* 右侧折叠触发区 */
+#xjzl-player-hud .toggle-trigger {
+    cursor: pointer;
+    padding-left: 10px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* 技能网格 */
+#xjzl-player-hud .skill-grid {
+    /* 技能名字一般只有两个字，可以排密一点，比如3列 */
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 4px;
+    padding: 4px;
+}
+
+/* 技能按钮 (胶囊状) */
+#xjzl-player-hud .skill-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    /* 圆角胶囊 */
+    padding: 2px 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#xjzl-player-hud .skill-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #ffd700;
+}
+
+#xjzl-player-hud .s-name {
+    font-size: 12px;
+    color: #ccc;
+}
+
+#xjzl-player-hud .s-val {
+    font-size: 12px;
+    color: #ffd700;
+    font-weight: bold;
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
+/* 技艺特殊样式 */
+#xjzl-player-hud .skill-btn.art {
+    border-left: 2px solid #00e676;
+}

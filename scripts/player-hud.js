@@ -1,8 +1,5 @@
 /**
  * Player Control HUD Logic
- * 适配: FVTT V13 & XJZL-System
- * 版本: Final (集成奇珍装备逻辑)
- * 作者: Tiwelee
  */
 export class PlayerHUD {
 
@@ -37,6 +34,7 @@ export class PlayerHUD {
         temp.innerHTML = htmlContent;
         let text = temp.textContent || temp.innerText || "";
         text = text.trim();
+        // 截取长度
         if (text.length > 80) {
             text = text.substring(0, 80) + "...";
         }
@@ -62,6 +60,7 @@ export class PlayerHUD {
                 const temp = document.createElement('div');
                 temp.innerHTML = html;
                 const newEl = temp.firstElementChild;
+                // 尝试保留之前的折叠状态
                 if (hudEl.classList.contains('collapsed')) {
                     newEl.classList.add('collapsed');
                 }
@@ -86,6 +85,7 @@ export class PlayerHUD {
         const res = sys.resources || {};
         const combat = sys.combat || {};
 
+        // A. 基础数值
         const hp = res.hp || { value: 0, max: 1 };
         const mp = res.mp || { value: 0, max: 1 };
         const rage = res.rage || { value: 0 };
@@ -94,7 +94,7 @@ export class PlayerHUD {
         const hutiValue = res.huti || 0;
         const hutiPercent = hp.max ? Math.min(100, (hutiValue / hp.max) * 100) : 0;
 
-        // 预处理 Item 数据的函数
+        // 预处理 Item 数据的函数 (处理描述和自动化说明)
         const processItem = (item) => {
             let descStr = item.system.description || "";
             if (typeof descStr === 'object') descStr = descStr.value || "";
@@ -154,7 +154,7 @@ export class PlayerHUD {
             }
         }
 
-        // C. 物品分类 (消耗品直接处理)
+        // C. 消耗品
         const consumables = (actor.itemTypes?.consumable || []).map(processItem);
 
         // D. 装备分组逻辑
@@ -180,7 +180,6 @@ export class PlayerHUD {
 
         for (const item of allEquips) {
             const processed = processItem(item);
-
             if (item.type === "weapon") {
                 typeMapping.weapon.items.push(processed);
             } else if (item.type === "qizhen") {
@@ -206,7 +205,52 @@ export class PlayerHUD {
                 isCollapsed: false
             }));
 
-        // E. 内功与架招
+        // E. 技能与属性分组 (Skill Groups - 替代原来的 stats 列表)
+        const skillGroupsStructure = [
+            { key: "liliang", skills: ["jiaoli", "zhengtuo", "paozhi", "qinbao"] },
+            { key: "shenfa", skills: ["qianxing", "qiaoshou", "qinggong", "mashu"] },
+            { key: "tipo", skills: ["renxing", "biqi", "rennai", "ningxue"] },
+            { key: "neixi", skills: ["liaoshang", "chongxue", "lianxi", "duqi"] },
+            { key: "qigan", skills: ["dianxue", "zhuizong", "tancha", "dongcha"] },
+            { key: "shencai", skills: ["jiaoyi", "qiman", "shuofu", "dingli"] },
+            { key: "wuxing", skills: ["wuxue", "jianding", "bagua", "shili"] }
+        ];
+
+        const skillGroups = skillGroupsStructure.map(group => {
+            const statKey = group.key;
+            const statVal = sys.stats?.[statKey]?.total || 0;
+            const statLabel = game.i18n.localize(`XJZL.Stats.${statKey.charAt(0).toUpperCase() + statKey.slice(1)}`);
+
+            const skills = group.skills.map(skillKey => {
+                const skillTotal = sys.skills?.[skillKey]?.total || 0;
+                const label = game.i18n.localize(`XJZL.Skills.${skillKey.charAt(0).toUpperCase() + skillKey.slice(1)}`);
+                return { key: skillKey, label, value: skillTotal };
+            });
+
+            return {
+                key: statKey,
+                label: statLabel,
+                value: statVal,
+                skills: skills
+            };
+        });
+
+        // F. 技艺分组 (Arts)
+        const artsObj = sys.arts || {};
+        const learnedArts = [];
+        for (const [key, artData] of Object.entries(artsObj)) {
+            if (artData.total > 0) {
+                let label = game.i18n.localize(`XJZL.Arts.${key.charAt(0).toUpperCase() + key.slice(1)}`);
+
+                learnedArts.push({
+                    key: key,
+                    label: label,
+                    value: artData.total || 0
+                });
+            }
+        }
+
+        // G. 内功与架招
         let neigongElement = "none";
         if (sys.martial?.active_neigong) {
             const ng = actor.items.get(sys.martial.active_neigong);
@@ -247,13 +291,9 @@ export class PlayerHUD {
             shortcuts,
             consumables,
             equipmentGroups,
+            skillGroups, // 新增：属性+技能分组
+            learnedArts, // 新增：已学技艺列表
 
-            stats: [
-                { key: "liliang", label: "力量" }, { key: "shenfa", label: "身法" },
-                { key: "tipo", label: "体魄" }, { key: "neixi", label: "内息" },
-                { key: "qigan", label: "气感" }, { key: "shencai", label: "神采" },
-                { key: "wuxing", label: "悟性" }
-            ],
             isCollapsed: false
         };
     }
@@ -262,7 +302,7 @@ export class PlayerHUD {
     static activateListeners(html, actor) {
         if (!html) return;
 
-        // 输入框
+        // 0. 输入框
         html.querySelectorAll('input.res-input').forEach(input => {
             input.addEventListener("focus", ev => ev.currentTarget.select());
             input.addEventListener("change", async (ev) => {
@@ -279,7 +319,7 @@ export class PlayerHUD {
             ev.preventDefault(); actor.sheet.render(true);
         });
 
-        // 1. 属性检定
+        // 1. 属性/技能/技艺检定 (左键)
         html.querySelectorAll('[data-action="roll-stat"]').forEach(el => {
             el.addEventListener("click", async (ev) => {
                 ev.preventDefault(); ev.stopPropagation();
@@ -320,9 +360,8 @@ export class PlayerHUD {
             });
         });
 
-        // 4. 装备 (左键: 穿脱(含奇珍逻辑) | 右键: 发送)
+        // 4. 装备 (左键: 穿脱(含奇珍) | 右键: 发送)
         html.querySelectorAll('[data-action="toggle-equip"]').forEach(el => {
-            // 右键发送
             el.addEventListener("contextmenu", async (ev) => {
                 ev.preventDefault(); ev.stopPropagation();
                 const itemId = ev.currentTarget.dataset.itemId;
@@ -330,28 +369,21 @@ export class PlayerHUD {
                 if (item) await item.postToChat();
             });
 
-            // 左键穿脱
             el.addEventListener("click", async (ev) => {
                 ev.preventDefault(); ev.stopPropagation();
                 const itemId = ev.currentTarget.dataset.itemId;
                 const item = actor.items.get(itemId);
                 if (!item) return;
 
-                // 4.1 卸下直接执行
                 if (item.system.equipped) {
                     return await item.toggleEquip();
                 }
 
-                // 4.2 奇珍装备逻辑 (需选穴位)
                 if (item.type === "qizhen") {
-                    // 获取可用穴位
-                    const availableSlots = actor.getAvailableAcupoints(); // 调用 Actor 方法
-
+                    const availableSlots = actor.getAvailableAcupoints();
                     if (!availableSlots || availableSlots.length === 0) {
                         return ui.notifications.warn("没有可用的已打通穴位。");
                     }
-
-                    // 构建弹窗内容
                     const content = `
                     <div class="form-group">
                         <label>选择放入穴位:</label>
@@ -361,8 +393,6 @@ export class PlayerHUD {
                             </select>
                         </div>
                     </div>`;
-
-                    // 弹出 V2 Dialog
                     try {
                         const acupoint = await foundry.applications.api.DialogV2.prompt({
                             window: { title: `装备: ${item.name}`, icon: "fas fa-gem" },
@@ -372,13 +402,9 @@ export class PlayerHUD {
                                 callback: (event, button) => new FormData(button.form).get("acupoint")
                             }
                         });
-
                         if (acupoint) await item.toggleEquip(acupoint);
-                    } catch (e) {
-                        // 用户取消
-                    }
+                    } catch (e) { /* Cancelled */ }
                 } else {
-                    // 4.3 普通装备逻辑
                     await item.toggleEquip();
                 }
             });
@@ -402,10 +428,15 @@ export class PlayerHUD {
             });
         }
 
-        // 7. 装备分组折叠/展开
+        // 7. 分组折叠/展开 (通用: 装备分组 + 技能分组)
         html.querySelectorAll('.group-header').forEach(header => {
             header.addEventListener("click", (ev) => {
                 ev.preventDefault(); ev.stopPropagation();
+
+                // [关键] 如果点击的是标题栏左侧的“属性检定”区域，则不执行折叠，
+                // 而是让事件冒泡给上面的 [data-action="roll-stat"] 监听器去处理
+                if (ev.target.closest('.header-left')) return;
+
                 const group = header.closest('.equip-group');
                 group.classList.toggle('collapsed');
             });
