@@ -26,6 +26,7 @@
     "scripts/main.js"
   ],
   "styles": [
-    "styles/xjzl-token-hud.css"
+    "styles/xjzl-token-hud.css",
+    "styles/xjzl-player-hud.css"
   ]
 }
