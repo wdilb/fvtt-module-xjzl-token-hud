@@ -1,7 +1,4 @@
-<!-- 
-  Player Control HUD (PCH) - 模板文件
-  版本: Final (包含护体修复、怒气对齐、架招提示优化)
--->
+<!-- Player Control HUD (PCH) - 模板文件 -->
 <div id="xjzl-player-hud">
 
     <!-- 1. 左翼：战阵四维 -->
@@ -18,37 +15,26 @@
 
     <!-- 2. 中庭：本我 -->
     <div class="hud-center">
-
-        <!-- 架招 Badge (顶端悬浮) -->
+        <!-- 架招 Badge -->
         {{#if stanceName}}
-        <!-- 这里的 stanceDesc 已经在 JS 里拼好了“点击解除”的提示 -->
         <div class="stance-badge" data-action="stop-stance" data-tooltip="{{stanceDesc}}" data-tooltip-direction="UP">
             <i class="fas fa-shield-alt"></i> {{stanceName}}
         </div>
         {{/if}}
 
-        <!-- 核心立绘容器 -->
         <div class="avatar-wrapper">
-            <!-- 头像框 (点击打开角色卡) -->
             <div class="avatar-frame clickable" data-action="open-sheet" data-tooltip="点击打开角色面板">
                 <img src="{{actorImg}}" class="avatar-img">
-                <!-- 内功呼吸光环 -->
                 <div class="aura-ring {{neigongElement}}"></div>
             </div>
-
-            <!-- 境界印章 -->
             {{#if realmName}}
             <div class="realm-seal" data-tooltip="当前境界">{{realmName}}</div>
             {{/if}}
-
-            <!-- 怒气环绕 (半圆排列) -->
             <div class="rage-ring-container">
                 {{#each rageDots}}
                 <div class="rage-orb {{#if this.active}}active{{/if}}" style="--i:{{@index}}"></div>
                 {{/each}}
             </div>
-
-            <!-- 怒气核心 (底部输入框) -->
             <div class="rage-core" data-tooltip="当前怒气">
                 <i class="fas fa-fire"></i>
                 <input type="text" class="res-input rage-input" data-target="system.resources.rage.value"
@@ -56,7 +42,6 @@
             </div>
         </div>
 
-        <!-- 折叠/展开按钮 -->
         <div class="toggle-hud-btn" data-action="toggle-collapse" data-tooltip="折叠/展开 HUD">
             <i class="fas fa-chevron-down"></i>
         </div>
@@ -64,11 +49,7 @@
 
     <!-- 3. 右翼：气血内力 -->
     <div class="hud-wing right">
-
-        <!-- HP组: 使用 group 包裹，护体徽章外置防止截断 -->
         <div class="bar-group">
-
-            <!-- 护体数值徽章 (浮动在上方) -->
             {{#if hutiValue}}
             <div class="huti-badge" data-tooltip="护体真气">
                 <i class="fas fa-shield-alt"></i>
@@ -76,11 +57,8 @@
                     value="{{hutiValue}}">
             </div>
             {{/if}}
-
-            <!-- HP 条本体 -->
             <div class="res-bar hp">
                 <div class="bar-fill" style="width: {{hpPercent}}%;"></div>
-                <!-- 护体光罩 -->
                 <div class="bar-shield" style="width: {{hutiPercent}}%;"></div>
                 <div class="bar-text">
                     <input type="text" class="res-input" data-target="system.resources.hp.value" value="{{hp.value}}">
@@ -89,8 +67,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- MP 条 -->
         <div class="res-bar mp">
             <div class="bar-fill" style="width: {{mpPercent}}%;"></div>
             <div class="bar-text">
@@ -101,7 +77,7 @@
         </div>
     </div>
 
-    <!-- 4. 底座：万象森罗 (操作按钮) -->
+    <!-- 4. 底座：万象森罗 -->
     <div class="hud-dock">
         <!-- 常用招式 -->
         <div class="dock-category">
@@ -111,13 +87,13 @@
                     {{#each shortcuts}}
                     <div class="item-btn move" data-action="use-move" data-item-id="{{item.id}}"
                         data-move-id="{{move.id}}"
-                        data-tooltip="<div style='text-align:left'><strong>{{move.name}}</strong><br><span style='color:#aaa'>{{item.name}}</span><hr><i class='fas fa-mouse-pointer'></i> 左键: 出招<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
+                        data-tooltip="<div style='text-align:left; max-width:200px'><strong>{{move.name}}</strong><br><span style='color:#aaa; font-size:11px'>{{item.name}}</span><hr><div style='font-size:11px; color:#ddd'>{{moveDesc}}</div><hr><i class='fas fa-mouse-pointer'></i> 左键: 出招<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
                         <img src="{{item.img}}">
                         <span class="label">{{move.name}}</span>
                     </div>
                     {{/each}}
                     {{#unless shortcuts}}
-                    <div class="empty-tip">无常用招式</div>
+                    <div class="empty-tip" style="color:#666; text-align:center; padding:10px;">无常用招式</div>
                     {{/unless}}
                 </div>
             </div>
@@ -130,9 +106,10 @@
                 <div class="scroll-area">
                     {{#each consumables}}
                     <div class="item-btn" data-action="use-item" data-item-id="{{id}}"
-                        data-tooltip="<div style='text-align:left'><strong>{{name}}</strong><br>数量: {{system.quantity}}<hr><i class='fas fa-mouse-pointer'></i> 左键: 使用<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
+                        data-tooltip="<div style='text-align:left; max-width:200px'><strong>{{name}}</strong><br><span style='color:#aaa'>数量: {{system.quantity}}</span><hr><div style='font-size:11px; color:#ddd'>{{shortDesc}}</div><hr><i class='fas fa-mouse-pointer'></i> 左键: 使用<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
                         <img src="{{img}}">
                         <span class="qty">{{system.quantity}}</span>
+                        <span class="label">{{name}}</span>
                     </div>
                     {{/each}}
                 </div>
@@ -147,9 +124,10 @@
                     {{#each equipments}}
                     <div class="item-btn {{#if system.equipped}}equipped{{/if}}" data-action="toggle-equip"
                         data-item-id="{{id}}"
-                        data-tooltip="<div style='text-align:left'><strong>{{name}}</strong><hr><i class='fas fa-mouse-pointer'></i> 左键: 穿戴<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
+                        data-tooltip="<div style='text-align:left; max-width:200px'><strong>{{name}}</strong><hr><div style='font-size:11px; color:#ddd'>{{shortDesc}}</div><hr><i class='fas fa-mouse-pointer'></i> 左键: 穿戴<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
                         <img src="{{img}}">
                         {{#if system.equipped}}<i class="fas fa-check equip-mark"></i>{{/if}}
+                        <span class="label">{{name}}</span>
                     </div>
                     {{/each}}
                 </div>

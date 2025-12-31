@@ -1,7 +1,7 @@
 /* -----------------------------------------------------------
    Player Control HUD (PCH) - 样式表
    Scope ID: #xjzl-player-hud
-   版本: Final Fix
+   版本: Grid Layout & Final Polish
    ----------------------------------------------------------- */
 
 /* 容器定位 */
@@ -24,17 +24,13 @@
     pointer-events: auto;
 }
 
-/* 
-   折叠模式逻辑 (Collapse Logic) 
-   目标: 原地隐藏内容，只保留按钮，不遮挡底部技能栏
-*/
+/* 折叠模式 */
 #xjzl-player-hud.collapsed {
     width: 0;
     height: 0;
     overflow: visible;
 }
 
-/* 内容隐藏动画 */
 #xjzl-player-hud.collapsed .hud-wing,
 #xjzl-player-hud.collapsed .hud-dock,
 #xjzl-player-hud.collapsed .avatar-wrapper,
@@ -47,7 +43,7 @@
     transition: all 0.3s ease;
 }
 
-/* 按钮变形：折叠时变身为“展开”图标 */
+/* 折叠按钮 */
 #xjzl-player-hud.collapsed .toggle-hud-btn {
     pointer-events: auto;
     top: 20px;
@@ -78,7 +74,6 @@
     transform: rotate(180deg);
 }
 
-
 /* --- 1. 中庭 (Center) --- */
 #xjzl-player-hud .hud-center {
     position: absolute;
@@ -99,7 +94,6 @@
     height: 120px;
 }
 
-/* 头像框 */
 #xjzl-player-hud .avatar-frame {
     width: 100%;
     height: 100%;
@@ -128,7 +122,6 @@
     object-fit: cover;
 }
 
-/* 呼吸光环 */
 #xjzl-player-hud .aura-ring {
     position: absolute;
     top: 0;
@@ -153,7 +146,6 @@
     color: #fff;
 }
 
-/* 境界印章 */
 #xjzl-player-hud .realm-seal {
     position: absolute;
     top: 0px;
@@ -170,7 +162,6 @@
     text-shadow: 1px 1px 0 #000;
 }
 
-/* 架招 Badge */
 #xjzl-player-hud .stance-badge {
     position: absolute;
     top: -25px;
@@ -208,7 +199,7 @@
     cursor: pointer;
 }
 
-/* --- 怒气环绕系统 --- */
+/* 怒气环绕 */
 #xjzl-player-hud .rage-ring-container {
     position: absolute;
     top: 50%;
@@ -242,7 +233,6 @@
     width: 9px;
 }
 
-/* 怒气颜色定义 */
 #xjzl-player-hud .rage-orb:nth-child(1).active {
     --seg-color: #b9f6ca;
 }
@@ -284,7 +274,7 @@
     animation: kf-pulse-orb 0.5s infinite alternate;
 }
 
-/* --- [新] 怒气核心 (对齐修复版) --- */
+/* 怒气核心 */
 #xjzl-player-hud .rage-core {
     position: absolute;
     bottom: -15px;
@@ -338,12 +328,6 @@
     margin: 0 !important;
 }
 
-#xjzl-player-hud input.rage-input:focus {
-    color: #ffd700;
-    background: rgba(255, 255, 255, 0.05) !important;
-}
-
-
 /* --- 2. 左右翼 (Wings) --- */
 #xjzl-player-hud .hud-wing {
     position: absolute;
@@ -365,7 +349,6 @@
     align-items: flex-start;
 }
 
-/* 战斗属性 */
 #xjzl-player-hud .combat-stat-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -395,15 +378,11 @@
     color: #fff;
 }
 
-/* --- 资源条与护体系统 --- */
+/* 资源条 */
 #xjzl-player-hud .bar-group {
     position: relative;
     width: 100%;
     margin-bottom: 5px;
-}
-
-#xjzl-player-hud .bar-group .res-bar {
-    margin-bottom: 0;
 }
 
 #xjzl-player-hud .res-bar {
@@ -431,7 +410,6 @@
     transition: width 0.3s;
 }
 
-/* 护体光罩 */
 #xjzl-player-hud .bar-shield {
     position: absolute;
     top: 0;
@@ -444,55 +422,6 @@
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
 }
 
-/* 护体徽章 (移出 overflow 区域，修复截断) */
-#xjzl-player-hud .huti-badge {
-    position: absolute;
-    top: -14px;
-    left: 0px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    padding: 0 4px;
-    height: 18px;
-    min-width: 50px;
-    background: rgba(0, 100, 150, 0.95);
-    border: 1px solid #4fc3f7;
-    border-radius: 4px;
-    z-index: 20;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
-}
-
-#xjzl-player-hud .huti-badge i {
-    font-size: 10px;
-    color: #4fc3f7;
-    margin-right: 2px;
-}
-
-/* 护体输入框 */
-#xjzl-player-hud input.huti-input {
-    width: 36px !important;
-    height: 100% !important;
-    line-height: 16px !important;
-    font-size: 12px !important;
-    text-align: center !important;
-    font-family: 'Roboto Condensed', sans-serif !important;
-    font-weight: bold !important;
-    color: #fff !important;
-    background: transparent !important;
-    border: none !important;
-    outline: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-}
-
-#xjzl-player-hud input.huti-input:focus {
-    color: #ffd700 !important;
-    background: rgba(255, 255, 255, 0.15) !important;
-}
-
-/* 资源条文字 */
 #xjzl-player-hud .bar-text {
     position: absolute;
     top: 0;
@@ -531,8 +460,48 @@
     background: rgba(0, 0, 0, 0.2);
 }
 
+/* 护体徽章 */
+#xjzl-player-hud .huti-badge {
+    position: absolute;
+    top: -14px;
+    left: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 0 4px;
+    height: 18px;
+    min-width: 50px;
+    background: rgba(0, 100, 150, 0.95);
+    border: 1px solid #4fc3f7;
+    border-radius: 4px;
+    z-index: 20;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+}
 
-/* --- 3. 抽屉底座 (Dock) --- */
+#xjzl-player-hud .huti-badge i {
+    font-size: 10px;
+    color: #4fc3f7;
+    margin-right: 2px;
+}
+
+#xjzl-player-hud input.huti-input {
+    width: 36px !important;
+    height: 100% !important;
+    line-height: 16px !important;
+    font-size: 12px !important;
+    text-align: center !important;
+    font-family: 'Roboto Condensed', sans-serif !important;
+    font-weight: bold !important;
+    color: #fff !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* --- 3. 抽屉底座 (Dock) & 网格背包 --- */
 #xjzl-player-hud .hud-dock {
     position: absolute;
     bottom: -15px;
@@ -543,8 +512,8 @@
     display: flex;
     justify-content: space-between;
     padding: 0 80px;
-    /* 原来的 .hud-center z-index 是 10，这里设为 50 确保它盖在头像和翅膀上面 */
     z-index: 50;
+    /* 确保层级高于中间的立绘 */
 }
 
 #xjzl-player-hud .dock-category {
@@ -579,17 +548,15 @@
     box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
 }
 
+/* 弹窗容器 */
 #xjzl-player-hud .cat-content {
     position: absolute;
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%) scale(0.8);
-    width: 220px;
+    width: 340px;
     max-height: 0;
-
-    /* 背景色加深，防止透出后面的文字太杂乱 */
-    background: rgba(15, 15, 20, 0.98);
-
+    background: rgba(18, 18, 22, 0.98);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     backdrop-filter: blur(10px);
@@ -597,32 +564,29 @@
     opacity: 0;
     transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     pointer-events: none;
-
-    /* 增强阴影，营造“浮空”感 */
     box-shadow: 0 5px 30px rgba(0, 0, 0, 1);
-
     display: flex;
     flex-direction: column;
-
-    /* 确保内容本身也在高层 */
     z-index: 100;
 }
 
 #xjzl-player-hud .dock-category:hover .cat-content {
     bottom: 60px;
-    max-height: 350px;
+    max-height: 400px;
     opacity: 1;
     transform: translateX(-50%) scale(1);
     pointer-events: auto;
     padding: 10px;
 }
 
+/* 网格滚动区 */
 #xjzl-player-hud .scroll-area {
-    max-height: 300px;
+    max-height: 350px;
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 8px;
+    padding: 2px;
 }
 
 #xjzl-player-hud .scroll-area::-webkit-scrollbar {
@@ -633,78 +597,104 @@
     background: #555;
 }
 
+/* 物品卡片 (垂直布局) */
 #xjzl-player-hud .item-btn {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     padding: 6px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s;
     border: 1px solid transparent;
+    position: relative;
 }
 
 #xjzl-player-hud .item-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
 }
 
 #xjzl-player-hud .item-btn img {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
-    /* 强制不压缩 */
-    object-fit: contain;
-    /* 改为 contain 可以显示完整图标，或者 cover 填满 */
-    border-radius: 2px;
-    background: rgba(0, 0, 0, 0.3);
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    object-fit: cover;
+    border-radius: 4px;
+    background: #000;
+    border: 1px solid #333;
 }
 
 #xjzl-player-hud .item-btn .label {
-    font-size: 14px;
-    color: #eee;
+    font-size: 11px;
+    color: #e0e0e0;
+    text-align: center;
+    line-height: 1.2;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#xjzl-player-hud .item-btn:hover .label {
+    color: #fff;
 }
 
 #xjzl-player-hud .item-btn .qty {
-    margin-left: auto;
-    font-size: 12px;
-    color: #888;
-    background: #222;
-    padding: 1px 4px;
-    border-radius: 4px;
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 10px;
+    color: #fff;
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 0 4px;
+    border-radius: 8px;
+    border: 1px solid #555;
+    z-index: 2;
 }
 
 #xjzl-player-hud .item-btn.equipped {
     border: 1px solid #00e676;
-    background: rgba(0, 230, 118, 0.1);
+    background: rgba(0, 230, 118, 0.05);
+    box-shadow: inset 0 0 10px rgba(0, 230, 118, 0.1);
 }
 
 #xjzl-player-hud .equip-mark {
-    margin-left: auto;
+    position: absolute;
+    top: 2px;
+    left: 2px;
     color: #00e676;
+    font-size: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 50%;
+    padding: 2px;
+    z-index: 2;
 }
 
 #xjzl-player-hud .attr-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 6px;
 }
 
 #xjzl-player-hud .attr-btn {
     text-align: center;
-    background: #333;
-    padding: 6px 0;
+    background: #222;
+    padding: 8px 0;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
-    border: 1px solid #444;
+    font-size: 13px;
+    border: 1px solid #333;
     color: #ccc;
     transition: all 0.2s;
 }
 
 #xjzl-player-hud .attr-btn:hover {
-    background: #555;
+    background: #444;
     color: #ffd700;
     border-color: #ffd700;
 }
