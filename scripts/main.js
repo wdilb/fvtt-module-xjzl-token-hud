@@ -6,7 +6,7 @@
  *  描述: 这是一个高性能的战斗状态追踪 HUD，支持实时血量、内力、怒气显示及特效。
  * =================================================================
  */
-
+import { PlayerHUD } from "./player-hud.js";
 // --- 全局状态管理对象 ---
 const HUD_STATE = {
     // 记录 Token 上一次的数值(HP/内力/怒气)，用于计算动画方向 (涨/跌)
@@ -60,6 +60,7 @@ Hooks.once("init", async function () {
 Hooks.once("ready", function () {
     if (canvas.ready) {
         initHudSystem();
+        PlayerHUD.init();
     }
 });
 

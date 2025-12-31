@@ -1,0 +1,147 @@
+<div id="xjzl-player-hud" class="{{#if isCollapsed}}collapsed{{/if}}">
+
+    <!-- 1. 左翼：战阵四维 (Combat Stats) -->
+    <!-- 点击可以直接检定对应的技能 (这里做了映射假设，可根据实际调整) -->
+    <div class="hud-wing left">
+        <div class="combat-stat-grid">
+            <div class="c-stat" data-action="roll-stat" data-key="dongcha" title="点击检定: 洞察(看破)">
+                <i class="fas fa-eye"></i>
+                <span class="val">{{combat.kanpo}}</span>
+            </div>
+            <div class="c-stat" data-action="roll-stat" data-key="shenfa" title="点击检定: 身法(先攻)">
+                <i class="fas fa-wind"></i>
+                <span class="val">{{combat.initiative}}</span>
+            </div>
+            <div class="c-stat" title="外功命中 (来源于属性)">
+                <i class="fas fa-sword"></i>
+                <span class="val">{{combat.hitWaigong}}</span>
+            </div>
+            <div class="c-stat" title="内功命中 (来源于属性)">
+                <i class="fas fa-magic"></i>
+                <span class="val">{{combat.hitNeigong}}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 中庭：本我 (Avatar & Core) -->
+    <div class="hud-center">
+        <!-- 境界印章 (如果有境界) -->
+        {{#if realmName}}
+        <div class="realm-seal">{{realmName}}</div>
+        {{/if}}
+
+        <!-- 角色立绘 -->
+        <div class="avatar-frame">
+            <img src="{{actorImg}}" class="avatar-img">
+            <!-- 呼吸光环: 颜色根据内功属性变化 -->
+            <div class="aura-ring {{neigongElement}}"></div>
+        </div>
+
+        <!-- 当前架招 (点击取消) -->
+        {{#if stanceName}}
+        <div class="stance-badge" data-action="stop-stance" title="点击解除架招">
+            <i class="fas fa-shield-alt"></i> {{stanceName}}
+        </div>
+        {{/if}}
+
+        <!-- 折叠/展开按钮 -->
+        <div class="toggle-hud-btn" data-action="toggle-collapse">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </div>
+
+    <!-- 3. 右翼：三花聚顶 (Resources) -->
+    <div class="hud-wing right">
+        <!-- HP -->
+        <div class="res-bar hp">
+            <div class="bar-fill" style="width: {{hpPercent}}%;"></div>
+            <div class="bar-text">{{hpValue}} / {{hpMax}}</div>
+        </div>
+        <!-- MP (内力) -->
+        <div class="res-bar mp">
+            <div class="bar-fill" style="width: {{mpPercent}}%;"></div>
+            <div class="bar-text">{{mpValue}} / {{mpMax}}</div>
+        </div>
+        <!-- Rage (怒气) - 使用格子样式 -->
+        <div class="res-bar rage">
+            <div class="rage-grid">
+                {{#each rageDots}}
+                <div class="r-dot {{#if this.active}}active{{/if}}"></div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. 底座：万象森罗 (Action Dock) -->
+    <div class="hud-dock">
+
+        <!-- Tab 1: 常用招式 (Shortcuts) -->
+        <div class="dock-category">
+            <div class="cat-btn"><i class="fas fa-fist-raised"></i></div>
+            <div class="cat-content">
+                <div class="scroll-area">
+                    {{#each shortcuts}}
+                    <div class="item-btn move" data-action="use-move" data-item-id="{{item.id}}"
+                        data-move-id="{{move.id}}" title="{{move.name}} ({{item.name}})">
+                        <img src="{{item.img}}">
+                        <span class="label">{{move.name}}</span>
+                    </div>
+                    {{/each}}
+                    {{#unless shortcuts}}
+                    <div class="empty-tip">无常用招式</div>
+                    {{/unless}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: 消耗品 (Consumables) -->
+        <div class="dock-category">
+            <div class="cat-btn"><i class="fas fa-flask"></i></div>
+            <div class="cat-content">
+                <div class="scroll-area">
+                    {{#each consumables}}
+                    <div class="item-btn" data-action="use-item" data-item-id="{{id}}"
+                        title="{{name}} (数量: {{system.quantity}})">
+                        <img src="{{img}}">
+                        <span class="qty">{{system.quantity}}</span>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: 装备 (Equip) -->
+        <div class="dock-category">
+            <div class="cat-btn"><i class="fas fa-tshirt"></i></div>
+            <div class="cat-content">
+                <div class="scroll-area">
+                    {{#each equipments}}
+                    <div class="item-btn {{#if system.equipped}}equipped{{/if}}" data-action="toggle-equip"
+                        data-item-id="{{id}}" data-type="{{type}}" title="{{name}}">
+                        <img src="{{img}}">
+                        {{#if system.equipped}}<i class="fas fa-check equip-mark"></i>{{/if}}
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: 属性检定 (Attributes) -->
+        <div class="dock-category">
+            <div class="cat-btn"><i class="fas fa-dice-d20"></i></div>
+            <div class="cat-content">
+                <div class="attr-grid">
+                    <!-- 七维 -->
+                    {{#each stats}}
+                    <div class="attr-btn" data-action="roll-stat" data-key="{{key}}">{{label}}</div>
+                    {{/each}}
+                    <!-- 常用技能 -->
+                    <div class="attr-btn skill" data-action="roll-stat" data-key="qinggong">轻功</div>
+                    <div class="attr-btn skill" data-action="roll-stat" data-key="jianding">鉴定</div>
+                    <div class="attr-btn skill" data-action="roll-stat" data-key="tancha">探查</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
