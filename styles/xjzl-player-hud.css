@@ -675,6 +675,77 @@
     z-index: 2;
 }
 
+/* --- 装备分组样式 --- */
+
+.equip-group {
+    width: 100%;
+    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #bbb;
+    font-family: sans-serif;
+    transition: background 0.2s;
+}
+
+.group-header:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffd700;
+}
+
+.g-label {
+    font-weight: bold;
+}
+
+.g-count {
+    margin-left: auto;
+    margin-right: 8px;
+    font-size: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 0 5px;
+    border-radius: 8px;
+}
+
+.g-icon {
+    transition: transform 0.2s;
+    font-size: 10px;
+}
+
+/* 组内网格 (继承之前的 Grid 逻辑) */
+.group-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 8px;
+    padding: 6px 2px;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s;
+    max-height: 500px;
+    /* 足够大以容纳内容 */
+    opacity: 1;
+}
+
+/* 折叠状态 */
+.equip-group.collapsed .group-items {
+    max-height: 0;
+    opacity: 0;
+    padding: 0 2px;
+    /* 收起padding防止占位 */
+    pointer-events: none;
+}
+
+.equip-group.collapsed .g-icon {
+    transform: rotate(-90deg);
+}
+
 #xjzl-player-hud .attr-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;

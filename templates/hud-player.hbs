@@ -121,15 +121,34 @@
             <div class="cat-btn" data-tooltip="装备"><i class="fas fa-tshirt"></i></div>
             <div class="cat-content">
                 <div class="scroll-area">
-                    {{#each equipments}}
-                    <div class="item-btn {{#if system.equipped}}equipped{{/if}}" data-action="toggle-equip"
-                        data-item-id="{{id}}"
-                        data-tooltip="<div style='text-align:left; max-width:200px'><strong>{{name}}</strong><hr><div style='font-size:11px; color:#ddd'>{{shortDesc}}</div><hr><i class='fas fa-mouse-pointer'></i> 左键: 穿戴<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
-                        <img src="{{img}}">
-                        {{#if system.equipped}}<i class="fas fa-check equip-mark"></i>{{/if}}
-                        <span class="label">{{name}}</span>
+                    {{#each equipmentGroups}}
+                    <!-- 分组容器 -->
+                    <div class="equip-group">
+                        <!-- 分组标题 (点击折叠) -->
+                        <div class="group-header" title="点击折叠/展开">
+                            <span class="g-label">{{label}}</span>
+                            <span class="g-count">{{items.length}}</span>
+                            <i class="fas fa-chevron-down g-icon"></i>
+                        </div>
+
+                        <!-- 物品网格 -->
+                        <div class="group-items">
+                            {{#each items}}
+                            <div class="item-btn {{#if system.equipped}}equipped{{/if}}" data-action="toggle-equip"
+                                data-item-id="{{id}}"
+                                data-tooltip="<div style='text-align:left; max-width:200px'><strong>{{name}}</strong><hr><div style='font-size:11px; color:#ddd'>{{{shortDesc}}}</div><hr><i class='fas fa-mouse-pointer'></i> 左键: 穿戴<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
+                                <img src="{{img}}">
+                                {{#if system.equipped}}<i class="fas fa-check equip-mark"></i>{{/if}}
+                                <span class="label">{{name}}</span>
+                            </div>
+                            {{/each}}
+                        </div>
                     </div>
                     {{/each}}
+
+                    {{#unless equipmentGroups}}
+                    <div class="empty-tip" style="color:#666; text-align:center; padding:10px;">暂无装备</div>
+                    {{/unless}}
                 </div>
             </div>
         </div>

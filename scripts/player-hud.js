@@ -167,11 +167,61 @@ export class PlayerHUD {
 
         // C. 物品分类
         const consumables = (actor.itemTypes?.consumable || []).map(processItem);
-        const equipments = [
+        // 装备分组逻辑
+        // 1. 定义分类配置 (顺序即显示顺序)
+        const typeMapping = {
+            weapon: { label: "武器", items: [] }, // 武器
+            // 防具子类型映射 (根据你的系统定义)
+            head: { label: game.i18n.localize("XJZL.Armor.Type.Head"), items: [] },
+            earring: { label: game.i18n.localize("XJZL.Armor.Type.Earring"), items: [] },
+            necklace: { label: game.i18n.localize("XJZL.Armor.Type.Necklace"), items: [] },
+            top: { label: game.i18n.localize("XJZL.Armor.Type.Top"), items: [] },
+            bottom: { label: game.i18n.localize("XJZL.Armor.Type.Bottom"), items: [] },
+            shoes: { label: game.i18n.localize("XJZL.Armor.Type.Shoes"), items: [] },
+            ring: { label: game.i18n.localize("XJZL.Armor.Type.Ring"), items: [] },
+            accessory: { label: game.i18n.localize("XJZL.Armor.Type.Accessory"), items: [] },
+            qizhen: { label: "奇珍", items: [] }, // 奇珍异宝
+            other: { label: "其他装备", items: [] }
+        };
+
+        // 2. 遍历所有装备并归类
+        const allEquips = [
             ...(actor.itemTypes?.weapon || []),
             ...(actor.itemTypes?.armor || []),
             ...(actor.itemTypes?.qizhen || [])
-        ].map(processItem);
+        ];
+
+        for (const item of allEquips) {
+            const processed = processItem(item);
+
+            if (item.type === "weapon") {
+                typeMapping.weapon.items.push(processed);
+            } else if (item.type === "qizhen") {
+                typeMapping.qizhen.items.push(processed);
+            } else if (item.type === "armor") {
+                // 读取防具的具体部位 (system.type)
+                const subType = item.system.type;
+                if (typeMapping[subType]) {
+                    typeMapping[subType].items.push(processed);
+                } else {
+                    typeMapping.other.items.push(processed);
+                }
+            } else {
+                typeMapping.other.items.push(processed);
+            }
+        }
+
+        // 3. 转换为数组供模板遍历 (只保留有物品的组)
+        // 增加 isCollapsed 状态，默认全部展开 (false)
+        const equipmentGroups = Object.entries(typeMapping)
+            .filter(([key, group]) => group.items.length > 0)
+            .map(([key, group]) => ({
+                key: key,
+                label: group.label,
+                items: group.items,
+                // 这里可以从 Flags 读取记忆状态，暂且默认展开
+                isCollapsed: false
+            }));
 
         // D. 内功与架招
         let neigongElement = "none";
@@ -317,5 +367,17 @@ export class PlayerHUD {
                 html.classList.toggle("collapsed");
             });
         }
+
+        // 7. 装备分组折叠/展开
+        html.querySelectorAll('.group-header').forEach(header => {
+            header.addEventListener("click", (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                // 切换 collapsed 类
+                const group = header.closest('.equip-group');
+                group.classList.toggle('collapsed');
+                // (可选) 这里可以保存 Flag 记忆玩家的折叠偏好
+            });
+        });
     }
 }
