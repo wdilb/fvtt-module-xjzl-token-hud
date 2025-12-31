@@ -1,6 +1,6 @@
 <div id="xjzl-player-hud">
 
-    <!-- 1. 左翼：战阵四维 (纯展示) -->
+    <!-- 1. 左翼：战阵四维 -->
     <div class="hud-wing left">
         <div class="combat-stat-grid">
             {{#each leftStats}}
@@ -12,35 +12,55 @@
         </div>
     </div>
 
-    <!-- 2. 中庭：本我 -->
+    <!-- 2. 中庭：本我 (核心区域) -->
     <div class="hud-center">
-        {{#if realmName}}
-        <div class="realm-seal">{{realmName}}</div>
-        {{/if}}
-
-        <div class="avatar-frame">
-            <img src="{{actorImg}}" class="avatar-img">
-            <div class="aura-ring {{neigongElement}}"></div>
-        </div>
-
+        <!-- 架招 Badge (顶端悬浮) -->
         {{#if stanceName}}
         <div class="stance-badge" data-action="stop-stance" title="点击解除架招">
             <i class="fas fa-shield-alt"></i> {{stanceName}}
         </div>
         {{/if}}
 
+        <!-- 核心容器 -->
+        <div class="avatar-wrapper">
+            <!-- 立绘 -->
+            <div class="avatar-frame">
+                <img src="{{actorImg}}" class="avatar-img">
+                <div class="aura-ring {{neigongElement}}"></div>
+            </div>
+
+            <!-- 境界印章 (右上角悬浮) -->
+            {{#if realmName}}
+            <div class="realm-seal">{{realmName}}</div>
+            {{/if}}
+
+            <!-- [新] 怒气环绕系统 -->
+            <div class="rage-ring-container">
+                <!-- 怒气点 (半圆排列) -->
+                {{#each rageDots}}
+                <div class="rage-orb {{#if this.active}}active{{/if}}" style="--i:{{@index}}"></div>
+                {{/each}}
+            </div>
+
+            <!-- [新] 怒气核心 (输入框) -->
+            <div class="rage-core" title="当前怒气">
+                <i class="fas fa-fire"></i>
+                <input type="text" class="res-input rage-input" data-target="system.resources.rage.value"
+                    value="{{rage.value}}">
+            </div>
+        </div>
+
         <div class="toggle-hud-btn" data-action="toggle-collapse">
             <i class="fas fa-chevron-down"></i>
         </div>
     </div>
 
-    <!-- 3. 右翼：资源 (可编辑) -->
+    <!-- 3. 右翼：气血内力 -->
     <div class="hud-wing right">
         <!-- HP -->
         <div class="res-bar hp">
             <div class="bar-fill" style="width: {{hpPercent}}%;"></div>
             <div class="bar-text">
-                <!-- 输入框: 直接修改 system.resources.hp.value -->
                 <input type="text" class="res-input" data-target="system.resources.hp.value" value="{{hp.value}}">
                 <span class="sep">/</span>
                 <span class="max">{{hp.max}}</span>
@@ -55,26 +75,12 @@
                 <span class="max">{{mp.max}}</span>
             </div>
         </div>
-        <!-- Rage (怒气) - 既有格子，也有输入框方便微调 -->
-        <div class="res-bar rage-container">
-            <!-- 上层：输入框 (放在侧边或者做成微型) -->
-            <div class="rage-input-wrapper">
-                <i class="fas fa-fire"></i>
-                <input type="text" class="res-input small" data-target="system.resources.rage.value"
-                    value="{{rage.value}}">
-            </div>
-            <!-- 下层：格子 -->
-            <div class="rage-grid">
-                {{#each rageDots}}
-                <div class="r-dot {{#if this.active}}active{{/if}}"></div>
-                {{/each}}
-            </div>
-        </div>
     </div>
 
     <!-- 4. 底座：万象森罗 (保持不变) -->
     <div class="hud-dock">
-        <!-- 常用招式 -->
+        <!-- ... (底座代码不需要动，和之前一样) ... -->
+        <!-- 为了节省篇幅，这里省略底座的重复代码，请保留原来的底座代码 -->
         <div class="dock-category">
             <div class="cat-btn"><i class="fas fa-fist-raised"></i></div>
             <div class="cat-content">
@@ -92,8 +98,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- 消耗品 -->
         <div class="dock-category">
             <div class="cat-btn"><i class="fas fa-flask"></i></div>
             <div class="cat-content">
@@ -107,8 +111,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- 装备 -->
         <div class="dock-category">
             <div class="cat-btn"><i class="fas fa-tshirt"></i></div>
             <div class="cat-content">
@@ -123,8 +125,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- 属性检定 -->
         <div class="dock-category">
             <div class="cat-btn"><i class="fas fa-dice-d20"></i></div>
             <div class="cat-content">
@@ -138,6 +138,5 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>

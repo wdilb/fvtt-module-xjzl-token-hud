@@ -1,15 +1,15 @@
 /* -----------------------------------------------------------
-   Player Control HUD (PCH) - 样式表 (最终修正版)
+   Player Control HUD (PCH) - 样式表 (双翼拱月版)
    Scope ID: #xjzl-player-hud
    ----------------------------------------------------------- */
 
 #xjzl-player-hud {
     position: fixed;
-    /* [修正] 再次调高，避开宏栏 */
-    bottom: 100px;
+    bottom: 90px;
     left: 50%;
     transform: translateX(-50%);
-    width: 750px;
+    width: 800px;
+    /* 稍微再宽一点，给圆环留空间 */
     height: 160px;
     z-index: 60;
     font-family: 'Ma Shan Zheng', cursive;
@@ -18,13 +18,11 @@
     transition: bottom 0.3s ease;
 }
 
-/* 交互恢复 */
 #xjzl-player-hud * {
     pointer-events: auto;
 }
 
-/* 折叠模式：完全隐藏到底部，只留切换按钮 */
-/* 因为容器上移了，这里隐藏的数值要更大 */
+/* 折叠模式 */
 #xjzl-player-hud.collapsed {
     bottom: -150px;
 }
@@ -33,22 +31,29 @@
     transform: rotate(180deg);
 }
 
-/* --- 1. 中庭 (Avatar) --- */
+
+/* --- 1. 中庭 (Center) --- */
 .hud-center {
     position: absolute;
-    bottom: 45px;
-    /* 再次上浮 */
+    bottom: 30px;
+    /* 立绘底座高度 */
     left: 50%;
     transform: translateX(-50%);
-    width: 130px;
-    height: 130px;
+    width: 140px;
+    height: 140px;
     display: flex;
     justify-content: center;
-    align-items: flex-end;
+    align-items: center;
     z-index: 10;
 }
 
-/* ... Avatar Frame, Aura Ring, Stance Badge 保持之前的样式 ... */
+.avatar-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    /* 核心立绘尺寸 */
+}
+
 .avatar-frame {
     width: 100%;
     height: 100%;
@@ -57,12 +62,13 @@
     background: #111;
     overflow: hidden;
     position: relative;
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+    z-index: 5;
     transition: transform 0.2s;
 }
 
 .avatar-frame:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
 .avatar-img {
@@ -71,6 +77,7 @@
     object-fit: cover;
 }
 
+/* 呼吸光环 */
 .aura-ring {
     position: absolute;
     top: 0;
@@ -105,27 +112,31 @@
     }
 }
 
+/* 境界印章 - 移到右上角肩膀处 */
 .realm-seal {
     position: absolute;
-    bottom: 0px;
-    right: -10px;
-    background: #b71c1c;
+    top: 5px;
+    right: -15px;
+    background: linear-gradient(135deg, #b71c1c, #880e4f);
     color: #fff;
-    padding: 2px 8px;
-    font-size: 14px;
+    padding: 1px 6px;
+    font-size: 13px;
     border-radius: 4px;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-    transform: rotate(-5deg);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    z-index: 12;
-    white-space: nowrap;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+    transform: rotate(10deg);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    z-index: 20;
+    text-shadow: 1px 1px 0 #000;
 }
 
+/* 架招 Badge - 顶部居中 */
 .stance-badge {
     position: absolute;
-    top: -15px;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.8);
-    padding: 4px 12px;
+    padding: 3px 10px;
     border-radius: 12px;
     font-size: 13px;
     font-family: sans-serif;
@@ -134,7 +145,7 @@
     cursor: pointer;
     white-space: nowrap;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-    z-index: 11;
+    z-index: 15;
 }
 
 .stance-badge:hover {
@@ -145,7 +156,7 @@
 
 .toggle-hud-btn {
     position: absolute;
-    top: -35px;
+    top: -45px;
     width: 30px;
     height: 20px;
     background: rgba(0, 0, 0, 0.6);
@@ -156,73 +167,225 @@
     cursor: pointer;
 }
 
-/* --- 2. 左右翼 (Wings) --- */
-.hud-wing {
+
+/* --- [新] 怒气环绕系统 (Rage Ring) --- */
+.rage-ring-container {
     position: absolute;
-    bottom: 40px;
-    /* 上移对齐 */
-    width: 260px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 160px;
+    height: 160px;
+    /* 比头像大一圈 */
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 4;
+}
+
+/* 怒气宝珠 */
+.rage-orb {
+    position: absolute;
+    width: 8px;
+    height: 12px;
+    /* 长条形宝石 */
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    left: 50%;
+    top: 50%;
+    /* 核心算法: 旋转并在Y轴推出去
+       -105deg 是起始角度 (左下)
+       + (var(--i) * 23deg) 是间距，10个点跨越下方约 210度
+       translateY(72px) 是半径距离
+    */
+    transform: translate(-50%, -50%) rotate(calc(-115deg + (var(--i) * 25deg))) translateY(74px);
+    border-radius: 2px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 怒气激活 - 沿用之前的渐变色逻辑 */
+.rage-orb.active {
+    background: var(--seg-color, #ffd700);
+    box-shadow: 0 0 8px var(--seg-color, #ffd700);
+    border-color: #fff;
+    height: 14px;
+    /* 激活变长一点 */
+    width: 9px;
+}
+
+/* 颜色定义 (复用之前的逻辑) */
+.rage-orb:nth-child(1).active {
+    --seg-color: #b9f6ca;
+}
+
+.rage-orb:nth-child(2).active {
+    --seg-color: #69f0ae;
+}
+
+.rage-orb:nth-child(3).active {
+    --seg-color: #00e676;
+}
+
+.rage-orb:nth-child(4).active {
+    --seg-color: #00c853;
+}
+
+.rage-orb:nth-child(5).active {
+    --seg-color: #64dd17;
+}
+
+.rage-orb:nth-child(6).active {
+    --seg-color: #76ff03;
+}
+
+.rage-orb:nth-child(7).active {
+    --seg-color: #ffff00;
+}
+
+.rage-orb:nth-child(8).active {
+    --seg-color: #ffd600;
+}
+
+.rage-orb:nth-child(9).active {
+    --seg-color: #ffab00;
+}
+
+.rage-orb:nth-child(10).active {
+    --seg-color: #ff3d00;
+    animation: kf-pulse-orb 0.5s infinite alternate;
+}
+
+@keyframes kf-pulse-orb {
+    from {
+        box-shadow: 0 0 5px #ff3d00;
+    }
+
+    to {
+        box-shadow: 0 0 15px #ff3d00, 0 0 5px #fff;
+    }
+}
+
+
+/* --- [新] 怒气核心 (输入框) --- */
+.rage-core {
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 36px;
+    background: radial-gradient(circle, #222, #000);
+    border: 2px solid #444;
+    border-radius: 50%;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    transition: border-color 0.2s;
+}
+
+.rage-core:hover {
+    border-color: #ff9100;
+    box-shadow: 0 0 15px rgba(255, 145, 0, 0.4);
+}
+
+.rage-core i {
+    font-size: 10px;
+    color: #ff6d00;
+    margin-top: -2px;
+}
+
+/* 核心里的输入框 */
+input.rage-input {
+    width: 100%;
+    text-align: center;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-weight: bold;
+    font-size: 14px;
+    font-family: 'Roboto Condensed', sans-serif;
+    padding: 0;
+    margin: 0;
+}
+
+
+/* --- 2. 左右翼 (Wings) - 顶部对齐 --- */
+.hud-wing {
+    position: absolute;
+    /* [核心修改] 顶部对齐：现在用 top 定位，基于 hud-center 的顶部 */
+    /* 计算：hud-center高140px，居中。我们希望翼的顶部和头像顶部（约20px处）对齐 */
+    top: 25px;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .hud-wing.left {
-    right: 58%;
+    right: 56%;
+    /* 离中心远一点，避开怒气环 */
     align-items: flex-end;
+    /* 向右对齐，紧贴圆环 */
 }
 
 .hud-wing.right {
-    left: 58%;
+    left: 56%;
     align-items: flex-start;
+    /* 向左对齐，紧贴圆环 */
 }
 
-/* 战斗属性 (左侧) - 纯展示 */
+
+/* 战斗属性矩阵 (左侧) */
 .combat-stat-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 6px;
     width: 100%;
 }
 
 .c-stat {
-    background: linear-gradient(90deg, rgba(0, 0, 0, 0.8), rgba(60, 60, 60, 0.6));
-    padding: 6px 12px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.8), rgba(40, 40, 40, 0.8));
+    padding: 4px 10px;
     border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     color: #ccc;
     font-family: 'Ma Shan Zheng', cursive;
-    /* 标签用书法体 */
-    font-size: 15px;
+    font-size: 14px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    height: 32px;
+    /* 固定高度 */
 }
 
+/* 右边那列文字靠右 */
 .c-stat .label {
     opacity: 0.8;
 }
 
 .c-stat .val {
     font-family: 'Roboto Condensed', sans-serif;
-    /* 数值用数字字体 */
     font-weight: bold;
-    font-size: 18px;
+    font-size: 16px;
     color: #fff;
-    text-shadow: 0 0 2px #000;
 }
 
-/* 资源条 (右侧) - 可编辑 */
+
+/* 资源条 (右侧) */
 .res-bar {
     width: 100%;
-    height: 20px;
+    height: 22px;
     background: rgba(0, 0, 0, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.2);
     transform: skewX(-15deg);
     position: relative;
     overflow: hidden;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    margin-bottom: 5px;
 }
 
 .res-bar.hp .bar-fill {
@@ -238,7 +401,6 @@
     transition: width 0.3s;
 }
 
-/* 文本/输入框容器 */
 .bar-text {
     position: absolute;
     top: 0;
@@ -257,89 +419,27 @@
     gap: 2px;
 }
 
-/* [新增] 隐形输入框样式 */
+/* 隐形输入框 */
 input.res-input {
     background: transparent;
     border: none;
+    outline: none;
     color: #fff;
     font-family: inherit;
     font-size: inherit;
     font-weight: inherit;
     text-align: right;
     width: 40px;
-    /* 足够显示3-4位数 */
-    padding: 0;
-    margin: 0;
-    outline: none;
-    text-shadow: 1px 1px 2px black;
     border-bottom: 1px solid transparent;
-    /* 默认无边框 */
     transition: border-color 0.2s;
 }
 
 input.res-input:hover,
 input.res-input:focus {
     border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-    /* 聚焦时显示下划线 */
     background: rgba(0, 0, 0, 0.2);
 }
 
-/* 怒气的小输入框 */
-input.res-input.small {
-    width: 25px;
-    text-align: center;
-}
-
-/* 怒气区域特殊处理 */
-.res-bar.rage-container {
-    border: none;
-    background: transparent;
-    box-shadow: none;
-    height: auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 2px;
-    transform: none;
-    /* 怒气区整体不斜切，只有内部元素斜切 */
-}
-
-/* 怒气数值显示 (图标+输入框) */
-.rage-input-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.rage-input-wrapper i {
-    font-size: 12px;
-    color: #ff9100;
-}
-
-.rage-grid {
-    display: flex;
-    height: 12px;
-    gap: 3px;
-    flex: 1;
-}
-
-.r-dot {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transform: skewX(-15deg);
-    transition: all 0.2s;
-}
-
-.r-dot.active {
-    background: #ff9100;
-    box-shadow: 0 0 8px #ff9100;
-    border-color: #ffd180;
-}
 
 /* --- 3. 抽屉底座 (Dock) --- */
 .hud-dock {
@@ -347,14 +447,16 @@ input.res-input.small {
     bottom: -15px;
     left: 50%;
     transform: translateX(-50%);
-    width: 380px;
-    /* 稍微加宽 */
+    width: 400px;
+    /* 加宽避开怒气环 */
     height: 50px;
     display: flex;
     justify-content: space-between;
-    padding: 0 60px;
+    padding: 0 80px;
+    /* 中间留出 160px 给怒气环和核心 */
 }
 
+/* Dock 样式复用之前的，无需更改 */
 .dock-category {
     position: relative;
     width: 45px;
