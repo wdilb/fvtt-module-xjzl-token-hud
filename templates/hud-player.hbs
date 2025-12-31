@@ -1,16 +1,14 @@
 <!-- 
-  Player Control HUD (PCH) - HTML 模板
-  布局逻辑: 双翼拱月 (Double Wing Arching Moon)
-  版本: V13 适配版
+  Player Control HUD (PCH) - 模板文件
+  版本: Final Fix (护体修复/怒气对齐/原生Tooltip)
 -->
 <div id="xjzl-player-hud">
 
-    <!-- 1. 左翼：战阵四维 (纯展示) -->
-    <!-- 通过 top 属性与头像顶部对齐 -->
+    <!-- 1. 左翼：战阵四维 -->
     <div class="hud-wing left">
         <div class="combat-stat-grid">
             {{#each leftStats}}
-            <div class="c-stat" title="{{label}}">
+            <div class="c-stat" data-tooltip="{{label}}">
                 <span class="label">{{label}}</span>
                 <span class="val">{{value}}</span>
             </div>
@@ -18,79 +16,79 @@
         </div>
     </div>
 
-    <!-- 2. 中庭：本我 (核心区域) -->
+    <!-- 2. 中庭：本我 -->
     <div class="hud-center">
 
-        <!-- 架招 Badge (顶端悬浮，点击取消) -->
+        <!-- 架招 Badge (顶端悬浮) -->
         {{#if stanceName}}
         <div class="stance-badge" data-action="stop-stance" data-tooltip="{{stanceDesc}}" data-tooltip-direction="UP">
-
             <i class="fas fa-shield-alt"></i> {{stanceName}}
-            <!-- 提示语可以放在 tooltip 里，这里就不写 title 属性了，防止冲突 -->
-            <span class="sub-text">(点击解除)</span>
         </div>
         {{/if}}
 
         <!-- 核心立绘容器 -->
         <div class="avatar-wrapper">
-            <!-- 头像框 -->
-            <div class="avatar-frame clickable" data-action="open-sheet" title="点击打开角色面板">
+            <!-- 头像框 (点击打开角色卡) -->
+            <div class="avatar-frame clickable" data-action="open-sheet" data-tooltip="点击打开角色面板">
                 <img src="{{actorImg}}" class="avatar-img">
+                <!-- 内功呼吸光环 -->
                 <div class="aura-ring {{neigongElement}}"></div>
             </div>
 
-            <!-- 境界印章 (右上角肩章) -->
+            <!-- 境界印章 -->
             {{#if realmName}}
-            <div class="realm-seal">{{realmName}}</div>
+            <div class="realm-seal" data-tooltip="当前境界">{{realmName}}</div>
             {{/if}}
 
-            <!-- 怒气环绕系统 (半圆排列) -->
+            <!-- 怒气环绕 (半圆排列) -->
             <div class="rage-ring-container">
                 {{#each rageDots}}
-                <!-- index 用于 CSS 计算旋转角度 -->
                 <div class="rage-orb {{#if this.active}}active{{/if}}" style="--i:{{@index}}"></div>
                 {{/each}}
             </div>
 
             <!-- 怒气核心 (底部输入框) -->
-            <div class="rage-core" title="当前怒气">
-                <!-- 装饰图标 (绝对定位在顶部) -->
+            <div class="rage-core" data-tooltip="当前怒气">
                 <i class="fas fa-fire"></i>
-                <!-- 输入框 (绝对定位在底部，确保居中) -->
                 <input type="text" class="res-input rage-input" data-target="system.resources.rage.value"
                     value="{{rage.value}}">
             </div>
         </div>
 
         <!-- 折叠/展开按钮 -->
-        <div class="toggle-hud-btn" data-action="toggle-collapse">
+        <div class="toggle-hud-btn" data-action="toggle-collapse" data-tooltip="折叠/展开 HUD">
             <i class="fas fa-chevron-down"></i>
         </div>
     </div>
 
-    <!-- 3. 右翼：气血内力 (可编辑) -->
+    <!-- 3. 右翼：气血内力 -->
     <div class="hud-wing right">
-        <!-- HP 条 -->
-        <div class="res-bar hp">
-            <div class="bar-fill" style="width: {{hpPercent}}%;"></div>
-            <!-- 护体真气光罩 (覆盖层) -->
-            <!-- style="width: {{hutiPercent}}%" 控制长度 -->
-            <div class="bar-shield" style="width: {{hutiPercent}}%;"></div>
-            <div class="bar-text">
-                <!-- data-target 用于 JS 自动绑定更新 -->
-                <input type="text" class="res-input" data-target="system.resources.hp.value" value="{{hp.value}}">
-                <span class="sep">/</span>
-                <span class="max">{{hp.max}}</span>
-            </div>
-            <!-- 4. 护体数值徽章 (浮动显示) -->
+
+        <!-- [结构修复] HP组: 使用 group 包裹，将护体徽章移出 res-bar 防止截断 -->
+        <div class="bar-group">
+
+            <!-- 护体数值徽章 (浮动在上方) -->
             {{#if hutiValue}}
-            <div class="huti-badge" title="护体真气">
+            <div class="huti-badge" data-tooltip="护体真气">
                 <i class="fas fa-shield-alt"></i>
                 <input type="text" class="res-input huti-input" data-target="system.resources.huti"
                     value="{{hutiValue}}">
             </div>
             {{/if}}
+
+            <!-- HP 条本体 -->
+            <div class="res-bar hp">
+                <div class="bar-fill" style="width: {{hpPercent}}%;"></div>
+                <!-- 护体光罩 -->
+                <div class="bar-shield" style="width: {{hutiPercent}}%;"></div>
+                <div class="bar-text">
+                    <input type="text" class="res-input" data-target="system.resources.hp.value" value="{{hp.value}}">
+                    <span class="sep">/</span>
+                    <span class="max">{{hp.max}}</span>
+                </div>
+            </div>
         </div>
+
         <!-- MP 条 -->
         <div class="res-bar mp">
             <div class="bar-fill" style="width: {{mpPercent}}%;"></div>
@@ -106,12 +104,12 @@
     <div class="hud-dock">
         <!-- 常用招式 -->
         <div class="dock-category">
-            <div class="cat-btn"><i class="fas fa-fist-raised"></i></div>
+            <div class="cat-btn" data-tooltip="常用招式"><i class="fas fa-fist-raised"></i></div>
             <div class="cat-content">
                 <div class="scroll-area">
                     {{#each shortcuts}}
                     <div class="item-btn move" data-action="use-move" data-item-id="{{item.id}}"
-                        data-move-id="{{move.id}}" title="{{move.name}}">
+                        data-move-id="{{move.id}}" data-tooltip="<strong>{{move.name}}</strong><br>{{item.name}}">
                         <img src="{{item.img}}">
                         <span class="label">{{move.name}}</span>
                     </div>
@@ -125,11 +123,12 @@
 
         <!-- 消耗品 -->
         <div class="dock-category">
-            <div class="cat-btn"><i class="fas fa-flask"></i></div>
+            <div class="cat-btn" data-tooltip="消耗品"><i class="fas fa-flask"></i></div>
             <div class="cat-content">
                 <div class="scroll-area">
                     {{#each consumables}}
-                    <div class="item-btn" data-action="use-item" data-item-id="{{id}}" title="{{name}}">
+                    <div class="item-btn" data-action="use-item" data-item-id="{{id}}"
+                        data-tooltip="<strong>{{name}}</strong><br>数量: {{system.quantity}}">
                         <img src="{{img}}">
                         <span class="qty">{{system.quantity}}</span>
                     </div>
@@ -140,12 +139,12 @@
 
         <!-- 装备 -->
         <div class="dock-category">
-            <div class="cat-btn"><i class="fas fa-tshirt"></i></div>
+            <div class="cat-btn" data-tooltip="装备"><i class="fas fa-tshirt"></i></div>
             <div class="cat-content">
                 <div class="scroll-area">
                     {{#each equipments}}
                     <div class="item-btn {{#if system.equipped}}equipped{{/if}}" data-action="toggle-equip"
-                        data-item-id="{{id}}" title="{{name}}">
+                        data-item-id="{{id}}" data-tooltip="{{name}}">
                         <img src="{{img}}">
                         {{#if system.equipped}}<i class="fas fa-check equip-mark"></i>{{/if}}
                     </div>
@@ -156,7 +155,7 @@
 
         <!-- 属性检定 -->
         <div class="dock-category">
-            <div class="cat-btn"><i class="fas fa-dice-d20"></i></div>
+            <div class="cat-btn" data-tooltip="属性/技能"><i class="fas fa-dice-d20"></i></div>
             <div class="cat-content">
                 <div class="attr-grid">
                     {{#each stats}}

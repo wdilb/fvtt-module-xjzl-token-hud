@@ -54,8 +54,7 @@ export class PlayerHUD {
 
             // 4. 插入 DOM
             if (hudEl) {
-                // 如果已存在，使用 replaceWith 进行替换
-                // 同时尝试保留折叠状态
+                // 如果已存在，使用 replaceWith 进行替换，并尝试保留折叠状态
                 const temp = document.createElement('div');
                 temp.innerHTML = html;
                 const newEl = temp.firstElementChild;
@@ -93,8 +92,8 @@ export class PlayerHUD {
         const mp = res.mp || { value: 0, max: 1 };
         const rage = res.rage || { value: 0 };
         const rageVal = Math.max(0, Math.min(10, rage.value));
-        // 护体真气计算
-        // 逻辑：基于 HP 上限计算百分比，最大 100%
+
+        // 护体真气 (基于 HP 上限计算百分比)
         const hutiValue = res.huti || 0;
         const hutiPercent = hp.max ? Math.min(100, (hutiValue / hp.max) * 100) : 0;
 
@@ -134,15 +133,15 @@ export class PlayerHUD {
         let stanceName = null;
         let stanceDesc = null;
         if (sys.martial?.stanceActive && sys.martial.stanceItemId) {
-        const stItem = actor.items.get(sys.martial.stanceItemId);
-        const stMove = stItem?.system.moves?.find(m => m.id === sys.martial.stance);
-        if (stMove) {
-            stanceName = stMove.name;
-            stanceDesc = stMove.description || "暂无描述";
+            const stItem = actor.items.get(sys.martial.stanceItemId);
+            const stMove = stItem?.system.moves?.find(m => m.id === sys.martial.stance);
+            if (stMove) {
+                stanceName = stMove.name;
+                stanceDesc = stMove.description || "暂无描述";
+            }
         }
-    }
 
-        // E. 境界名称 (本地化读取)
+        // E. 境界名称
         const realmLevel = sys.cultivation?.realmLevel ?? 0;
         const realmKey = `XJZL.Realm.${realmLevel}`;
         const realmName = game.i18n.localize(realmKey);
@@ -155,14 +154,12 @@ export class PlayerHUD {
             stanceDesc,
 
             // 资源百分比
-            hp, mp, rage, rageVal, // 传递原始对象供 input 使用
+            hp, mp, rage, rageVal, hutiValue, hutiPercent,
             hpPercent: (hp.value / hp.max) * 100,
             mpPercent: (mp.value / mp.max) * 100,
             rageDots: Array.from({ length: 10 }, (_, i) => ({ active: i < rageVal })),
-            hutiValue,
-            hutiPercent,
 
-            // 左侧四维 (纯展示)
+            // 左侧四维
             leftStats: [
                 { label: "格挡", value: combat.blockTotal || 0 },
                 { label: "闪避", value: combat.dodgeTotal || 0 },
@@ -174,7 +171,7 @@ export class PlayerHUD {
             consumables,
             equipments,
 
-            // 属性列表 (用于按钮)
+            // 属性列表
             stats: [
                 { key: "liliang", label: "力量" },
                 { key: "shenfa", label: "身法" },
@@ -193,18 +190,10 @@ export class PlayerHUD {
     static activateListeners(html, actor) {
         if (!html) return;
 
-        // 点击头像打开角色卡
-        html.querySelector('[data-action="open-sheet"]')?.addEventListener("click", (ev) => {
-            ev.preventDefault();
-            // 这里的 actor 是 token.actor，会自动判断是本体还是复制体
-            actor.sheet.render(true);
-        });
-
-        // 0. 资源输入框监听 (HP/MP/Rage)
+        // 0. 资源输入框监听 (HP/MP/Rage/Huti)
+        // 使用 CSS 选择器 .res-input，因为护体输入框也加了这个类
         html.querySelectorAll('input.res-input').forEach(input => {
-            // 聚焦时选中所有文本
             input.addEventListener("focus", ev => ev.currentTarget.select());
-            // 变更时更新 Actor
             input.addEventListener("change", async (ev) => {
                 ev.preventDefault();
                 ev.stopPropagation();
@@ -213,6 +202,12 @@ export class PlayerHUD {
                 if (!target || isNaN(value)) return;
                 await actor.update({ [target]: value });
             });
+        });
+
+        // 头像点击 -> 打开角色卡
+        html.querySelector('[data-action="open-sheet"]')?.addEventListener("click", (ev) => {
+            ev.preventDefault();
+            actor.sheet.render(true);
         });
 
         // 1. 属性检定
