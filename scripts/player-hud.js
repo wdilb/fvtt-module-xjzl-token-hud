@@ -3,18 +3,31 @@
  */
 export class PlayerHUD {
 
+    // 定义一个防抖函数变量
+    static debouncedRender = null;
+
     // 初始化监听器
     static init() {
-        Hooks.on("controlToken", () => this.renderHUD());
+        // 创建防抖版本的 renderHUD
+        // 50ms 的延迟足以合并人类的框选操作，但人眼感觉不到延迟
+        this.debouncedRender = foundry.utils.debounce(() => this.renderHUD(), 50);
 
-        // 监听数据变化 (实时刷新)
+        // 1. 监听 Token 选中 (使用防抖)
+        // 无论是选中 1 个还是框选 100 个，50ms 内的操作都会被合并为一次调用
+        Hooks.on("controlToken", () => this.debouncedRender());
+
+        // 2. 监听数据变化 (使用防抖，防止短时间内大量属性变更导致频繁重绘)
         Hooks.on("updateActor", (actor) => {
-            if (this.currentActor && this.currentActor.id === actor.id) this.renderHUD();
+            if (this.currentActor && this.currentActor.id === actor.id) this.debouncedRender();
         });
+        // 物品更新(使用防抖)
         Hooks.on("updateItem", (item) => {
-            if (this.currentActor && this.currentActor.id === item.parent?.id) this.renderHUD();
+            if (this.currentActor && this.currentActor.id === item.parent?.id) this.debouncedRender();
         });
-        Hooks.on("updateCombat", () => this.renderHUD());
+        // 战斗轮次更新(使用防抖)
+        Hooks.on("updateCombat", () => this.debouncedRender());
+        // 删除 Token (强制刷新)(使用防抖)
+        Hooks.on("deleteToken", () => this.debouncedRender());
     }
 
     // 获取当前控制的 Actor
@@ -46,6 +59,10 @@ export class PlayerHUD {
         const actor = this.currentActor;
         const hudEl = document.getElementById("xjzl-player-hud");
 
+        // 记录我们打算渲染谁 (ID)
+        // 如果当前没有 actor，targetId 就是 null
+        const targetId = actor ? actor.id : null;
+
         if (!actor) {
             if (hudEl) hudEl.remove();
             return;
@@ -53,18 +70,29 @@ export class PlayerHUD {
 
         try {
             const data = await this.getData(actor);
+
+            // 数据准备好了，但在这段时间里，玩家可能已经换了选中目标
+            // 再次检查：现在的控制目标，还是我刚才准备数据的那个 actor 吗？
+            if (this.currentActor?.id !== targetId) return; // 目标变了，作废本次渲染
+
             const renderer = foundry.applications?.handlebars?.renderTemplate || globalThis.renderTemplate;
             const html = await renderer("modules/xjzl-token-hud/templates/hud-player.hbs", data);
 
-            if (hudEl) {
+            // 模板也渲染好了，最后一次检查
+            if (this.currentActor?.id !== targetId) return; // 目标又变了，作废
+
+            // 安全插入 DOM
+            // 此时我们要重新获取 hudEl，因为在 await 期间它可能已经被移除了
+            const currentHudEl = document.getElementById("xjzl-player-hud");
+
+            if (currentHudEl) {
                 const temp = document.createElement('div');
                 temp.innerHTML = html;
                 const newEl = temp.firstElementChild;
-                // 尝试保留之前的折叠状态
-                if (hudEl.classList.contains('collapsed')) {
+                if (currentHudEl.classList.contains('collapsed')) {
                     newEl.classList.add('collapsed');
                 }
-                hudEl.replaceWith(newEl);
+                currentHudEl.replaceWith(newEl);
             } else {
                 document.body.insertAdjacentHTML('beforeend', html);
             }
