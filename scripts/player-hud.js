@@ -235,13 +235,13 @@ export class PlayerHUD {
 
         // E. 技能与属性分组 (Skill Groups - 替代原来的 stats 列表)
         const skillGroupsStructure = [
+            { key: "wuxing", skills: ["wuxue", "jianding", "bagua", "shili"] },
             { key: "liliang", skills: ["jiaoli", "zhengtuo", "paozhi", "qinbao"] },
             { key: "shenfa", skills: ["qianxing", "qiaoshou", "qinggong", "mashu"] },
             { key: "tipo", skills: ["renxing", "biqi", "rennai", "ningxue"] },
             { key: "neixi", skills: ["liaoshang", "chongxue", "lianxi", "duqi"] },
             { key: "qigan", skills: ["dianxue", "zhuizong", "tancha", "dongcha"] },
-            { key: "shencai", skills: ["jiaoyi", "qiman", "shuofu", "dingli"] },
-            { key: "wuxing", skills: ["wuxue", "jianding", "bagua", "shili"] }
+            { key: "shencai", skills: ["jiaoyi", "qiman", "shuofu", "dingli"] }
         ];
 
         const skillGroups = skillGroupsStructure.map(group => {
