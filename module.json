@@ -1,7 +1,7 @@
 {
   "id": "xjzl-token-hud",
   "title": "侠界之旅 Token HUD",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "compatibility": {
     "minimum": "13",
     "verified": "13"
