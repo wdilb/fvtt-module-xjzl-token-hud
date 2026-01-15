@@ -51,6 +51,18 @@ Hooks.once("init", async function () {
         default: false,
         onChange: () => updateAllTokens() // 设置变更时立即刷新
     });
+
+    // 注册设置: 小队HUD缩放比例
+    game.settings.register("xjzl-token-hud", "partyScale", {
+        name: "小队HUD缩放比例",
+        hint: "调整左右两侧小队列表的大小 (0.5 - 1.5 倍)。",
+        scope: "client", // 仅客户端生效，每个玩家可以自己调
+        config: true,
+        type: Number,
+        range: { min: 0.5, max: 1.5, step: 0.1 }, // 滑动条
+        default: 1.0,
+        onChange: (value) => updateHudScale(value)
+    });
 });
 
 /**
@@ -78,7 +90,12 @@ Hooks.on("canvasReady", function () {
  */
 function initHudSystem() {
     createHUDContainer();
+    // updateSidebarOffset(); 默认是收起的，不要在初始化执行这个
     updateAllTokens();
+
+    // 初始化时应用当前的缩放比例
+    const scale = game.settings.get("xjzl-token-hud", "partyScale");
+    updateHudScale(scale);
 }
 
 // =================================================================
@@ -189,6 +206,30 @@ async function createHUDContainer() {
 
     const html = await HUD_STATE.renderer("modules/xjzl-token-hud/templates/hud-container.hbs", {});
     document.body.insertAdjacentHTML('beforeend', html);
+
+    // 绑定“一键收起”按钮事件
+    const toggleBtn = document.getElementById("hud-toggle-party-btn");
+    if (toggleBtn) {
+        toggleBtn.addEventListener("click", () => {
+            const container = document.getElementById("xjzl-custom-hud");
+            if (container) {
+                container.classList.toggle("hidden-ui");
+                // 切换图标样式 (可选: 从 眼睛 变成 闭眼)
+                const icon = toggleBtn.querySelector("i");
+                if (container.classList.contains("hidden-ui")) {
+                    icon.className = "fas fa-eye-slash";
+                } else {
+                    icon.className = "fas fa-eye";
+                }
+            }
+        });
+    }
+}
+
+// 更新缩放比例的辅助函数
+function updateHudScale(scale) {
+    // 通过设置 CSS 变量来控制缩放
+    document.documentElement.style.setProperty('--hud-party-scale', scale);
 }
 
 /**
