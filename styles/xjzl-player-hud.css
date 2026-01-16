@@ -958,76 +958,60 @@
 }
 
 /* =========================================
-   ✨ 战斗双星 (肩部悬浮版)
+   普通攻击和趁虚而入按钮
    ========================================= */
 
 #xjzl-player-hud .combat-satellite {
     position: absolute;
-    /* [关键改动] 从底部移到顶部，位于约 10点钟 和 2点钟 方向 */
-    top: 25px;
+    top: -15px; 
+    
     width: 36px;
     height: 36px;
     border-radius: 50%;
-
+    
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
+    font-size: 14px; /* 图标稍微调小一点点，更精致 */
     cursor: pointer;
-
-    /* 材质升级：深色磨砂玻璃感 */
+    
     background: radial-gradient(circle at 30% 30%, #444, #1a1a1a);
     border: 1px solid rgba(255, 255, 255, 0.3);
     color: #ddd;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
-    z-index: 25;
+    z-index: 30; /* 层级调高，确保在最上层 */
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* --- 定位调整 --- */
-/* .hud-center 宽度 140px。
-   我们把它们推到头像框(120px)的外缘，利用与左右翼之间的空隙。
-*/
-
+/* --- 左右定位 --- */
 .combat-satellite.left {
-    /* 向左推出，利用左侧属性块与头像之间的三角形空隙 */
-    left: -20px;
+    left: -29px; /* 往左拉开，利用左上角的大片空地 */
 }
 
 .combat-satellite.right {
-    /* 向右推出，位于头像与血条之间的空隙 */
-    /* 注意：稍微避让右上角的境界印章(Realm Seal) */
-    right: -20px;
+    right: -29px; /* 往右拉开，利用右上角空地 */
 }
 
-/* --- 悬停交互 --- */
+/* --- 悬停效果 --- */
 #xjzl-player-hud .combat-satellite:hover {
-    transform: scale(1.15) rotate(5deg);
-    /* 加一点微弱的旋转更有动感 */
+    transform: scale(1.15) translateY(-2px);
     color: #fff;
     border-color: #fff;
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
 }
 
-#xjzl-player-hud .combat-satellite:active {
-    transform: scale(0.95);
-}
-
-/* --- 普攻 (剑意风格) --- */
+/* 左星：普攻 */
 .combat-satellite.left:hover {
     background: radial-gradient(circle at 30% 30%, #555, #222);
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
 }
 
-/* --- 趁虚 (杀意风格) --- */
+/* 右星：趁虚 */
 .combat-satellite.right {
     border-color: rgba(183, 28, 28, 0.6);
     color: #ef9a9a;
 }
-
 .combat-satellite.right:hover {
     background: radial-gradient(circle at 30% 30%, #d32f2f, #500);
     border-color: #ff5252;
     box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
-    text-shadow: 0 0 5px #ff8a80;
 }
