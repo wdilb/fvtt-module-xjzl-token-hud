@@ -829,6 +829,8 @@
     align-items: center;
     cursor: pointer;
     flex: 1;
+    overflow: hidden;
+    /* 防止溢出 */
 }
 
 #xjzl-player-hud .header-left:hover .g-label {
@@ -848,10 +850,12 @@
 /* 技能网格 */
 #xjzl-player-hud .skill-grid {
     display: grid;
-    /* [修改] 强制分为 4 等份，不再根据宽度自动换行 */
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-    padding: 4px;
+    /* 保持 4 列，但设置最小宽度防止被压缩成 0 */
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+    /* 稍微拉大一点间距，减少拥挤感 */
+    padding: 6px 8px;
+    /* 增加一点内边距 */
 }
 
 /* 技能按钮 (胶囊状) */
@@ -859,31 +863,55 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    /* 圆角胶囊 */
-    padding: 2px 8px;
+    border-radius: 4px;
+    /* 改小圆角，对于密集文字，方一点看起来更整齐 */
+
+    padding: 2px 5px;
+    /* 左右边距改小，给文字腾空间 */
     cursor: pointer;
     transition: all 0.2s;
+    height: 24px;
+    /* 固定高度，确保整齐 */
+    overflow: hidden;
 }
 
 #xjzl-player-hud .skill-btn:hover {
     background: rgba(255, 255, 255, 0.15);
     border-color: #ffd700;
+    transform: translateY(-1px);
+    /* 微弱的上浮效果 */
 }
 
+/* 技能名称 */
 #xjzl-player-hud .s-name {
-    font-size: 12px;
+    font-size: 11px;
+    /* 稍微调小字体以容纳4个字 */
     color: #ccc;
+    white-space: nowrap;
+    /* 强制不换行 */
+    letter-spacing: -0.5px;
+    /* 稍微挤压字间距，让4个字看起来更紧凑 */
+
+    /* 溢出处理：如果名字实在太长，显示省略号 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 4px;
+    /* 保证和数字之间有空隙 */
 }
 
+/* 技能数值 */
 #xjzl-player-hud .s-val {
     font-size: 12px;
     color: #ffd700;
     font-weight: bold;
     font-family: 'Roboto Condensed', sans-serif;
+    flex-shrink: 0;
+    /* 禁止数值被压缩 */
 }
+
 
 /* 技艺特殊样式 */
 #xjzl-player-hud .skill-btn.art {

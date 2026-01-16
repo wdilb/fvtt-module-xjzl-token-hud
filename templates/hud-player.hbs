@@ -88,7 +88,7 @@
                     <div class="simple-grid">
                         {{#each shortcuts}}
                         <div class="item-btn move" data-action="use-move" data-item-id="{{item.id}}"
-                            data-move-id="{{move.id}}" data-tooltip="{{{tooltip}}}">
+                            data-move-id="{{move.id}}" data-tooltip="{{{tooltip}}}" data-tooltip-direction="UP">
                             <img src="{{item.img}}">
                             <span class="label">{{move.name}}</span>
                         </div>
@@ -108,7 +108,8 @@
                 <div class="scroll-area">
                     <div class="simple-grid">
                         {{#each consumables}}
-                        <div class="item-btn" data-action="use-item" data-item-id="{{id}}" data-tooltip="{{{tooltip}}}">
+                        <div class="item-btn" data-action="use-item" data-item-id="{{id}}" data-tooltip="{{{tooltip}}}"
+                            data-tooltip-direction="UP">
                             <img src="{{img}}">
                             <span class="qty">{{system.quantity}}</span>
                             <span class="label">{{name}}</span>
@@ -136,7 +137,7 @@
                         <div class="group-items">
                             {{#each items}}
                             <div class="item-btn {{#if system.equipped}}equipped{{/if}}" data-action="toggle-equip"
-                                data-item-id="{{id}}" data-tooltip="{{{tooltip}}}">
+                                data-item-id="{{id}}" data-tooltip="{{{tooltip}}}" data-tooltip-direction="UP">
                                 <img src="{{img}}">
                                 {{#if system.equipped}}<i class="fas fa-check equip-mark"></i>{{/if}}
                                 <span class="label">{{name}}</span>
@@ -182,7 +183,7 @@
                         <div class="group-items skill-grid">
                             {{#each skills}}
                             <div class="skill-btn" data-action="roll-stat" data-key="{{key}}"
-                                data-tooltip="点击检定: {{label}}">
+                                data-tooltip="点击检定: {{label}}" data-tooltip-direction="UP">
                                 <span class="s-name">{{label}}</span>
                                 <span class="s-val">{{value}}</span>
                             </div>
