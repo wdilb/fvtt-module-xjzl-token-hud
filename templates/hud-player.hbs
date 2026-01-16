@@ -11,20 +11,6 @@
             </div>
             {{/each}}
         </div>
-        <!-- 战斗动作双子键 -->
-        <div class="attack-actions-row">
-            <!-- 普通攻击 -->
-            <div class="atk-btn basic" data-action="roll-basic-attack" data-tooltip="普通攻击" data-tooltip-direction="UP">
-                <i class="fas fa-fist-raised"></i>
-                <span>普攻</span>
-            </div>
-
-            <!-- 趁虚而入 -->
-            <div class="atk-btn opp" data-action="roll-opp-attack" data-tooltip="趁虚而入" data-tooltip-direction="UP">
-                <i class="fas fa-bullseye"></i>
-                <span>趁虚</span>
-            </div>
-        </div>
     </div>
 
     <!-- 2. 中庭：本我 -->
@@ -55,7 +41,17 @@
                     value="{{rage.value}}">
             </div>
         </div>
+        <!-- 左星：普攻 -->
+        <div class="combat-satellite left" data-action="roll-basic-attack" data-tooltip="普通攻击"
+            data-tooltip-direction="UP">
+            <i class="fas fa-fist-raised"></i>
+        </div>
 
+        <!-- 右星：趁虚 -->
+        <div class="combat-satellite right" data-action="roll-opp-attack" data-tooltip="趁虚而入"
+            data-tooltip-direction="UP">
+            <i class="fas fa-bullseye"></i>
+        </div>
         <div class="toggle-hud-btn" data-action="toggle-collapse" data-tooltip="折叠/展开 HUD">
             <i class="fas fa-chevron-down"></i>
         </div>
