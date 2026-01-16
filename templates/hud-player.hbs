@@ -85,12 +85,10 @@
             <div class="cat-btn" data-tooltip="常用招式"><i class="fas fa-fist-raised"></i></div>
             <div class="cat-content">
                 <div class="scroll-area">
-                    <!-- [新增] 包裹一层 grid 容器 -->
                     <div class="simple-grid">
                         {{#each shortcuts}}
                         <div class="item-btn move" data-action="use-move" data-item-id="{{item.id}}"
-                            data-move-id="{{move.id}}"
-                            data-tooltip="<div style='text-align:left; max-width:200px'><strong>{{move.name}}</strong><br><span style='color:#aaa; font-size:11px'>{{item.name}}</span><hr><div style='font-size:11px; color:#ddd'>{{{moveDesc}}}</div><hr><i class='fas fa-mouse-pointer'></i> 左键: 出招<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
+                            data-move-id="{{move.id}}" data-tooltip="{{{tooltip}}}">
                             <img src="{{item.img}}">
                             <span class="label">{{move.name}}</span>
                         </div>
@@ -108,11 +106,9 @@
             <div class="cat-btn" data-tooltip="消耗品"><i class="fas fa-flask"></i></div>
             <div class="cat-content">
                 <div class="scroll-area">
-                    <!-- [新增] 包裹一层 grid 容器 -->
                     <div class="simple-grid">
                         {{#each consumables}}
-                        <div class="item-btn" data-action="use-item" data-item-id="{{id}}"
-                            data-tooltip="<div style='text-align:left; max-width:200px'><strong>{{name}}</strong><br><span style='color:#aaa'>数量: {{system.quantity}}</span><hr><div style='font-size:11px; color:#ddd'>{{{shortDesc}}}</div><hr><i class='fas fa-mouse-pointer'></i> 左键: 使用<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
+                        <div class="item-btn" data-action="use-item" data-item-id="{{id}}" data-tooltip="{{{tooltip}}}">
                             <img src="{{img}}">
                             <span class="qty">{{system.quantity}}</span>
                             <span class="label">{{name}}</span>
@@ -128,10 +124,8 @@
             <div class="cat-btn" data-tooltip="装备"><i class="fas fa-tshirt"></i></div>
             <div class="cat-content">
                 <div class="scroll-area">
-                    <!-- 这里直接遍历 group，不加 simple-grid，让 div 自动换行堆叠 -->
                     {{#each equipmentGroups}}
                     <div class="equip-group">
-                        <!-- 标题栏 -->
                         <div class="group-header" title="点击折叠/展开">
                             <span class="g-label">{{label}}</span>
                             <div class="header-right">
@@ -139,12 +133,10 @@
                                 <i class="fas fa-chevron-down g-icon"></i>
                             </div>
                         </div>
-                        <!-- 组内物品 -->
                         <div class="group-items">
                             {{#each items}}
                             <div class="item-btn {{#if system.equipped}}equipped{{/if}}" data-action="toggle-equip"
-                                data-item-id="{{id}}"
-                                data-tooltip="<div style='text-align:left; max-width:200px'><strong>{{name}}</strong><hr><div style='font-size:11px; color:#ddd'>{{{shortDesc}}}</div><hr><i class='fas fa-mouse-pointer'></i> 左键: 穿戴<br><i class='fas fa-comment-dots'></i> 右键: 发送</div>">
+                                data-item-id="{{id}}" data-tooltip="{{{tooltip}}}">
                                 <img src="{{img}}">
                                 {{#if system.equipped}}<i class="fas fa-check equip-mark"></i>{{/if}}
                                 <span class="label">{{name}}</span>
