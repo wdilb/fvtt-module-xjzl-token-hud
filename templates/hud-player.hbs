@@ -161,7 +161,7 @@
 
                     {{!-- 1. 七维属性分组 --}}
                     {{#each skillGroups}}
-                    <div class="equip-group skill-group-wrapper"> <!-- 复用 equip-group 样式 -->
+                    <div class="equip-group skill-group-wrapper" data-group="{{key}}"> <!-- 复用 equip-group 样式 -->
 
                         <!-- 标题栏: 点击检定属性 (不再折叠，而是直接检定) -->
                         <!-- 技巧: 为了让标题能检定，我们把折叠按钮单独放右边，或者把整个条做成折叠，里面放个检定按钮 -->

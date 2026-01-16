@@ -847,15 +847,54 @@
     align-items: center;
 }
 
-/* 技能网格 */
+/* --- 技能网格通用设置 --- */
 #xjzl-player-hud .skill-grid {
     display: grid;
-    /* 保持 4 列，但设置最小宽度防止被压缩成 0 */
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 5px;
-    /* 稍微拉大一点间距，减少拥挤感 */
+    /* 默认所有组：一行4个 */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
     padding: 6px 8px;
-    /* 增加一点内边距 */
+}
+
+/* 特殊处理：悟性组 (key="wuxing") */
+
+/* 1. 布局改为一行2个，让宽度翻倍 */
+#xjzl-player-hud .equip-group[data-group="wuxing"] .skill-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    /* 间距稍微大一点，更有呼吸感 */
+}
+
+/* 2. 悟性组按钮样式微调 */
+#xjzl-player-hud .equip-group[data-group="wuxing"] .skill-btn {
+    /* 增加一点高度，显得更稳重 */
+    height: 28px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    /* 微弱的金色边框暗示 */
+    padding: 0 10px;
+    /* 内部空间更宽裕 */
+}
+
+/* 3. 悟性组文字调整 */
+#xjzl-player-hud .equip-group[data-group="wuxing"] .s-name {
+    font-size: 12px;
+    /* 恢复正常的字体大小，不需要缩了 */
+    letter-spacing: 1px;
+    /* 甚至可以加一点字间距，更有质感 */
+    color: #eee;
+    /*稍微亮一点*/
+    width: auto;
+    margin-right: auto;
+    /* 让文字靠左，数字靠右 */
+}
+
+/* 4. 悟性组的悬停特效 */
+#xjzl-player-hud .equip-group[data-group="wuxing"] .skill-btn:hover {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.2), transparent);
+    border-color: #ffd700;
+    transform: translateY(-1px) scale(1.02);
+    /* 微微放大的效果 */
 }
 
 /* 技能按钮 (胶囊状) */
