@@ -344,6 +344,73 @@
     align-items: flex-end;
 }
 
+/* =========================================
+   战斗动作双子键 (左翼下方)
+   ========================================= */
+
+#xjzl-player-hud .attack-actions-row {
+    display: flex;
+    width: 100%;
+    gap: 6px;
+    margin-top: 2px;
+    /* 与上方属性块拉开一点距离 */
+}
+
+#xjzl-player-hud .atk-btn {
+    flex: 1;
+    /* 两个按钮平分宽度 */
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    /* 默认材质感 */
+    background: linear-gradient(180deg, #333, #111);
+    border: 1px solid #555;
+    color: #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+#xjzl-player-hud .atk-btn i {
+    font-size: 12px;
+}
+
+/* 1. 普通攻击 - 风格 (深灰色偏硬朗) */
+#xjzl-player-hud .atk-btn.basic:hover {
+    background: linear-gradient(180deg, #444, #222);
+    border-color: #fff;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+/* 2. 趁虚而入 - 风格 (暗红色强调杀机) */
+#xjzl-player-hud .atk-btn.opp {
+    border-color: #8b0000;
+    color: #ffcccc;
+}
+
+#xjzl-player-hud .atk-btn.opp:hover {
+    background: linear-gradient(180deg, #b71c1c, #500);
+    border-color: #ff5252;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+}
+
+/* 点击时的按压效果 */
+#xjzl-player-hud .atk-btn:active {
+    transform: translateY(1px);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
 #xjzl-player-hud .hud-wing.right {
     left: 62%;
     align-items: flex-start;

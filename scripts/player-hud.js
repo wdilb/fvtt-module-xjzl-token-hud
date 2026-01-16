@@ -326,7 +326,7 @@ export class PlayerHUD {
                 img: item.img,
                 system: item.system,
                 // 这里直接生成完整的 HTML tooltip
-                tooltip: this._buildItemTooltip(item) 
+                tooltip: this._buildItemTooltip(item)
             };
         };
         const consumables = (actor.itemTypes?.consumable || []).map(processItem);
@@ -610,6 +610,22 @@ export class PlayerHUD {
 
                 const group = header.closest('.equip-group');
                 group.classList.toggle('collapsed');
+            });
+        });
+
+        // 9. 普通攻击
+        html.querySelectorAll('[data-action="roll-basic-attack"]').forEach(el => {
+            el.addEventListener("click", async (ev) => {
+                ev.preventDefault(); ev.stopPropagation();
+                await actor.rollBasicAttack(); // 调用 Actor 方法
+            });
+        });
+
+        // 10. 趁虚而入
+        html.querySelectorAll('[data-action="roll-opp-attack"]').forEach(el => {
+            el.addEventListener("click", async (ev) => {
+                ev.preventDefault(); ev.stopPropagation();
+                await actor.rollBasicAttack({ mode: "opportunity" }); // 调用 Actor 方法
             });
         });
     }
