@@ -22,6 +22,18 @@
         </div>
         {{/if}}
 
+        <!-- 左星：普攻 (剑图标) -->
+        <div class="combat-satellite left" data-action="roll-basic-attack" data-tooltip="普通攻击"
+            data-tooltip-direction="UP">
+            <i class="fas fa-sword"></i>
+        </div>
+
+        <!-- 右星：趁虚 (靶心图标) -->
+        <div class="combat-satellite right" data-action="roll-opp-attack" data-tooltip="趁虚而入"
+            data-tooltip-direction="UP">
+            <i class="fas fa-bullseye"></i>
+        </div>
+
         <div class="avatar-wrapper">
             <div class="avatar-frame clickable" data-action="open-sheet" data-tooltip="点击打开角色面板">
                 <img src="{{actorImg}}" class="avatar-img">
@@ -40,17 +52,6 @@
                 <input type="text" class="res-input rage-input" data-target="system.resources.rage.value"
                     value="{{rage.value}}">
             </div>
-        </div>
-        <!-- 左星：普攻 -->
-        <div class="combat-satellite left" data-action="roll-basic-attack" data-tooltip="普通攻击"
-            data-tooltip-direction="UP">
-            <i class="fas fa-fist-raised"></i>
-        </div>
-
-        <!-- 右星：趁虚 -->
-        <div class="combat-satellite right" data-action="roll-opp-attack" data-tooltip="趁虚而入"
-            data-tooltip-direction="UP">
-            <i class="fas fa-bullseye"></i>
         </div>
         <div class="toggle-hud-btn" data-action="toggle-collapse" data-tooltip="折叠/展开 HUD">
             <i class="fas fa-chevron-down"></i>

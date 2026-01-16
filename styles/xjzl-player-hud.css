@@ -958,75 +958,76 @@
 }
 
 /* =========================================
-   ✨ 战斗双星 (Combat Satellites)
+   ✨ 战斗双星 (肩部悬浮版)
    ========================================= */
 
-/* 基础样式：圆形浮动按钮 */
 #xjzl-player-hud .combat-satellite {
     position: absolute;
-    bottom: 0px;
-    /* 位于中庭底部，稍微靠上一点，避开 rage-core */
-    width: 38px;
-    height: 38px;
+    /* [关键改动] 从底部移到顶部，位于约 10点钟 和 2点钟 方向 */
+    top: 25px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
 
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 15px;
     cursor: pointer;
 
-    background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #ccc;
+    /* 材质升级：深色磨砂玻璃感 */
+    background: radial-gradient(circle at 30% 30%, #444, #1a1a1a);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ddd;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
     z-index: 25;
-    /* 确保在 rage-ring 之上，但在 Dock 之下或持平 */
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* --- 定位 (关键) --- */
-/* .hud-center 宽度是 140px，居中。我们把按钮往外推 */
+/* --- 定位调整 --- */
+/* .hud-center 宽度 140px。
+   我们把它们推到头像框(120px)的外缘，利用与左右翼之间的空隙。
+*/
 
 .combat-satellite.left {
+    /* 向左推出，利用左侧属性块与头像之间的三角形空隙 */
     left: -20px;
-    /* 往左飞出头像区域 */
 }
 
 .combat-satellite.right {
+    /* 向右推出，位于头像与血条之间的空隙 */
+    /* 注意：稍微避让右上角的境界印章(Realm Seal) */
     right: -20px;
-    /* 往右飞出头像区域 */
 }
 
-/* --- 悬停效果 --- */
+/* --- 悬停交互 --- */
 #xjzl-player-hud .combat-satellite:hover {
-    transform: scale(1.15) translateY(-2px);
+    transform: scale(1.15) rotate(5deg);
+    /* 加一点微弱的旋转更有动感 */
     color: #fff;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
     border-color: #fff;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
 }
 
-/* --- 点击效果 --- */
 #xjzl-player-hud .combat-satellite:active {
     transform: scale(0.95);
 }
 
-/* --- 左星：普攻 (风格：刚猛) --- */
+/* --- 普攻 (剑意风格) --- */
 .combat-satellite.left:hover {
-    background: linear-gradient(145deg, #444, #222);
-    text-shadow: 0 0 5px #fff;
+    background: radial-gradient(circle at 30% 30%, #555, #222);
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
 }
 
-/* --- 右星：趁虚 (风格：危险) --- */
+/* --- 趁虚 (杀意风格) --- */
 .combat-satellite.right {
-    border-color: rgba(183, 28, 28, 0.5);
-    /* 默认带一点红边 */
-    color: #e57373;
+    border-color: rgba(183, 28, 28, 0.6);
+    color: #ef9a9a;
 }
 
 .combat-satellite.right:hover {
-    background: linear-gradient(145deg, #b71c1c, #500);
+    background: radial-gradient(circle at 30% 30%, #d32f2f, #500);
     border-color: #ff5252;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
     text-shadow: 0 0 5px #ff8a80;
 }
