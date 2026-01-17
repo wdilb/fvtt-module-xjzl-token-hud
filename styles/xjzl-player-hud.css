@@ -36,7 +36,8 @@
 #xjzl-player-hud.collapsed .avatar-wrapper,
 #xjzl-player-hud.collapsed .stance-badge,
 #xjzl-player-hud.collapsed .realm-seal,
-#xjzl-player-hud.collapsed .rage-core {
+#xjzl-player-hud.collapsed .rage-core,
+#xjzl-player-hud.collapsed .combat-satellite {
     opacity: 0;
     pointer-events: none;
     transform: scale(0.8);
@@ -963,33 +964,37 @@
 
 #xjzl-player-hud .combat-satellite {
     position: absolute;
-    top: -15px; 
-    
+    top: -15px;
+
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    
+
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px; /* 图标稍微调小一点点，更精致 */
+    font-size: 14px;
+    /* 图标稍微调小一点点，更精致 */
     cursor: pointer;
-    
+
     background: radial-gradient(circle at 30% 30%, #444, #1a1a1a);
     border: 1px solid rgba(255, 255, 255, 0.3);
     color: #ddd;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
-    z-index: 30; /* 层级调高，确保在最上层 */
+    z-index: 30;
+    /* 层级调高，确保在最上层 */
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* --- 左右定位 --- */
 .combat-satellite.left {
-    left: -29px; /* 往左拉开，利用左上角的大片空地 */
+    left: -29px;
+    /* 往左拉开，利用左上角的大片空地 */
 }
 
 .combat-satellite.right {
-    right: -29px; /* 往右拉开，利用右上角空地 */
+    right: -29px;
+    /* 往右拉开，利用右上角空地 */
 }
 
 /* --- 悬停效果 --- */
@@ -1010,6 +1015,7 @@
     border-color: rgba(183, 28, 28, 0.6);
     color: #ef9a9a;
 }
+
 .combat-satellite.right:hover {
     background: radial-gradient(circle at 30% 30%, #d32f2f, #500);
     border-color: #ff5252;
