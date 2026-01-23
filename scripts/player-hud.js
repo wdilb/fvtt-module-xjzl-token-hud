@@ -99,10 +99,17 @@ export class PlayerHUD {
                     <span style='${sTypeBadge}'>${typeLabel}</span>
                  </div>`;
 
-        // --- 次级信息: 所属武学 | 等级 | 距离 ---
+        // --- 次级信息: 所属武学 | 等级 | 动作消耗 |距离 ---
+        let actionHtml = "";
+        if (move.actionCost && move.actionCost !== "无") {
+            actionHtml = `<span style='color:#e67e22; margin-right:8px; font-weight:bold;'><i class='fas fa-clock'></i> ${move.actionCost}</span>`;
+        }
         html += `<div style='${sSubInfo}'>
                     <span>${item.name} · ${levelLabel}</span>
-                    ${move.range ? `<span><i class='fas fa-ruler-horizontal'></i> ${move.range}</span>` : ''}
+                    <div style='display:flex; align-items:center;'>
+                        ${actionHtml}
+                        ${move.range ? `<span><i class='fas fa-ruler-horizontal'></i> ${move.range}</span>` : ''}
+                    </div>
                  </div>`;
 
         // --- 消耗行 (根据 derivedData 或 move.cost) ---
