@@ -63,6 +63,10 @@ Hooks.once("init", async function () {
         default: 1.0,
         onChange: (value) => updateHudScale(value)
     });
+
+    // 预缓存视频文件
+    // 这会让浏览器在后台静默下载文件到缓存，但不会触发并发读取错误
+    fetch("modules/xjzl-token-hud/resource/effect.webm").then(r => r.blob()).catch(e => { });
 });
 
 /**
@@ -509,25 +513,39 @@ function removeTokenCard(tokenId) {
  * 触发 CSS 动画类 (自动重置)
  */
 function triggerAnimation(element, className) {
-    // 移除互斥的动画类，重置状态
+    // 移除互斥的动画类
     element.classList.remove('effect-shake', 'effect-heal', 'effect-neili-cast', 'effect-neili-surge', 'effect-ultimate');
 
-    // 强制浏览器重绘 (Reflow) 以重启动画
+    // 强制重绘
     void element.offsetWidth;
 
     element.classList.add(className);
 
-    // 特殊处理：绝招视频播放
+    // 懒加载播放逻辑
     if (className === 'effect-ultimate') {
         const video = element.querySelector('.ultimate-video');
         if (video) {
+            // 1. 如果还没有 src，从 data-src 读取并赋值
+            if (!video.src) {
+                // 这里的 dataset.src 对应 HTML 里的 data-src
+                // window.location.origin 确保生成完整的绝对路径
+                const videoPath = video.dataset.src;
+                if (videoPath) {
+                    video.src = videoPath;
+                    video.load(); // 告诉浏览器加载资源
+                }
+            }
+
+            // 2. 播放
             video.currentTime = 0;
-            // 捕获播放错误 (例如用户未交互导致无法自动播放)
-            video.play().catch(e => { });
+            video.play().catch(e => {
+                // 忽略未交互导致的自动播放失败警告
+                // console.warn("XJZL HUD | Video play prevented:", e);
+            });
         }
     }
 
-    // 动画结束后自动清理类名 (1.5s 是保守估计，对应最长动画时间)
+    // 动画结束后清理类名
     setTimeout(() => {
         if (element) element.classList.remove(className);
     }, 1500);
