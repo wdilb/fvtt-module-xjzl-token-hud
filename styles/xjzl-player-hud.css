@@ -121,6 +121,10 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+
+    /* 顶部对齐 */
+    /* 这样图片会从头顶开始往下显示，优先保留面部，舍弃腿部 */
+    object-position: top center; 
 }
 
 #xjzl-player-hud .aura-ring {
