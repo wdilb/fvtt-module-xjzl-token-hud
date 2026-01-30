@@ -64,6 +64,17 @@ Hooks.once("init", async function () {
         onChange: (value) => updateHudScale(value)
     });
 
+    // 注册设置: 完全隐藏敌方血条长度
+    game.settings.register("xjzl-token-hud", "hideEnemyBars", {
+        name: "隐藏敌方血条长度",
+        hint: "开启后，普通玩家将无法通过进度条长度判断敌人状态，只能依靠文字描述（如“轻伤”、“濒死”）。GM 仍然可见。",
+        scope: "world",      // 所有玩家统一规则
+        config: true,
+        type: Boolean,
+        default: false,
+        onChange: () => updateAllTokens()
+    });
+
     // 预缓存视频文件
     // 这会让浏览器在后台静默下载文件到缓存，但不会触发并发读取错误
     fetch("modules/xjzl-token-hud/resource/effect.webm").then(r => r.blob()).catch(e => { });
@@ -313,6 +324,11 @@ async function updateSingleToken(token) {
     // 敌方单位对玩家隐藏具体数值，仅显示状态描述
     const showExactHp = isGM || !isEnemy;
 
+    // 读取设置：是否完全隐藏敌方条
+    const hideEnemyBars = game.settings.get("xjzl-token-hud", "hideEnemyBars");
+    // 判定条件：不是GM + 是敌人 + 开启了设置
+    const isSecretMode = !isGM && isEnemy && hideEnemyBars;
+
     // 5. 状态文本计算 (如: 濒临死亡)
     let statusLabel = "未知";
     let statusColorClass = "status-high";
@@ -365,6 +381,12 @@ async function updateSingleToken(token) {
 
     // 2. 卡片已存在：局部更新
     if (card) {
+        // 应用/移除保密模式类名
+        if (isSecretMode) {
+            card.classList.add('mode-secret');
+        } else {
+            card.classList.remove('mode-secret');
+        }
         // 2.1 模糊/精确模式切换 (Fog of War for Stats)
         const hpTrack = card.querySelector('.hp-track');
         const neiliTrack = card.querySelector('.neili-track');

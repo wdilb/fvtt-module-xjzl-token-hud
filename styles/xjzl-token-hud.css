@@ -62,7 +62,8 @@
     background: #333;
     color: #ffd700;
     border-color: #ffd700;
-    transform: translateY(-2px); /* 悬停微动 */
+    transform: translateY(-2px);
+    /* 悬停微动 */
 }
 
 /* 左右列表通用样式 */
@@ -466,6 +467,37 @@
 
 .neili-track.obscured .neili-bar::after {
     display: none;
+}
+
+/* 强制隐藏填充条和幽灵条 */
+.hud-card.enemy.mode-secret .bar-fill,
+.hud-card.enemy.mode-secret .bar-ghost,
+.hud-card.enemy.mode-secret .bar-shield {
+    /* 连护体盾也一起隐藏，防止通过护体猜测 */
+    display: none !important;
+}
+
+/* 调整底槽样式，让它看起来像一个单纯的文本框 */
+.hud-card.enemy.mode-secret .bar-track {
+    background: rgba(0, 0, 0, 0.6);
+    /* 加深底色 */
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 确保状态文字依然清晰可见 */
+.hud-card.enemy.mode-secret .bar-text {
+    z-index: 10;
+    opacity: 1 !important;
+    /* 强制显示文字 */
+}
+
+/* 如果在保密模式下，可以让文字稍微大一点或者醒目一点 */
+.hud-card.enemy.mode-secret .status-label {
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px currentColor;
+    /* 让文字发光，因为没有彩色的条了 */
 }
 
 /* -------------------------------------------------------------
