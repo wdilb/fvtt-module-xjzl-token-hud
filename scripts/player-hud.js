@@ -286,7 +286,7 @@ export class PlayerHUD {
         const hutiValue = res.huti || 0;
         const hutiPercent = hp.max ? Math.min(100, (hutiValue / hp.max) * 100) : 0;
 
-        // === B. 常用招式 (Pinned Moves) - [逻辑重写] ===
+        // === B. 常用招式 (Pinned Moves)  ===
         const pinnedList = actor.getFlag("xjzl-system", "pinnedMoves") || [];
         const shortcuts = [];
 
@@ -301,7 +301,12 @@ export class PlayerHUD {
                 if (item) {
                     const move = item.system.moves?.find(m => m.id === moveId);
                     if (move) {
-                        // [关键步骤] 1. 计算实时数据 (伤害、消耗)
+                        // 插入招式类型判断逻辑
+                        // 优先级: 绝招(ultimate) > 类型(real/feint/stance/qi)
+                        let moveTypeClass = move.type || "real"; 
+                        if (move.isUltimate) moveTypeClass = "ultimate";
+
+                        // 1. 计算实时数据 (伤害、消耗)
                         // 我们尝试调用 Item 类中的 calculateMoveDamage 方法
                         // 如果 Item 类没有这个方法，提供一个默认空对象防报错
                         let derived = { damage: 0, cost: move.cost };
@@ -318,7 +323,8 @@ export class PlayerHUD {
                             item: item,
                             move: move,
                             // 这里不再是简单的 moveDesc，而是完整的 HTML
-                            tooltip: detailedTooltip
+                            tooltip: detailedTooltip,
+                            cssType: moveTypeClass    // 传给模板用于显示颜色
                         });
                     }
                 }

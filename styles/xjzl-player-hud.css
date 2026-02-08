@@ -124,7 +124,7 @@
 
     /* 顶部对齐 */
     /* 这样图片会从头顶开始往下显示，优先保留面部，舍弃腿部 */
-    object-position: top center; 
+    object-position: top center;
 }
 
 #xjzl-player-hud .aura-ring {
@@ -1024,4 +1024,100 @@
     background: radial-gradient(circle at 30% 30%, #d32f2f, #500);
     border-color: #ff5252;
     box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+}
+
+/* =================================================================
+   招式类型颜色编码 (Color Coding for Moves)
+   ================================================================= */
+
+/* 1. 定义颜色变量 (基于你的角色卡配色) */
+#xjzl-player-hud {
+    --c-move-real: #c0392b;
+    /* 实招: 红色 */
+    --c-move-feint: #2980b9;
+    /* 虚招: 蓝色 */
+    --c-move-stance: #27ae60;
+    /* 架招: 绿色 */
+    --c-move-qi: #8e44ad;
+    /* 气招: 紫色 */
+    --c-move-counter: #7f8c8d;
+    /* 反击: 灰色 */
+    --c-move-ultimate: #ffd700;
+    /* 绝招: 金色 */
+}
+
+/* 2. 基础覆盖样式 */
+#xjzl-player-hud .item-btn.move {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    /* 默认微弱边框 */
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+/* 3. 各类型具体样式 */
+
+/* 实招 (Real) */
+#xjzl-player-hud .item-btn.move.real {
+    border-color: var(--c-move-real);
+    background: linear-gradient(135deg, rgba(192, 57, 43, 0.15), transparent);
+    box-shadow: 0 0 5px rgba(192, 57, 43, 0.2);
+}
+
+/* 虚招 (Feint) */
+#xjzl-player-hud .item-btn.move.feint {
+    border-color: var(--c-move-feint);
+    background: linear-gradient(135deg, rgba(41, 128, 185, 0.15), transparent);
+    box-shadow: 0 0 5px rgba(41, 128, 185, 0.2);
+}
+
+/* 架招 (Stance) */
+#xjzl-player-hud .item-btn.move.stance {
+    border-color: var(--c-move-stance);
+    background: linear-gradient(135deg, rgba(39, 174, 96, 0.15), transparent);
+    box-shadow: 0 0 5px rgba(39, 174, 96, 0.2);
+}
+
+/* 气招 (Qi) */
+#xjzl-player-hud .item-btn.move.qi {
+    border-color: var(--c-move-qi);
+    background: linear-gradient(135deg, rgba(142, 68, 173, 0.15), transparent);
+    box-shadow: 0 0 5px rgba(142, 68, 173, 0.2);
+}
+
+/* 反击 (Counter) */
+#xjzl-player-hud .item-btn.move.counter {
+    border-color: var(--c-move-counter);
+    background: linear-gradient(135deg, rgba(189, 195, 199, 0.15), transparent);
+    box-shadow: 0 0 5px rgba(189, 195, 199, 0.3);
+}
+
+/* 绝招 (Ultimate) - 更华丽 */
+#xjzl-player-hud .item-btn.move.ultimate {
+    border-color: var(--c-move-ultimate);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(0, 0, 0, 0));
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.4), inset 0 0 5px rgba(255, 215, 0, 0.1);
+    animation: kf-ult-pulse 2s infinite alternate;
+    /* 绝招特有呼吸灯 */
+}
+
+/* 悬停增强效果 */
+#xjzl-player-hud .item-btn.move:hover {
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+    z-index: 2;
+    /* 悬停时浮起 */
+}
+
+/* 绝招呼吸动画 */
+@keyframes kf-ult-pulse {
+    0% {
+        box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+        border-color: #e6c200;
+    }
+
+    100% {
+        box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+        border-color: #ffd700;
+    }
 }

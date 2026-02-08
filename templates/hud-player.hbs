@@ -98,7 +98,7 @@
                 <div class="scroll-area">
                     <div class="simple-grid">
                         {{#each shortcuts}}
-                        <div class="item-btn move" data-action="use-move" data-item-id="{{item.id}}"
+                        <div class="item-btn move {{cssType}}" data-action="use-move" data-item-id="{{item.id}}"
                             data-move-id="{{move.id}}" data-tooltip="{{{tooltip}}}" data-tooltip-direction="UP">
                             <img src="{{item.img}}">
                             <span class="label">{{move.name}}</span>
