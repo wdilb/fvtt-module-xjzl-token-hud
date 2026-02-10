@@ -162,6 +162,8 @@ Hooks.on("updateToken", (tokenDocument, changes, options, userId) => {
  * [性能优化核心] 监听 Actor 数据更新 (HP/内力/怒气变化)
  */
 Hooks.on("updateActor", (actor, changes, options, userId) => {
+    // 如果是容器，直接忽略，不执行后续逻辑
+    if (actor.type === "container") return; 
     // 使用 foundry.utils.hasProperty 进行深度检查，只关心 attributes 变化
     const hasResourceChange = foundry.utils.hasProperty(changes, "system.resources");
 
@@ -270,6 +272,12 @@ function updateAllTokens() {
  */
 async function updateSingleToken(token) {
     if (!token || !token.actor) return;
+    // 忽略我们新增的容器类
+    if (token.actor.type === "container") {
+        // 如果之前意外创建了卡片，这里确保将其移除
+        removeTokenCard(token.id); 
+        return; 
+    }
     const id = token.id;
 
     // --- A. 可见性检查 ---

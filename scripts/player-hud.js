@@ -50,6 +50,7 @@ export class PlayerHUD {
         const token = tokens[0];
         if (!token.actor) return null;
         if (!token.actor.isOwner) return null;
+        if (token.actor.type === "container") return null; //容器类直接忽略
         return token.actor;
     }
 
