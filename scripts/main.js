@@ -163,7 +163,7 @@ Hooks.on("updateToken", (tokenDocument, changes, options, userId) => {
  */
 Hooks.on("updateActor", (actor, changes, options, userId) => {
     // 如果是容器，直接忽略，不执行后续逻辑
-    if (actor.type === "container") return; 
+    if (actor.type === "container") return;
     // 使用 foundry.utils.hasProperty 进行深度检查，只关心 attributes 变化
     const hasResourceChange = foundry.utils.hasProperty(changes, "system.resources");
 
@@ -275,8 +275,8 @@ async function updateSingleToken(token) {
     // 忽略我们新增的容器类
     if (token.actor.type === "container") {
         // 如果之前意外创建了卡片，这里确保将其移除
-        removeTokenCard(token.id); 
-        return; 
+        removeTokenCard(token.id);
+        return;
     }
     const id = token.id;
 
@@ -359,10 +359,12 @@ async function updateSingleToken(token) {
     }
     // 逻辑：优先取 Actor 图片，如果没有（比如默认神秘人），则回退使用 Token 图片
     const actorImg = token.actor.img || token.document.texture.src;
+    // 判断是否为视频格式
+    const isVideo = actorImg.toLowerCase().endsWith('.webm') || actorImg.toLowerCase().endsWith('.mp4');
     // 1. 卡片不存在：创建新卡片
     if (!card) {
         const data = {
-            id, name: token.name, img: token.document.texture.src, actorImg: actorImg,
+            id, name: token.name, img: actorImg, actorImg: actorImg, isVideo: isVideo,
             hpValue, hpMax, hpPercent,
             neiliValue, neiliMax, neiliPercent, hasNeili,
             rageDots, hasRage,
@@ -414,14 +416,53 @@ async function updateSingleToken(token) {
         const nameEl = card.querySelector('.hud-name');
         if (nameEl && nameEl.innerText !== token.name) nameEl.innerText = token.name;
 
-        const imgEl = card.querySelector('.hud-avatar');
-        const newImg = token.document.texture.src;
-        if (imgEl && imgEl.getAttribute('src') !== newImg) imgEl.src = newImg;
+        // 获取当前决定的新图像路径和类型
+        const newImg = actorImg;
+        const newIsVideo = newImg.toLowerCase().endsWith('.webm') || newImg.toLowerCase().endsWith('.mp4');
 
-        // 绝招立绘更新 (确保如果换了立绘，大招图也跟着变)
-        const ultImgEl = card.querySelector('.ultimate-img');
-        if (ultImgEl && ultImgEl.getAttribute('src') !== actorImg) {
-            ultImgEl.src = actorImg;
+        // --- 头像更新逻辑 ---
+        const avatarContainer = card.querySelector('.hud-avatar-container');
+        if (avatarContainer) {
+            const currentAvatar = avatarContainer.querySelector('.hud-avatar');
+            if (currentAvatar && currentAvatar.getAttribute('src') !== newImg) {
+                const isCurrentlyVideo = currentAvatar.tagName.toLowerCase() === 'video';
+
+                // 如果媒体类型改变了 (比如从图片变成了视频)，直接替换整个内部 DOM
+                if (isCurrentlyVideo !== newIsVideo) {
+                    if (newIsVideo) {
+                        avatarContainer.innerHTML = `<video class="hud-avatar" src="${newImg}" autoplay loop muted playsinline></video>`;
+                    } else {
+                        avatarContainer.innerHTML = `<img class="hud-avatar" src="${newImg}" alt="${token.name}">`;
+                    }
+                } else {
+                    // 类型没变，直接换 src
+                    currentAvatar.src = newImg;
+                    if (newIsVideo) {
+                        currentAvatar.load(); // 切换视频源需要调用 load() 重新加载
+                        currentAvatar.play().catch(() => { });
+                    }
+                }
+            }
+        }
+
+        // --- 绝招立绘更新逻辑 ---
+        const ultContainer = card.querySelector('.ultimate-overlay');
+        if (ultContainer) {
+            const currentUlt = ultContainer.querySelector('.ultimate-img');
+            if (currentUlt && currentUlt.getAttribute('src') !== newImg) {
+                const isCurrentlyVideo = currentUlt.tagName.toLowerCase() === 'video';
+
+                if (isCurrentlyVideo !== newIsVideo) {
+                    if (newIsVideo) {
+                        currentUlt.outerHTML = `<video class="ultimate-img" src="${newImg}" autoplay loop muted playsinline></video>`;
+                    } else {
+                        currentUlt.outerHTML = `<img class="ultimate-img" src="${newImg}">`;
+                    }
+                } else {
+                    currentUlt.src = newImg;
+                    if (newIsVideo) currentUlt.load();
+                }
+            }
         }
 
         // 2.3 数值文本更新
