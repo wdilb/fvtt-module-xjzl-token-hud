@@ -527,6 +527,34 @@
     height: 45px;
 }
 
+/* 1. 在底部不可见的容器上加上隐形桥梁 */
+#xjzl-player-hud .dock-category::before {
+    content: "";
+    position: absolute;
+    bottom: 20px;
+    /* 从按钮正中间的高度开始往上长 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    /* 宽一点，允许鼠标沿对角线或手抖往上滑 */
+    height: 0;
+    /* 平时高度为 0，不挡任何东西 */
+    background: transparent;
+    /* 调试：把这里改成 rgba(255, 0, 0, 0.4) 就能看见红框！需要透明改回 transparent */
+    pointer-events: none;
+    /* 平时不可触摸 */
+    z-index: 10;
+    /* 层级放到按钮(20)和弹窗(100)下面，不会干扰按钮的特效 */
+}
+
+/* 2. 触发时：瞬间变高、兜住鼠标 */
+#xjzl-player-hud .dock-category:hover::before {
+    height: 80px;
+    /* 撑起 80px 高的隐形墙，填满隐藏区域 */
+    pointer-events: auto;
+    /* 瞬间开启捕捉鼠标 */
+}
+
 #xjzl-player-hud .cat-btn {
     width: 45px;
     height: 45px;
