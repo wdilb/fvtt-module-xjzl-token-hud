@@ -124,11 +124,25 @@ export class PlayerHUD {
             html += `</div>`;
         }
 
-        // --- 伤害预览 (绿色高亮) ---
-        if (derivedData && derivedData.damage) {
-            html += `<div style='margin-bottom:6px; color:#2ecc71; font-size:12px; font-family:Consolas; border-left: 2px solid #2ecc71; padding-left: 4px;'>
-                        <i class='fas fa-fist-raised'></i> 预计伤害: ${derivedData.damage}
-                     </div>`;
+        // --- 伤害与虚招预览 ---
+        // 只要存在 damage 或 feint 中的任意一个，就渲染这一行
+        if (derivedData && (derivedData.damage || derivedData.feint)) {
+            // 使用 display:flex 和 gap 控制同一行的间距
+            html += `<div style='display:flex; gap:12px; margin-bottom:6px; font-size:12px; font-family:Consolas; border-left: 2px solid #2ecc71; padding-left: 4px;'>`;
+
+            // 渲染虚招 (如果存在)
+            if (derivedData.feint) {
+                // 获取虚招的本地化文本，如果没有则降级显示 "预计虚招"
+                const feintLabel = game.i18n.localize("XJZL.Combat.FeintPreview") || "预计虚招";
+                html += `<span style='color:#9b59b6;'><i class='fas fa-magic'></i> ${feintLabel}: ${derivedData.feint}</span>`;
+            }
+
+            // 渲染伤害 (如果存在)
+            if (derivedData.damage) {
+                html += `<span style='color:#2ecc71;'><i class='fas fa-fist-raised'></i> 预计伤害: ${derivedData.damage}</span>`;
+            }
+
+            html += `</div>`;
         }
 
         // --- 描述文本 ---
@@ -304,7 +318,7 @@ export class PlayerHUD {
                     if (move) {
                         // 插入招式类型判断逻辑
                         // 优先级: 绝招(ultimate) > 类型(real/feint/stance/qi)
-                        let moveTypeClass = move.type || "real"; 
+                        let moveTypeClass = move.type || "real";
                         if (move.isUltimate) moveTypeClass = "ultimate";
 
                         // 1. 计算实时数据 (伤害、消耗)
