@@ -38,6 +38,12 @@ export class PlayerHUD {
 
         // 5. 删除 Token (强制刷新)
         Hooks.on("deleteToken", () => this.debouncedRender());
+
+        // ==========================================
+        // 初始化时主动检查并渲染一次
+        // 解决 F5 刷新后，Token 已被选中但不显示 HUD 的问题
+        // ==========================================
+        this.debouncedRender();
     }
 
     /**

@@ -97,6 +97,10 @@ Hooks.once("ready", function () {
  */
 Hooks.on("canvasReady", function () {
     initHudSystem();
+    // 每次切地图，HUD 重新渲染，但不会重复注册监听器
+    if (PlayerHUD.debouncedRender) {
+        PlayerHUD.debouncedRender();
+    }
 });
 
 /**
