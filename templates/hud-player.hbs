@@ -98,9 +98,14 @@
                 <div class="scroll-area">
                     <div class="simple-grid">
                         {{#each shortcuts}}
-                        <div class="item-btn move {{cssType}}" data-action="use-move" data-item-id="{{item.id}}"
-                            data-move-id="{{move.id}}" data-tooltip="{{{tooltip}}}" data-tooltip-direction="UP">
-                            <img src="{{item.img}}">
+                        <!-- 动态判定：有 actionType 就用它，没有就默认用 use-move -->
+                        <div class="item-btn move {{cssType}}"
+                            data-action="{{#if actionType}}{{actionType}}{{else}}use-move{{/if}}"
+                            data-item-id="{{item.id}}" data-move-id="{{move.id}}" data-ability-index="{{abilityIndex}}"
+                            data-tooltip="{{{tooltip}}}" data-tooltip-direction="UP">
+
+                            <!-- 动态判定：如果是野兽直接用 img，如果是人类用 item.img -->
+                            <img src="{{#if img}}{{img}}{{else}}{{item.img}}{{/if}}">
                             <span class="label">{{move.name}}</span>
                         </div>
                         {{/each}}

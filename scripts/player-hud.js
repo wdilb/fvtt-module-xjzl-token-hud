@@ -315,6 +315,41 @@ export class PlayerHUD {
             for (const str of pinnedList) {
                 if (typeof str !== 'string') continue;
 
+                // 如果是野兽特性
+                if (str.startsWith("Ability.")) {
+                    const index = parseInt(str.split(".")[1]);
+                    const ability = actor.system.abilities[index];
+
+                    if (ability && ability.isAttack) {
+                        // 尝试获取本地化的伤害类型名称，获取不到默认显示"伤害"
+                        let dmgTypeName = "伤害";
+                        if (CONFIG.XJZL.damageTypes && CONFIG.XJZL.damageTypes[ability.damageType]) {
+                            // 如果是 i18n 键，可以加 game.i18n.localize，如果本身就是中文可以直接用
+                            dmgTypeName = game.i18n.localize(CONFIG.XJZL.damageTypes[ability.damageType]) || CONFIG.XJZL.damageTypes[ability.damageType];
+                        }
+
+                        // 这里的 HTML 属性全部使用单引号，防止与外层的双引号冲突！！！
+                        let tooltip = `<div style='text-align:left; min-width:160px; font-family:var(--font-serif); font-size:13px;'>
+                            <div style='border-bottom:1px solid rgba(255,255,255,0.2); margin-bottom:6px; padding-bottom:4px; font-weight:bold; color:#fff;'>${ability.name}</div>
+                            <div style='font-size:12px; color:#e74c3c; margin-bottom:4px;'><i class='fas fa-tint'></i> 预计${dmgTypeName}: ${ability.damage || 0}</div>
+                            <div style='font-size:11px; color:#aaa; line-height:1.4;'>${this.cleanRichText(ability.description) || "野兽基础攻击"}</div>
+                            <hr style='border:0; border-top:1px solid #444; margin:6px 0;'>
+                            <div style='font-size:10px; color:#777;'><i class='fas fa-mouse-pointer'></i> 左键攻击</div>
+                        </div>`;
+
+                        shortcuts.push({
+                            isAbility: true,
+                            abilityIndex: index,
+                            img: "modules/xjzl-token-hud/resource/creature-attack.png",
+                            move: { name: ability.name },
+                            tooltip: tooltip,
+                            cssType: "real",
+                            actionType: "use-ability"
+                        });
+                    }
+                    continue; // 结束当前循环，不往下执行人物招式的逻辑
+                }
+
                 // 解析存储的字符串 "ItemId.MoveId"
                 const [itemId, moveId] = str.split(".");
                 const item = actor.items.get(itemId);
@@ -337,7 +372,7 @@ export class PlayerHUD {
                             derived = item.calculateMoveDamage(moveId) || derived;
                         }
 
-                        // [关键步骤] 2. 调用构建器生成 HTML Tooltip
+                        // 2. 调用构建器生成 HTML Tooltip
                         const detailedTooltip = this._buildMoveTooltip(item, move, derived);
 
                         shortcuts.push({
@@ -545,6 +580,28 @@ export class PlayerHUD {
                 const { itemId, moveId } = ev.currentTarget.dataset;
                 const item = actor.items.get(itemId);
                 if (item) await item.postMoveToChat(moveId);
+            });
+        });
+
+        // 野兽特性操作 (只需左键攻击)
+        html.querySelectorAll('[data-action="use-ability"]').forEach(el => {
+            el.addEventListener("click", async (ev) => {
+                ev.preventDefault(); ev.stopPropagation();
+
+                const index = ev.currentTarget.dataset.abilityIndex;
+                const ability = actor.system.abilities[index];
+
+                if (ability) {
+                    // 复刻在 XJZLCreatureSheet 里的攻击方法
+                    await actor.rollBasicAttack({
+                        isCreatureAttack: true,
+                        baseDamage: ability.damage || 0,
+                        damageType: ability.damageType || "waigong",
+                        defaultDamageType: ability.damageType || "waigong",
+                        damageTypes: CONFIG.XJZL.damageTypes,
+                        label: ability.name || "野兽攻击"
+                    });
+                }
             });
         });
 
