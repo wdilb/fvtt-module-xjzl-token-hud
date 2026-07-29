@@ -76,6 +76,31 @@ export class PlayerHUD {
     };
 
     /**
+     * 清洗招式描述时保留系统生成的等级公式结果标记。
+     * 截断在恢复 HTML 标记前完成，避免标签长度影响 120 字限制。
+     */
+    static cleanFormulaDescription(text, maxLength = 0) {
+        if (!text) return "";
+
+        const formulaResults = [];
+        const tokenized = text.replace(
+            /<span class="xjzl-level-formula-result">([^<]*)<\/span>/g,
+            (_match, result) => String.fromCharCode(0xE000 + formulaResults.push(result) - 1)
+        );
+        let cleaned = this.cleanRichText(tokenized);
+        const truncated = maxLength > 0 && cleaned.length > maxLength;
+        if (truncated) cleaned = cleaned.substring(0, maxLength);
+
+        for (const [index, result] of formulaResults.entries()) {
+            cleaned = cleaned.replace(
+                String.fromCharCode(0xE000 + index),
+                `<span class='xjzl-level-formula-result'>${result}</span>`
+            );
+        }
+        return truncated ? `${cleaned}...` : cleaned;
+    }
+
+    /**
      * 构建详细的招式 Tooltip HTML
      * 复刻 Character Sheet 的样式，显示类型、消耗、伤害预览等
      * 
@@ -109,13 +134,15 @@ export class PlayerHUD {
         // --- 次级信息: 所属武学 | 等级 | 动作消耗 |距离 ---
         let actionHtml = "";
         if (move.actionCost && move.actionCost !== "无") {
-            actionHtml = `<span style='color:#e67e22; margin-right:8px; font-weight:bold;'><i class='fas fa-clock'></i> ${move.actionCost}</span>`;
+            const actionClass = move.formulaFields?.actionCost ? "xjzl-level-formula-result" : "";
+            actionHtml = `<span style='color:#e67e22; margin-right:8px; font-weight:bold;'><i class='fas fa-clock'></i> <span class='${actionClass}'>${move.actionCost}</span></span>`;
         }
+        const rangeClass = move.formulaFields?.range ? "xjzl-level-formula-result" : "";
         html += `<div style='${sSubInfo}'>
                     <span>${item.name} · ${levelLabel}</span>
                     <div style='display:flex; align-items:center;'>
                         ${actionHtml}
-                        ${move.range ? `<span><i class='fas fa-ruler-horizontal'></i> ${move.range}</span>` : ''}
+                        ${move.range ? `<span><i class='fas fa-ruler-horizontal'></i> <span class='${rangeClass}'>${move.range}</span></span>` : ''}
                     </div>
                  </div>`;
 
@@ -153,9 +180,8 @@ export class PlayerHUD {
 
         // --- 描述文本 ---
         if (move.description) {
-            let desc = this.cleanRichText(move.description);
-            // 限制长度防止 HUD 遮挡太多屏幕，保留120字
-            if (desc.length > 120) desc = desc.substring(0, 120) + "...";
+            // 限制长度防止 HUD 遮挡太多屏幕，保留 120 字及公式结果颜色
+            const desc = this.cleanFormulaDescription(move.description, 120);
             // white-space: pre-wrap 用于保留换行符
             html += `<div style='font-size:11px; color:#ccc; line-height:1.4; white-space: pre-wrap; margin-top:4px; border-top:1px dashed #444; padding-top:4px;'>${desc}</div>`;
         }
