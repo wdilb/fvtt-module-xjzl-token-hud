@@ -6,15 +6,22 @@ export class PlayerHUD {
 
     // 定义一个防抖函数变量，防止短时间内多次重绘导致性能问题
     static debouncedRender = null;
+    static initialized = false;
 
     /**
      * 初始化监听器
      * 在 Foundry VTT 启动或模块加载时调用
      */
     static init() {
+        if (this.initialized) return;
+        this.initialized = true;
+
         // 创建防抖版本的 renderHUD
         // 50ms 的延迟足以合并人类的框选操作，但人眼感觉不到延迟
         this.debouncedRender = foundry.utils.debounce(() => this.renderHUD(), 50);
+        this.debouncedLayout = foundry.utils.debounce(() => {
+            this.updateSafeArea(document.getElementById("xjzl-player-hud"));
+        }, 50);
 
         // 1. 监听 Token 选中 (使用防抖)
         // 无论是选中 1 个还是框选 100 个，50ms 内的操作都会被合并为一次调用
@@ -39,6 +46,10 @@ export class PlayerHUD {
         // 5. 删除 Token (强制刷新)
         Hooks.on("deleteToken", () => this.debouncedRender());
 
+        // 原生技能栏渲染或窗口尺寸变化时，重新计算 HUD 的安全区。
+        Hooks.on("renderHotbar", () => this.debouncedLayout());
+        window.addEventListener("resize", () => this.debouncedLayout());
+
         // ==========================================
         // 初始化时主动检查并渲染一次
         // 解决 F5 刷新后，Token 已被选中但不显示 HUD 的问题
@@ -51,6 +62,7 @@ export class PlayerHUD {
      * 规则：必须只选中一个 Token，且玩家拥有该 Token 的 Actor 权限
      */
     static get currentActor() {
+        if (!canvas?.tokens) return null;
         const tokens = canvas.tokens.controlled;
         if (tokens.length !== 1) return null;
         const token = tokens[0];
@@ -285,20 +297,29 @@ export class PlayerHUD {
             // 模板渲染期间再次检查
             if (this.currentActor?.id !== targetId) return;
 
-            // DOM 操作：插入或替换 HUD
+            // DOM 操作：首次插入，后续原地更新子树
             const currentHudEl = document.getElementById("xjzl-player-hud");
 
             if (currentHudEl) {
-                // 如果已存在，进行替换以保持位置或折叠状态
-                const temp = document.createElement('div');
+                // 保留根节点，避免刷新数值时触发 fixed/transform 动画和位置重置。
+                const wasCollapsed = currentHudEl.classList.contains("collapsed");
+                const preservedPanelIndex = Array.from(currentHudEl.querySelectorAll(".dock-category"))
+                    .findIndex(category => category.classList.contains("is-open"));
+                const temp = document.createElement("div");
                 temp.innerHTML = html;
                 const newEl = temp.firstElementChild;
 
-                // 保持折叠状态
-                if (currentHudEl.classList.contains('collapsed')) {
-                    newEl.classList.add('collapsed');
+                currentHudEl.replaceChildren(...Array.from(newEl.childNodes));
+                currentHudEl.classList.toggle("collapsed", wasCollapsed);
+                currentHudEl.querySelector('[data-action="toggle-collapse"]')
+                    ?.setAttribute("aria-expanded", String(!wasCollapsed));
+
+                if (preservedPanelIndex >= 0) {
+                    const preservedCategory = currentHudEl.querySelectorAll(".dock-category")[preservedPanelIndex];
+                    preservedCategory?.classList.add("is-open");
+                    preservedCategory?.querySelector(".cat-btn")
+                        ?.setAttribute("aria-expanded", "true");
                 }
-                currentHudEl.replaceWith(newEl);
             } else {
                 // 如果不存在，追加到 body
                 document.body.insertAdjacentHTML('beforeend', html);
@@ -308,6 +329,7 @@ export class PlayerHUD {
             const newHudEl = document.getElementById("xjzl-player-hud");
             if (newHudEl) {
                 this.activateListeners(newHudEl, actor);
+                this.updateSafeArea(newHudEl);
             }
 
         } catch (err) {
@@ -562,12 +584,84 @@ export class PlayerHUD {
     }
 
     /**
+     * 计算原生技能栏的实际占用高度，并将人物 HUD 放在其上方。
+     * @param {HTMLElement|null} hudEl - 当前人物 HUD 根节点
+     */
+    static updateSafeArea(hudEl) {
+        if (!hudEl) return;
+
+        const hotbar = document.getElementById("hotbar");
+        if (!hotbar) {
+            hudEl.style.setProperty("--xjzl-hud-bottom", "16px");
+            return;
+        }
+
+        const rect = hotbar.getBoundingClientRect();
+        const hotbarVisible = rect.width > 0 && rect.height > 0 && rect.top < window.innerHeight;
+        const bottomOffset = hotbarVisible
+            ? Math.max(16, Math.round(window.innerHeight - rect.top + 10))
+            : 16;
+
+        hudEl.style.setProperty("--xjzl-hud-bottom", `${bottomOffset}px`);
+    }
+
+    /**
      * DOM 事件监听器绑定
      */
     static activateListeners(html, actor) {
         if (!html) return;
+        // 0. 使用短暂打开、延迟关闭的 hover intent；新面板打开前先关闭旧面板。
+        const openTimers = new WeakMap();
+        const closeTimers = new WeakMap();
+        const clearCategoryTimers = category => {
+            window.clearTimeout(openTimers.get(category));
+            window.clearTimeout(closeTimers.get(category));
+        };
+        let activeCategory = null;
 
-        // 0. 资源输入框 (双向绑定)
+        html.querySelectorAll(".dock-category").forEach(category => {
+            const button = category.querySelector(".cat-btn");
+            const closeCategory = () => {
+                clearCategoryTimers(category);
+                category.classList.remove("is-open");
+                button?.setAttribute("aria-expanded", "false");
+                if (activeCategory === category) activeCategory = null;
+            };
+            const openCategory = () => {
+                clearCategoryTimers(category);
+                html.querySelectorAll(".dock-category.is-open").forEach(other => {
+                    if (other !== category) {
+                        other.classList.remove("is-open");
+                        other.querySelector(".cat-btn")?.setAttribute("aria-expanded", "false");
+                    }
+                });
+                category.classList.add("is-open");
+                button?.setAttribute("aria-expanded", "true");
+                activeCategory = category;
+            };
+            const scheduleOpen = () => {
+                clearCategoryTimers(category);
+                html.querySelectorAll(".dock-category.is-open").forEach(other => {
+                    if (other === category) return;
+                    other.classList.remove("is-open");
+                    other.querySelector(".cat-btn")?.setAttribute("aria-expanded", "false");
+                });
+                openTimers.set(category, window.setTimeout(openCategory, 90));
+            };
+            const scheduleClose = () => {
+                window.clearTimeout(openTimers.get(category));
+                window.clearTimeout(closeTimers.get(category));
+                closeTimers.set(category, window.setTimeout(closeCategory, 260));
+            };
+
+            category.addEventListener("pointerenter", scheduleOpen);
+            category.addEventListener("pointerleave", scheduleClose);
+            category.addEventListener("focusin", openCategory);
+            category.addEventListener("focusout", event => {
+                if (!category.contains(event.relatedTarget)) closeCategory();
+            });
+        });
+        // 1. 资源输入框 (双向绑定)
         html.querySelectorAll('input.res-input').forEach(input => {
             input.addEventListener("focus", ev => ev.currentTarget.select());
             input.addEventListener("change", async (ev) => {
@@ -714,7 +808,8 @@ export class PlayerHUD {
         if (toggleBtn) {
             toggleBtn.addEventListener("click", (ev) => {
                 ev.preventDefault(); ev.stopPropagation();
-                html.classList.toggle("collapsed");
+                const isCollapsed = html.classList.toggle("collapsed");
+                toggleBtn.setAttribute("aria-expanded", String(!isCollapsed));
             });
         }
 

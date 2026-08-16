@@ -1,8 +1,22 @@
-<div id="xjzl-custom-hud">
-    <!-- 全局显示/隐藏开关 -->
-    <div id="hud-toggle-party-btn" title="显示/隐藏小队列表">
+<div id="xjzl-custom-hud" aria-label="战场状态界面">
+    <div class="hud-atmosphere" aria-hidden="true"></div>
+
+    <button id="hud-toggle-party-btn" type="button" title="显示/隐藏小队列表" aria-label="显示/隐藏小队列表">
         <i class="fas fa-eye"></i>
-    </div>
-    <div class="hud-column hud-column-left" id="hud-friends"></div>
-    <div class="hud-column hud-column-right" id="hud-enemies"></div>
+        <span>队伍</span>
+    </button>
+
+    <section class="hud-side hud-side-left" data-drag-side="friends" aria-label="友方单位">
+        <button class="hud-side-rail" type="button" data-drag-handle="friends" title="拖动友方小队 HUD">
+            <i class="fas fa-grip-vertical" aria-hidden="true"></i>
+        </button>
+        <div class="hud-column hud-column-left" id="hud-friends"></div>
+    </section>
+
+    <section class="hud-side hud-side-right" data-drag-side="enemies" aria-label="敌方单位">
+        <button class="hud-side-rail" type="button" data-drag-handle="enemies" title="拖动敌方小队 HUD">
+            <i class="fas fa-grip-vertical" aria-hidden="true"></i>
+        </button>
+        <div class="hud-column hud-column-right" id="hud-enemies"></div>
+    </section>
 </div>

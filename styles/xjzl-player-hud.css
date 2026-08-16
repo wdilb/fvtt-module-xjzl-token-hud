@@ -1,623 +1,850 @@
-/* -----------------------------------------------------------
-   Player Control HUD (PCH) - 样式表
-   Scope ID: #xjzl-player-hud
-   版本: Final Vertical Stack & Groups
-   ----------------------------------------------------------- */
-
-/* 容器定位 */
+/* 侠界之旅 · 人物 HUD：寒铁旧铜武侠界面；全部样式严格限制在根节点内 */
 #xjzl-player-hud {
+    --hud-ink: #141513;
+    --hud-ink-deep: rgba(8, 10, 9, .94);
+    --hud-ink-soft: rgba(18, 20, 18, .8);
+    --hud-paper: #f0e5cc;
+    --hud-muted: #b9ad94;
+    --hud-bronze: #b99a60;
+    --hud-bronze-bright: #e3c98b;
+    --hud-jade: #6d9f8e;
+    --hud-red: #b95647;
     position: fixed;
-    bottom: 100px;
+    z-index: 40;
     left: 50%;
-    transform: translateX(-50%);
-    width: 800px;
-    height: 160px;
-    z-index: 60;
-    font-family: 'Ma Shan Zheng', cursive;
-    color: #fff;
+    bottom: var(--xjzl-hud-bottom, 16px);
+    display: grid;
+    width: 550px;
+    grid-template-columns: 174px 150px 174px;
+    grid-template-areas:
+        "left center right"
+        "dock dock dock";
+    column-gap: 26px;
+    row-gap: 1px;
+    align-items: end;
+    color: var(--hud-paper);
+    font: 12px "FZKai-Z03", "STKaiti", "KaiTi", "Noto Serif SC", serif;
     pointer-events: none;
-    transition: bottom 0.3s ease;
+    transform: translateX(-50%) scale(var(--hud-party-scale, 1));
+    transform-origin: bottom center;
+    transition: bottom .18s ease;
 }
 
-/* 恢复内部交互 */
+#xjzl-player-hud,
 #xjzl-player-hud * {
-    pointer-events: auto;
+    box-sizing: border-box;
 }
 
-/* 折叠模式 */
-#xjzl-player-hud.collapsed {
-    width: 0;
-    height: 0;
-    overflow: visible;
+#xjzl-player-hud button {
+    margin: 0;
+    font: inherit;
 }
 
-#xjzl-player-hud.collapsed .hud-wing,
-#xjzl-player-hud.collapsed .hud-dock,
-#xjzl-player-hud.collapsed .avatar-wrapper,
-#xjzl-player-hud.collapsed .stance-badge,
-#xjzl-player-hud.collapsed .realm-seal,
-#xjzl-player-hud.collapsed .rage-core,
-#xjzl-player-hud.collapsed .combat-satellite {
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(0.8);
-    transition: all 0.3s ease;
-}
-
-/* 折叠按钮 */
-#xjzl-player-hud.collapsed .toggle-hud-btn {
-    pointer-events: auto;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #333, #000);
-    border: 2px solid #ffd700;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ffd700;
-    font-size: 18px;
-    z-index: 100;
-}
-
-#xjzl-player-hud.collapsed .toggle-hud-btn:hover {
-    transform: translateX(-50%) scale(1.1);
-    background: #444;
-    color: #fff;
-    border-color: #fff;
-}
-
-#xjzl-player-hud.collapsed .toggle-hud-btn i {
-    transform: rotate(180deg);
-}
-
-/* --- 1. 中庭 (Center) --- */
-#xjzl-player-hud .hud-center {
+#xjzl-player-hud .player-hud-glow {
     position: absolute;
+    z-index: -3;
+    left: 50%;
     bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 140px;
-    height: 140px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-}
-
-#xjzl-player-hud .avatar-wrapper {
-    position: relative;
-    width: 120px;
-    height: 120px;
-}
-
-#xjzl-player-hud .avatar-frame {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 3px solid rgba(255, 255, 255, 0.2);
-    background: #111;
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
-    z-index: 5;
-    transition: transform 0.2s;
-}
-
-#xjzl-player-hud .avatar-frame.clickable {
-    cursor: pointer;
-}
-
-#xjzl-player-hud .avatar-frame.clickable:hover {
-    transform: scale(1.02);
-    border-color: rgba(255, 255, 255, 0.6);
-}
-
-#xjzl-player-hud .avatar-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-
-    /* 顶部对齐 */
-    /* 这样图片会从头顶开始往下显示，优先保留面部，舍弃腿部 */
-    object-position: top center;
-}
-
-#xjzl-player-hud .aura-ring {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    box-shadow: inset 0 0 20px currentColor;
-    opacity: 0.6;
-    animation: kf-breathe 3s infinite alternate;
-}
-
-#xjzl-player-hud .aura-ring.yin {
-    color: #d500f9;
-}
-
-#xjzl-player-hud .aura-ring.yang {
-    color: #ff3d00;
-}
-
-#xjzl-player-hud .aura-ring.taiji {
-    color: #fff;
-}
-
-#xjzl-player-hud .realm-seal {
-    position: absolute;
-    top: 0px;
-    right: -10px;
-    background: linear-gradient(135deg, #b71c1c, #880e4f);
-    color: #fff;
-    padding: 1px 6px;
-    font-size: 12px;
-    border-radius: 4px;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
-    transform: rotate(10deg);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    z-index: 20;
-    text-shadow: 1px 1px 0 #000;
-}
-
-#xjzl-player-hud .stance-badge {
-    position: absolute;
-    top: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-family: sans-serif;
-    border: 1px solid #ffd700;
-    color: #ffd700;
-    cursor: pointer;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-    z-index: 15;
-}
-
-#xjzl-player-hud .stance-badge:hover {
-    background: #b71c1c;
-    color: #fff;
-    border-color: #fff;
-}
-
-#xjzl-player-hud .toggle-hud-btn {
-    position: absolute;
-    top: -45px;
-    width: 30px;
-    height: 20px;
-    background: rgba(0, 0, 0, 0.6);
-    color: #aaa;
-    text-align: center;
-    line-height: 20px;
-    border-radius: 4px 4px 0 0;
-    cursor: pointer;
-}
-
-/* 怒气环绕 */
-#xjzl-player-hud .rage-ring-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
+    width: 390px;
+    height: 92px;
     pointer-events: none;
-    z-index: 4;
-}
-
-#xjzl-player-hud .rage-orb {
-    position: absolute;
-    width: 8px;
-    height: 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) rotate(calc(-115deg + (var(--i) * 25deg))) translateY(74px);
-    border-radius: 2px;
-    transition: all 0.3s;
-}
-
-#xjzl-player-hud .rage-orb.active {
-    background: var(--seg-color, #ffd700);
-    box-shadow: 0 0 8px var(--seg-color, #ffd700);
-    border-color: #fff;
-    height: 14px;
-    width: 9px;
-}
-
-#xjzl-player-hud .rage-orb:nth-child(1).active {
-    --seg-color: #b9f6ca;
-}
-
-#xjzl-player-hud .rage-orb:nth-child(2).active {
-    --seg-color: #69f0ae;
-}
-
-#xjzl-player-hud .rage-orb:nth-child(3).active {
-    --seg-color: #00e676;
-}
-
-#xjzl-player-hud .rage-orb:nth-child(4).active {
-    --seg-color: #00c853;
-}
-
-#xjzl-player-hud .rage-orb:nth-child(5).active {
-    --seg-color: #64dd17;
-}
-
-#xjzl-player-hud .rage-orb:nth-child(6).active {
-    --seg-color: #76ff03;
-}
-
-#xjzl-player-hud .rage-orb:nth-child(7).active {
-    --seg-color: #ffff00;
-}
-
-#xjzl-player-hud .rage-orb:nth-child(8).active {
-    --seg-color: #ffd600;
-}
-
-#xjzl-player-hud .rage-orb:nth-child(9).active {
-    --seg-color: #ffab00;
-}
-
-#xjzl-player-hud .rage-orb:nth-child(10).active {
-    --seg-color: #ff3d00;
-    animation: kf-pulse-orb 0.5s infinite alternate;
-}
-
-/* 怒气核心 */
-#xjzl-player-hud .rage-core {
-    position: absolute;
-    bottom: -15px;
-    left: 50%;
+    background:
+        radial-gradient(ellipse, rgba(185, 154, 96, .1), transparent 61%),
+        radial-gradient(ellipse, rgba(0, 0, 0, .27), transparent 73%);
+    filter: blur(13px);
     transform: translateX(-50%);
-    width: 36px;
-    height: 36px;
-    background: radial-gradient(circle, #222 30%, #000 100%);
-    border: 2px solid #444;
-    border-radius: 50%;
-    z-index: 20;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
-    transition: border-color 0.2s;
-    overflow: hidden;
 }
 
-#xjzl-player-hud .rage-core:hover {
-    border-color: #ff9100;
-    box-shadow: 0 0 15px rgba(255, 145, 0, 0.4);
+#xjzl-player-hud .hud-wing,
+#xjzl-player-hud .hud-center,
+#xjzl-player-hud .hud-dock {
+    pointer-events: auto;
 }
 
-#xjzl-player-hud .rage-core i {
-    position: absolute;
-    top: 4px;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    font-size: 10px;
-    color: #ff6d00;
-    opacity: 0.9;
-    line-height: 1;
-    pointer-events: none;
-}
-
-#xjzl-player-hud input.rage-input {
-    position: absolute;
-    bottom: 2px;
-    left: 0;
-    width: 100% !important;
-    height: 18px !important;
-    text-align: center !important;
-    line-height: 18px !important;
-    font-family: 'Roboto Condensed', sans-serif;
-    font-size: 15px !important;
-    font-weight: bold;
-    color: #fff;
-    background: transparent !important;
-    border: none !important;
-    outline: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-/* --- 2. 左右翼 (Wings) --- */
+/* 两侧采用向外消散的薄墨，不形成网页卡片。 */
 #xjzl-player-hud .hud-wing {
+    position: relative;
+    height: 82px;
+    min-width: 0;
+    align-self: end;
+    margin-bottom: 10px;
+    padding: 8px 11px;
+    isolation: isolate;
+}
+
+#xjzl-player-hud .hud-wing::before,
+#xjzl-player-hud .hud-wing::after {
     position: absolute;
-    top: 25px;
-    width: 250px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    z-index: 5;
+    content: "";
+    pointer-events: none;
+}
+
+#xjzl-player-hud .hud-wing::before {
+    z-index: -2;
+    inset: 0;
+    background: transparent;
+    filter: none;
+}
+
+#xjzl-player-hud .hud-wing::after {
+    z-index: -1;
+    bottom: 5px;
+    height: 1px;
+    opacity: .8;
 }
 
 #xjzl-player-hud .hud-wing.left {
-    right: 62%;
-    align-items: flex-end;
+    grid-area: left;
+    padding-right: 17px;
+}
+
+#xjzl-player-hud .hud-wing.left::before {
+    background: transparent;
+}
+
+#xjzl-player-hud .hud-wing.left::after {
+    right: 2px;
+    left: 16px;
+    background: linear-gradient(90deg, transparent, rgba(185, 154, 96, .34), var(--hud-bronze));
+    transform: rotate(-1deg);
+    transform-origin: right;
 }
 
 #xjzl-player-hud .hud-wing.right {
-    left: 62%;
-    align-items: flex-start;
+    grid-area: right;
+    padding-left: 17px;
+}
+
+#xjzl-player-hud .hud-wing.right::before {
+    background: transparent;
+}
+
+#xjzl-player-hud .hud-wing.right::after {
+    right: 16px;
+    left: 2px;
+    background: linear-gradient(90deg, var(--hud-bronze), rgba(185, 154, 96, .34), transparent);
+    transform: rotate(1deg);
+    transform-origin: left;
+}
+
+#xjzl-player-hud .wing-heading,
+#xjzl-player-hud .wing-footer {
+    display: none;
 }
 
 #xjzl-player-hud .combat-stat-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    width: 100%;
+    height: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, 1fr);
+    gap: 0 13px;
 }
 
 #xjzl-player-hud .c-stat {
-    background: linear-gradient(90deg, rgba(0, 0, 0, 0.8), rgba(40, 40, 40, 0.8));
-    padding: 4px 10px;
-    border-radius: 4px;
+    position: relative;
     display: flex;
+    min-width: 0;
     align-items: center;
     justify-content: space-between;
-    color: #ccc;
-    font-family: 'Ma Shan Zheng', cursive;
-    font-size: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    height: 32px;
+    gap: 5px;
+    padding: 0 1px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    transition: filter .16s ease, transform .16s ease;
+}
+
+#xjzl-player-hud .c-stat::after {
+    position: absolute;
+    right: 0;
+    bottom: 1px;
+    left: 0;
+    height: 1px;
+    content: "";
+    background: linear-gradient(90deg, transparent, rgba(240, 229, 204, .15), transparent);
+}
+
+#xjzl-player-hud .c-stat:hover {
+    filter: brightness(1.2);
+    transform: translateY(-1px);
+}
+
+#xjzl-player-hud .c-stat .label {
+    min-width: 0;
+    overflow: hidden;
+    color: #e3cd94;
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-overflow: ellipsis;
+    font-weight: 600;
+    text-shadow: 0 1px 2px #000, 0 0 5px rgba(0, 0, 0, .85);
+    white-space: nowrap;
+}
+
+#xjzl-player-hud .c-stat .label::before {
+    display: inline-block;
+    width: 3px;
+    height: 3px;
+    margin-right: 5px;
+    content: "";
+    background: var(--hud-bronze);
+    box-shadow: 0 0 5px rgba(185, 154, 96, .48);
+    transform: rotate(45deg);
+    vertical-align: 2px;
 }
 
 #xjzl-player-hud .c-stat .val {
-    font-family: 'Roboto Condensed', sans-serif;
-    font-weight: bold;
-    font-size: 16px;
-    color: #fff;
+    color: #fff5dd;
+    font-family: "DIN Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    text-shadow: 0 2px 4px #000, 0 0 7px rgba(0, 0, 0, .9);
 }
 
-/* 资源条 */
-#xjzl-player-hud .bar-group {
+#xjzl-player-hud .resource-line {
     position: relative;
-    width: 100%;
-    margin-bottom: 5px;
+    display: grid;
+    height: 34px;
+    grid-template-columns: 29px minmax(0, 1fr);
+    align-items: center;
+    gap: 5px;
+}
+
+#xjzl-player-hud .resource-meta {
+    position: relative;
+    z-index: 4;
+    color: #f2e7ce;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-align: center;
+    text-shadow: 0 1px 2px #000, 0 0 5px rgba(0, 0, 0, .85);
+}
+
+#xjzl-player-hud .resource-meta::after {
+    position: absolute;
+    right: 2px;
+    bottom: -3px;
+    left: 2px;
+    height: 1px;
+    content: "";
+    background: var(--hud-bronze);
+    opacity: .55;
+}
+
+#xjzl-player-hud .hp-line .resource-meta {
+    color: #efb6a8;
+}
+
+#xjzl-player-hud .hp-line .resource-meta::after {
+    background: var(--hud-red);
 }
 
 #xjzl-player-hud .res-bar {
-    width: 100%;
-    height: 22px;
-    background: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transform: skewX(-15deg);
     position: relative;
+    height: 18px;
     overflow: hidden;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    margin-bottom: 5px;
+    background: rgba(5, 6, 6, .78);
+    border: 0;
+    box-shadow:
+        inset 0 1px 5px rgba(0, 0, 0, .7),
+        0 1px 0 rgba(240, 229, 204, .12);
+    clip-path: polygon(4px 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 4px 100%, 0 50%);
+}
+
+#xjzl-player-hud .res-bar::after {
+    position: absolute;
+    z-index: 4;
+    inset: 0;
+    content: "";
+    pointer-events: none;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, .13), transparent 42%),
+        repeating-linear-gradient(90deg, transparent 0 29px, rgba(240, 229, 204, .07) 30px, transparent 31px);
+}
+
+#xjzl-player-hud .res-bar .bar-fill,
+#xjzl-player-hud .res-bar .bar-shield {
+    position: absolute;
+    inset: 0 auto 0 0;
+    transition: width .42s ease;
 }
 
 #xjzl-player-hud .res-bar.hp .bar-fill {
-    background: linear-gradient(90deg, #b71c1c, #ff5252);
+    background: linear-gradient(90deg, #71342d, #b65447 72%, #d98761);
 }
 
 #xjzl-player-hud .res-bar.mp .bar-fill {
-    background: linear-gradient(90deg, #0d47a1, #2196f3);
+    background: linear-gradient(90deg, #315b56, #5b8e80 72%, #9db9a1);
 }
 
-#xjzl-player-hud .bar-fill {
-    height: 100%;
-    transition: width 0.3s;
-}
-
-#xjzl-player-hud .bar-shield {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    background: linear-gradient(90deg, rgba(200, 230, 255, 0.4), rgba(255, 255, 255, 0.6));
+#xjzl-player-hud .res-bar .bar-shield {
     z-index: 2;
-    pointer-events: none;
-    animation: kf-shield-breathe 2s infinite alternate ease-in-out;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    opacity: .64;
+    border-right: 2px solid #d8eee2;
+    background: repeating-linear-gradient(135deg, rgba(109, 159, 142, .5) 0 2px, transparent 2px 6px);
 }
 
-#xjzl-player-hud .bar-text {
+#xjzl-player-hud .res-bar .bar-text {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    z-index: 5;
+    inset: 0 8px 0 auto;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: bold;
-    font-family: 'Roboto Condensed', sans-serif;
-    transform: skewX(15deg);
-    color: #fff;
-    z-index: 5;
-    gap: 2px;
+    color: #fff8e7;
+    font-family: "DIN Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    text-shadow: 0 1px 3px #000, 0 0 5px #000;
 }
 
-#xjzl-player-hud input.res-input {
+#xjzl-player-hud .res-input {
+    width: 34px;
+    padding: 0;
+    border: 0;
+    outline: 0;
     background: transparent;
-    border: none;
-    outline: none;
-    color: #fff;
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: inherit;
+    color: inherit;
+    font: inherit;
     text-align: right;
-    width: 40px;
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.2s;
 }
 
-#xjzl-player-hud input.res-input:hover,
-#xjzl-player-hud input.res-input:focus {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-    background: rgba(0, 0, 0, 0.2);
+#xjzl-player-hud .res-input:focus {
+    color: var(--hud-bronze-bright);
+    border-bottom: 1px solid currentColor;
 }
 
-/* 护体徽章 */
+#xjzl-player-hud .sep,
+#xjzl-player-hud .max {
+    color: rgba(255, 247, 226, .72);
+}
+
 #xjzl-player-hud .huti-badge {
     position: absolute;
-    top: -14px;
-    left: 0px;
+    top: -7px;
+    right: 7px;
+    z-index: 9;
     display: flex;
+    height: 17px;
+    align-items: center;
+    gap: 3px;
+    padding: 0 6px;
+    color: #dcece4;
+    background: rgba(17, 35, 29, .92);
+    border: 1px solid rgba(109, 159, 142, .5);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, .3);
+    font-size: 8px;
+}
+
+#xjzl-player-hud .huti-badge .res-input {
+    width: 25px;
+}
+
+/* 中央头像使用旧铜璧轮廓，是唯一高对比视觉中心。 */
+#xjzl-player-hud .hud-center {
+    position: relative;
+    z-index: 5;
+    grid-area: center;
+    display: flex;
+    min-height: 120px;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+#xjzl-player-hud .hud-center::before,
+#xjzl-player-hud .hud-center::after {
+    position: absolute;
+    z-index: -1;
+    bottom: 25px;
+    width: 102px;
+    height: 1px;
+    content: "";
+    pointer-events: none;
+    opacity: .55;
+}
+
+#xjzl-player-hud .hud-center::before {
+    right: 75px;
+    background: linear-gradient(90deg, transparent, var(--hud-bronze));
+    transform: rotate(6deg);
+    transform-origin: right;
+}
+
+#xjzl-player-hud .hud-center::after {
+    left: 75px;
+    background: linear-gradient(90deg, var(--hud-bronze), transparent);
+    transform: rotate(-6deg);
+    transform-origin: left;
+}
+
+#xjzl-player-hud .toggle-hud-btn {
+    position: absolute;
+    z-index: 20;
+    top: -23px;
+    left: 50%;
+    display: grid;
+    width: 34px;
+    height: 20px;
+    place-items: center;
+    padding: 0;
+    cursor: pointer;
+    color: var(--hud-paper);
+    appearance: none;
+    background: rgba(17, 18, 16, .88);
+    border: 1px solid rgba(185, 154, 96, .42);
+    border-radius: 0;
+    box-shadow: 0 4px 9px rgba(0, 0, 0, .32);
+    clip-path: polygon(5px 0, calc(100% - 5px) 0, 100% 50%, calc(100% - 5px) 100%, 5px 100%, 0 50%);
+    transform: translateX(-50%);
+    transition: color .16s ease, background .16s ease, transform .16s ease;
+}
+
+#xjzl-player-hud .toggle-hud-btn:hover,
+#xjzl-player-hud .toggle-hud-btn:focus-visible {
+    color: #fff;
+    background: rgba(65, 52, 31, .94);
+    outline: none;
+    transform: translateX(-50%) translateY(-1px);
+}
+
+#xjzl-player-hud .stance-badge {
+    position: absolute;
+    z-index: 18;
+    top: 1px;
+    left: 50%;
+    display: flex;
+    max-width: 132px;
+    height: 21px;
+    align-items: center;
+    gap: 5px;
+    padding: 0 9px;
+    overflow: hidden;
+    cursor: pointer;
+    color: #fff1da;
+    background: linear-gradient(90deg, rgba(95, 29, 23, .94), rgba(168, 67, 52, .96), rgba(95, 29, 23, .94));
+    border: 1px solid rgba(207, 105, 83, .58);
+    border-radius: 0;
+    box-shadow: 0 4px 9px rgba(0, 0, 0, .35);
+    clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 8px 100%, 0 50%);
+    font-size: 10px;
+    text-shadow: 0 1px 3px #350c08;
+    transform: translateX(-50%);
+}
+
+#xjzl-player-hud .stance-badge span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#xjzl-player-hud .stance-dismiss {
+    font-size: 8px;
+    opacity: .78;
+}
+
+#xjzl-player-hud .upper-actions {
+    position: absolute;
+    z-index: 16;
+    top: 35px;
+    left: 50%;
+    display: flex;
+    width: 174px;
+    justify-content: space-between;
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+#xjzl-player-hud .avatar-wrapper {
+    position: relative;
+    display: flex;
+    width: 112px;
+    height: 107px;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    padding: 0 4px;
-    height: 18px;
-    min-width: 50px;
-    background: rgba(0, 100, 150, 0.95);
-    border: 1px solid #4fc3f7;
-    border-radius: 4px;
-    z-index: 20;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
 }
 
-#xjzl-player-hud .huti-badge i {
-    font-size: 10px;
-    color: #4fc3f7;
-    margin-right: 2px;
+#xjzl-player-hud .core-label,
+#xjzl-player-hud .core-caption {
+    display: none;
 }
 
-#xjzl-player-hud input.huti-input {
-    width: 36px !important;
-    height: 100% !important;
-    line-height: 16px !important;
-    font-size: 12px !important;
-    text-align: center !important;
-    font-family: 'Roboto Condensed', sans-serif !important;
-    font-weight: bold !important;
-    color: #fff !important;
-    background: transparent !important;
-    border: none !important;
-    outline: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-/* --- 3. 抽屉底座 (Dock) --- */
-#xjzl-player-hud .hud-dock {
+#xjzl-player-hud .avatar-wrapper::before {
     position: absolute;
-    bottom: -15px;
+    z-index: 0;
+    inset: 6px;
+    content: "";
+    border-radius: 50%;
+    background:
+        repeating-conic-gradient(from 0deg, rgba(227, 201, 139, .48) 0 1deg, transparent 1deg 59deg),
+        radial-gradient(circle, transparent 54%, rgba(185, 154, 96, .4) 55% 61%, rgba(10, 11, 10, .92) 62% 70%, transparent 71%);
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .44));
+    pointer-events: none;
+}
+
+#xjzl-player-hud .avatar-frame {
+    position: relative;
+    z-index: 10;
+    width: 85px;
+    height: 85px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #171813;
+    border: 2px solid var(--hud-bronze);
+    border-radius: 50%;
+    box-shadow:
+        0 0 0 3px rgba(10, 11, 9, .94),
+        0 0 0 5px rgba(185, 154, 96, .22),
+        0 7px 18px rgba(0, 0, 0, .45);
+    pointer-events: auto;
+    transition: filter .18s ease, transform .18s ease;
+}
+
+#xjzl-player-hud .avatar-frame::before {
+    position: absolute;
+    z-index: 2;
+    inset: 4px;
+    content: "";
+    border: 1px solid rgba(255, 244, 217, .3);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+#xjzl-player-hud .avatar-frame:hover,
+#xjzl-player-hud .avatar-frame:focus-visible {
+    filter: brightness(1.12);
+    outline: none;
+    transform: translateY(-2px);
+}
+
+#xjzl-player-hud .avatar-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    filter: saturate(.78) contrast(1.08);
+}
+
+#xjzl-player-hud .avatar-glare,
+#xjzl-player-hud .aura-ring,
+#xjzl-player-hud .rage-ring-container,
+#xjzl-player-hud .rage-orb,
+#xjzl-player-hud .realm-seal {
+    pointer-events: none;
+}
+
+#xjzl-player-hud .avatar-glare {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, rgba(255, 255, 255, .17), transparent 30%, rgba(185, 154, 96, .09));
+}
+
+#xjzl-player-hud .aura-ring {
+    position: absolute;
+    z-index: -1;
+    inset: -11px;
+    border: 1px solid rgba(185, 154, 96, .52);
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(185, 154, 96, .16);
+    animation: xjzl-wuxia-breathe 3.8s ease-in-out infinite alternate;
+}
+
+#xjzl-player-hud .aura-ring.yin {
+    border-color: rgba(105, 146, 180, .7);
+}
+
+#xjzl-player-hud .aura-ring.yang {
+    border-color: rgba(185, 86, 71, .72);
+}
+
+#xjzl-player-hud .aura-ring.taiji {
+    border-color: rgba(161, 186, 166, .72);
+}
+
+#xjzl-player-hud .realm-seal {
+    position: absolute;
+    z-index: 14;
+    bottom: 0;
     left: 50%;
-    transform: translateX(-50%);
-    width: 400px;
-    height: 50px;
     display: flex;
-    justify-content: space-between;
-    padding: 0 80px;
-    z-index: 50;
-    /* 确保层级高于中间的立绘 */
+    min-width: 78px;
+    height: 24px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1px 8px;
+    color: var(--hud-bronze-bright);
+    background: linear-gradient(180deg, rgba(48, 39, 25, .97), rgba(16, 15, 12, .98));
+    border: 1px solid rgba(185, 154, 96, .58);
+    box-shadow: 0 4px 9px rgba(0, 0, 0, .4);
+    clip-path: polygon(7px 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 7px 100%, 0 50%);
+    font-size: 10px;
+    line-height: 1.04;
+    text-shadow: 0 1px 3px #000;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+#xjzl-player-hud .realm-seal span {
+    color: var(--hud-muted);
+    font-size: 7px;
+    letter-spacing: .18em;
+}
+
+#xjzl-player-hud .rage-ring-container {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    animation: xjzl-wuxia-rotate 38s linear infinite;
+}
+
+#xjzl-player-hud .rage-orb {
+    --angle: calc(var(--i) * 36deg);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    border: 1px solid rgba(185, 154, 96, .42);
+    border-radius: 50%;
+    background: rgba(12, 12, 10, .94);
+    transform: rotate(var(--angle)) translateY(-51px) rotate(calc(var(--angle) * -1));
+}
+
+#xjzl-player-hud .rage-orb.active {
+    background: var(--hud-bronze);
+    border-color: #ffebbd;
+    box-shadow: 0 0 7px rgba(227, 201, 139, .76);
+}
+
+#xjzl-player-hud .rage-core {
+    position: absolute;
+    z-index: 15;
+    bottom: 19px;
+    display: grid;
+    width: 29px;
+    height: 29px;
+    place-items: center;
+    color: #e88670;
+    background: rgba(56, 21, 17, .97);
+    border: 1px solid rgba(185, 86, 71, .76);
+    border-radius: 50%;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, .44);
+    pointer-events: auto;
+}
+
+#xjzl-player-hud .rage-core i {
+    position: absolute;
+    top: 3px;
+    font-size: 8px;
+}
+
+#xjzl-player-hud .rage-core .rage-input {
+    align-self: end;
+    width: 22px;
+    height: 13px;
+    color: #fff0dd;
+    font-size: 10px;
+    text-align: center;
+}
+
+#xjzl-player-hud .combat-satellite,
+#xjzl-player-hud .cat-btn {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    color: var(--hud-paper);
+    appearance: none;
+    background:
+        radial-gradient(circle at 36% 27%, rgba(91, 77, 51, .96), rgba(24, 22, 17, .98) 62%);
+    border: 1px solid rgba(185, 154, 96, .52);
+    border-radius: 50%;
+    box-shadow:
+        inset 0 0 0 3px rgba(5, 5, 4, .32),
+        0 5px 10px rgba(0, 0, 0, .42);
+    text-shadow: 0 1px 3px #000;
+    pointer-events: auto;
+    transition: color .16s ease, filter .16s ease, transform .16s ease;
+}
+
+#xjzl-player-hud .combat-satellite {
+    width: 40px;
+    height: 40px;
+}
+
+#xjzl-player-hud .cat-btn {
+    width: 41px;
+    height: 41px;
+}
+
+#xjzl-player-hud .combat-satellite::before,
+#xjzl-player-hud .cat-btn::before {
+    position: absolute;
+    inset: 4px;
+    content: "";
+    border: 1px solid rgba(255, 241, 209, .13);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+#xjzl-player-hud .combat-satellite.right {
+    background:
+        radial-gradient(circle at 36% 27%, rgba(123, 52, 42, .97), rgba(42, 17, 14, .98) 64%);
+    border-color: rgba(199, 97, 79, .62);
+}
+
+#xjzl-player-hud .combat-satellite i,
+#xjzl-player-hud .cat-btn i {
+    color: #ead9b5;
+    font-size: 12px;
+}
+
+#xjzl-player-hud .combat-satellite.right i {
+    color: #f0b4a4;
+}
+
+#xjzl-player-hud .combat-satellite span,
+#xjzl-player-hud .cat-btn span {
+    margin-top: 1px;
+    font-size: 8px;
+}
+
+#xjzl-player-hud .combat-satellite:hover,
+#xjzl-player-hud .combat-satellite:focus-visible,
+#xjzl-player-hud .cat-btn:hover,
+#xjzl-player-hud .cat-btn:focus-visible,
+#xjzl-player-hud .dock-category:hover .cat-btn,
+#xjzl-player-hud .dock-category:focus-within .cat-btn,
+#xjzl-player-hud .dock-category.is-open .cat-btn {
+    color: #fff;
+    filter: brightness(1.2);
+    outline: none;
+    transform: translateY(-2px);
+}
+
+#xjzl-player-hud .hud-dock {
+    position: relative;
+    grid-area: dock;
+    display: flex;
+    min-height: 44px;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 13px;
+    padding: 0;
+    background: transparent;
+}
+
+#xjzl-player-hud .hud-dock::before,
+#xjzl-player-hud .hud-dock::after {
+    position: absolute;
+    top: 17px;
+    width: 84px;
+    height: 1px;
+    content: "";
+    pointer-events: none;
+    opacity: .55;
+}
+
+#xjzl-player-hud .hud-dock::before {
+    right: calc(50% + 110px);
+    background: linear-gradient(90deg, transparent, var(--hud-bronze));
+}
+
+#xjzl-player-hud .hud-dock::after {
+    left: calc(50% + 110px);
+    background: linear-gradient(90deg, var(--hud-bronze), transparent);
+}
+
+#xjzl-player-hud .dock-label {
+    display: none;
 }
 
 #xjzl-player-hud .dock-category {
     position: relative;
-    width: 45px;
-    height: 45px;
+    box-sizing: border-box;
+    height: 57px;
+    margin-top: -16px;
+    padding-top: 16px;
 }
 
-/* 1. 在底部不可见的容器上加上隐形桥梁 */
-#xjzl-player-hud .dock-category::before {
-    content: "";
+/* 热区通过真实盒模型延伸到面板底边，避免依赖脱离布局的伪元素桥接。 */#xjzl-player-hud .cat-content {
     position: absolute;
-    bottom: 20px;
-    /* 从按钮正中间的高度开始往上长 */
+    z-index: 30;
+    bottom: 50px;
     left: 50%;
-    transform: translateX(-50%);
-    width: 120px;
-    /* 宽一点，允许鼠标沿对角线或手抖往上滑 */
-    height: 0;
-    /* 平时高度为 0，不挡任何东西 */
-    background: transparent;
-    /* 调试：把这里改成 rgba(255, 0, 0, 0.4) 就能看见红框！需要透明改回 transparent */
-    pointer-events: none;
-    /* 平时不可触摸 */
-    z-index: 10;
-    /* 层级放到按钮(20)和弹窗(100)下面，不会干扰按钮的特效 */
-}
-
-/* 2. 触发时：瞬间变高、兜住鼠标 */
-#xjzl-player-hud .dock-category:hover::before {
-    height: 80px;
-    /* 撑起 80px 高的隐形墙，填满隐藏区域 */
-    pointer-events: auto;
-    /* 瞬间开启捕捉鼠标 */
-}
-
-#xjzl-player-hud .cat-btn {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    background: linear-gradient(180deg, #333, #1a1a1a);
-    border: 1px solid #555;
-    color: #ccc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
-    transition: all 0.2s;
-    position: relative;
-    z-index: 20;
-}
-
-#xjzl-player-hud .cat-btn:hover {
-    background: #444;
-    color: #fff;
-    transform: translateY(-3px);
-    border-color: #ffd700;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-}
-
-/* 弹窗容器 */
-#xjzl-player-hud .cat-content {
-    position: absolute;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) scale(0.8);
-    width: 340px;
+    width: 330px;
     max-height: 0;
-    background: rgba(18, 18, 22, 0.98);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    backdrop-filter: blur(10px);
     overflow: hidden;
     opacity: 0;
-    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     pointer-events: none;
-    box-shadow: 0 5px 30px rgba(0, 0, 0, 1);
-    display: flex;
-    flex-direction: column;
-    z-index: 100;
+    background:
+        radial-gradient(ellipse at 50% 0, rgba(185, 154, 96, .1), transparent 45%),
+        linear-gradient(150deg, rgba(24, 24, 21, .98), rgba(10, 12, 11, .99));
+    border: 1px solid rgba(185, 154, 96, .48);
+    border-radius: 0;
+    box-shadow: 0 15px 34px rgba(0, 0, 0, .52);
+    clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+    transform: translate(-50%, 8px) scale(.97);
+    transform-origin: bottom center;
+    transition: opacity .16s ease, transform .19s ease, max-height .19s ease;
 }
 
-#xjzl-player-hud .dock-category:hover .cat-content {
-    bottom: 60px;
-    max-height: 400px;
+#xjzl-player-hud .cat-content::before {
+    position: absolute;
+    z-index: 0;
+    inset: 5px;
+    content: "";
+    border: 1px solid rgba(240, 229, 204, .09);
+    pointer-events: none;
+}
+
+#xjzl-player-hud .dock-category:focus-within .cat-content,
+#xjzl-player-hud .dock-category.is-open .cat-content {
+    max-height: 360px;
+    overflow: visible;
     opacity: 1;
-    transform: translateX(-50%) scale(1);
     pointer-events: auto;
-    padding: 10px;
+    transform: translate(-50%, 0) scale(1);
 }
 
-/* 滚动区基础设置 (取消全局 Grid，允许垂直堆叠) */
+#xjzl-player-hud .panel-heading {
+    position: relative;
+    z-index: 1;
+    padding: 9px 12px 8px;
+    color: var(--hud-bronze-bright);
+    font-size: 12px;
+    letter-spacing: .15em;
+    text-align: center;
+}
+
+#xjzl-player-hud .panel-heading::before,
+#xjzl-player-hud .panel-heading::after {
+    display: inline-block;
+    width: 36px;
+    height: 1px;
+    margin: 0 8px;
+    content: "";
+    background: linear-gradient(90deg, transparent, rgba(185, 154, 96, .55));
+    vertical-align: middle;
+}
+
+#xjzl-player-hud .panel-heading::after {
+    background: linear-gradient(90deg, rgba(185, 154, 96, .55), transparent);
+}
+
 #xjzl-player-hud .scroll-area {
-    max-height: 350px;
+    position: relative;
+    z-index: 1;
+    max-height: 300px;
     overflow-y: auto;
-    padding: 2px;
-    display: block;
+    padding: 7px 9px 10px;
 }
 
 #xjzl-player-hud .scroll-area::-webkit-scrollbar {
@@ -625,527 +852,365 @@
 }
 
 #xjzl-player-hud .scroll-area::-webkit-scrollbar-thumb {
-    background: #555;
+    background: rgba(185, 154, 96, .6);
 }
 
-/* [新增] 纯平铺网格容器 (用于招式、消耗品) */
 #xjzl-player-hud .simple-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
 }
 
-/* --- 装备分组样式 (Vertical Stack) --- */
-#xjzl-player-hud .equip-group {
+#xjzl-player-hud .item-btn {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    min-height: 64px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 5px 4px;
+    cursor: pointer;
+    background: rgba(240, 229, 204, .035);
+    border: 1px solid rgba(240, 229, 204, .12);
+    border-radius: 0;
+    transition: background .16s ease, border-color .16s ease, transform .16s ease;
+}
+
+#xjzl-player-hud .item-btn:hover {
+    background: rgba(185, 154, 96, .12);
+    border-color: rgba(211, 180, 117, .58);
+    transform: translateY(-1px);
+}
+
+#xjzl-player-hud .item-btn img {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border: 1px solid rgba(185, 154, 96, .32);
+}
+
+#xjzl-player-hud .item-btn .label {
     width: 100%;
-    margin-bottom: 8px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
     overflow: hidden;
+    color: var(--hud-paper);
+    font-size: 9px;
+    line-height: 1.2;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#xjzl-player-hud .item-hotkey {
+    position: absolute;
+    top: 2px;
+    left: 3px;
+    color: var(--hud-muted);
+    font-size: 8px;
+}
+
+#xjzl-player-hud .item-btn .qty,
+#xjzl-player-hud .equip-mark {
+    position: absolute;
+    z-index: 2;
+    top: 2px;
+    right: 2px;
+    display: grid;
+    min-width: 14px;
+    height: 14px;
+    place-items: center;
+    color: #fff;
+    background: rgba(18, 17, 14, .94);
+    border: 1px solid rgba(185, 154, 96, .4);
+    border-radius: 50%;
+    font-size: 8px;
+}
+
+#xjzl-player-hud .equip-mark {
+    right: auto;
+    left: 2px;
+    color: #a8d1c0;
+    border-color: rgba(109, 159, 142, .6);
+}
+
+#xjzl-player-hud .item-btn.equipped {
+    background: rgba(109, 159, 142, .1);
+    border-color: rgba(109, 159, 142, .62);
+}
+
+#xjzl-player-hud .item-btn.move.real {
+    border-color: rgba(185, 86, 71, .6);
+}
+
+#xjzl-player-hud .item-btn.move.feint {
+    border-color: rgba(99, 137, 170, .58);
+}
+
+#xjzl-player-hud .item-btn.move.stance {
+    border-color: rgba(109, 159, 142, .6);
+}
+
+#xjzl-player-hud .item-btn.move.qi {
+    border-color: rgba(151, 116, 160, .58);
+}
+
+#xjzl-player-hud .item-btn.move.ultimate {
+    border-color: var(--hud-bronze);
+    box-shadow: 0 0 10px rgba(185, 154, 96, .2);
+    animation: xjzl-wuxia-ultimate-btn 2s ease-in-out infinite alternate;
+}
+
+#xjzl-player-hud .empty-tip {
+    padding: 20px 8px;
+    color: var(--hud-muted);
+    text-align: center;
+    font-size: 10px;
+}
+
+#xjzl-player-hud .equip-group {
+    position: relative;
+    margin-bottom: 6px;
+    overflow: hidden;
+    background: rgba(240, 229, 204, .025);
+    border: 1px solid rgba(240, 229, 204, .1);
+    border-radius: 0;
 }
 
 #xjzl-player-hud .group-header {
     display: flex;
+    min-height: 28px;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 8px;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 0 8px;
     cursor: pointer;
-    font-size: 12px;
-    color: #ddd;
-    font-family: sans-serif;
-    transition: background 0.2s;
+    color: var(--hud-muted);
+    background: rgba(185, 154, 96, .045);
+    border-bottom: 1px solid rgba(240, 229, 204, .09);
+    transition: color .16s ease, background .16s ease;
 }
 
 #xjzl-player-hud .group-header:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffd700;
+    color: var(--hud-paper);
+    background: rgba(185, 154, 96, .11);
 }
 
 #xjzl-player-hud .g-label {
-    font-weight: bold;
-    letter-spacing: 1px;
+    overflow: hidden;
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#xjzl-player-hud .header-left {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+#xjzl-player-hud .header-left i,
+#xjzl-player-hud .g-icon {
+    color: var(--hud-bronze);
+    font-size: 9px;
 }
 
 #xjzl-player-hud .header-right {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
 }
 
 #xjzl-player-hud .g-count {
-    font-size: 10px;
-    background: rgba(0, 0, 0, 0.5);
-    color: #aaa;
-    padding: 1px 6px;
-    border-radius: 10px;
+    color: var(--hud-muted);
+    font-size: 9px;
 }
 
 #xjzl-player-hud .g-icon {
-    transition: transform 0.2s;
-    font-size: 10px;
-    color: #888;
+    transition: transform .2s ease;
 }
 
-/* 组内网格 (Grid inside Group) */
+#xjzl-player-hud .g-val,
+#xjzl-player-hud .s-val {
+    margin-left: auto;
+    color: #9fc8b7;
+    font-size: 11px;
+    font-weight: 700;
+}
+
 #xjzl-player-hud .group-items {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    gap: 8px;
-    padding: 8px;
-    transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s;
+    grid-template-columns: repeat(auto-fill, minmax(66px, 1fr));
+    gap: 6px;
     max-height: 1000px;
     opacity: 1;
+    padding: 7px;
+    transition: max-height .24s ease, opacity .24s ease, padding .24s ease;
 }
 
-/* 折叠状态 */
+#xjzl-player-hud .skill-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 #xjzl-player-hud .equip-group.collapsed .group-items {
     max-height: 0;
     opacity: 0;
-    padding: 0 8px;
+    padding-top: 0;
+    padding-bottom: 0;
     pointer-events: none;
-    margin: 0;
 }
 
 #xjzl-player-hud .equip-group.collapsed .g-icon {
     transform: rotate(-90deg);
 }
 
-#xjzl-player-hud .equip-group.collapsed {
-    margin-bottom: 2px;
-}
-
-/* --- 物品卡片 --- */
-#xjzl-player-hud .item-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 6px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: 1px solid transparent;
-    position: relative;
-}
-
-#xjzl-player-hud .item-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
-}
-
-#xjzl-player-hud .item-btn img {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    object-fit: cover;
-    border-radius: 4px;
-    background: #000;
-    border: 1px solid #333;
-}
-
-#xjzl-player-hud .item-btn .label {
-    font-size: 11px;
-    color: #e0e0e0;
-    text-align: center;
-    line-height: 1.2;
-    width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-#xjzl-player-hud .item-btn:hover .label {
-    color: #fff;
-}
-
-#xjzl-player-hud .item-btn .qty {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    font-size: 10px;
-    color: #fff;
-    font-weight: bold;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 0 4px;
-    border-radius: 8px;
-    border: 1px solid #555;
-    z-index: 2;
-}
-
-#xjzl-player-hud .item-btn.equipped {
-    border: 1px solid #00e676;
-    background: rgba(0, 230, 118, 0.05);
-    box-shadow: inset 0 0 10px rgba(0, 230, 118, 0.1);
-}
-
-#xjzl-player-hud .equip-mark {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    color: #00e676;
-    font-size: 10px;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 50%;
-    padding: 2px;
-    z-index: 2;
-}
-
-#xjzl-player-hud .attr-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-}
-
-#xjzl-player-hud .attr-btn {
-    text-align: center;
-    background: #222;
-    padding: 8px 0;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
-    border: 1px solid #333;
-    color: #ccc;
-    transition: all 0.2s;
-}
-
-#xjzl-player-hud .attr-btn:hover {
-    background: #444;
-    color: #ffd700;
-    border-color: #ffd700;
-}
-
-#xjzl-player-hud .attr-btn.skill {
-    color: #888;
-    font-size: 13px;
-    border-style: dashed;
-}
-
-@keyframes kf-breathe {
-    0% {
-        opacity: 0.3;
-    }
-
-    100% {
-        opacity: 0.8;
-    }
-}
-
-@keyframes kf-pulse-orb {
-    from {
-        box-shadow: 0 0 5px #ff3d00;
-    }
-
-    to {
-        box-shadow: 0 0 15px #ff3d00, 0 0 5px #fff;
-    }
-}
-
-@keyframes kf-shield-breathe {
-    0% {
-        opacity: 0.3;
-    }
-
-    100% {
-        opacity: 0.7;
-    }
-}
-
-/* --- 技能列表样式 --- */
-
-/* 头部左侧 (属性检定区) */
-#xjzl-player-hud .header-left {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    flex: 1;
-    overflow: hidden;
-    /* 防止溢出 */
-}
-
-#xjzl-player-hud .header-left:hover .g-label {
-    color: #fff;
-    text-shadow: 0 0 5px #ffd700;
-}
-
-/* 右侧折叠触发区 */
-#xjzl-player-hud .toggle-trigger {
-    cursor: pointer;
-    padding-left: 10px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-}
-
-/* --- 技能网格通用设置 --- */
-#xjzl-player-hud .skill-grid {
-    display: grid;
-    /* 默认所有组：一行4个 */
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-    padding: 6px 8px;
-}
-
-/* 特殊处理：悟性组 (key="wuxing") */
-
-/* 1. 布局改为一行2个，让宽度翻倍 */
-#xjzl-player-hud .equip-group[data-group="wuxing"] .skill-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    /* 间距稍微大一点，更有呼吸感 */
-}
-
-/* 2. 悟性组按钮样式微调 */
-#xjzl-player-hud .equip-group[data-group="wuxing"] .skill-btn {
-    /* 增加一点高度，显得更稳重 */
-    height: 28px;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-    border: 1px solid rgba(255, 215, 0, 0.15);
-    /* 微弱的金色边框暗示 */
-    padding: 0 10px;
-    /* 内部空间更宽裕 */
-}
-
-/* 3. 悟性组文字调整 */
-#xjzl-player-hud .equip-group[data-group="wuxing"] .s-name {
-    font-size: 12px;
-    /* 恢复正常的字体大小，不需要缩了 */
-    letter-spacing: 1px;
-    /* 甚至可以加一点字间距，更有质感 */
-    color: #eee;
-    /*稍微亮一点*/
-    width: auto;
-    margin-right: auto;
-    /* 让文字靠左，数字靠右 */
-}
-
-/* 4. 悟性组的悬停特效 */
-#xjzl-player-hud .equip-group[data-group="wuxing"] .skill-btn:hover {
-    background: linear-gradient(90deg, rgba(255, 215, 0, 0.2), transparent);
-    border-color: #ffd700;
-    transform: translateY(-1px) scale(1.02);
-    /* 微微放大的效果 */
-}
-
-/* 技能按钮 (胶囊状) */
 #xjzl-player-hud .skill-btn {
     display: flex;
-    justify-content: space-between;
+    min-width: 0;
+    height: 25px;
     align-items: center;
-
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    /* 改小圆角，对于密集文字，方一点看起来更整齐 */
-
-    padding: 2px 5px;
-    /* 左右边距改小，给文字腾空间 */
+    justify-content: space-between;
+    gap: 3px;
+    padding: 0 6px;
     cursor: pointer;
-    transition: all 0.2s;
-    height: 24px;
-    /* 固定高度，确保整齐 */
-    overflow: hidden;
+    background: rgba(240, 229, 204, .035);
+    border: 1px solid rgba(240, 229, 204, .1);
+    transition: background .16s ease, border-color .16s ease;
 }
 
 #xjzl-player-hud .skill-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: #ffd700;
-    transform: translateY(-1px);
-    /* 微弱的上浮效果 */
+    background: rgba(109, 159, 142, .12);
+    border-color: rgba(109, 159, 142, .55);
 }
 
-/* 技能名称 */
 #xjzl-player-hud .s-name {
-    font-size: 11px;
-    /* 稍微调小字体以容纳4个字 */
-    color: #ccc;
-    white-space: nowrap;
-    /* 强制不换行 */
-    letter-spacing: -0.5px;
-    /* 稍微挤压字间距，让4个字看起来更紧凑 */
-
-    /* 溢出处理：如果名字实在太长，显示省略号 */
     overflow: hidden;
+    color: var(--hud-paper);
+    font-size: 9px;
     text-overflow: ellipsis;
-    margin-right: 4px;
-    /* 保证和数字之间有空隙 */
+    white-space: nowrap;
 }
 
-/* 技能数值 */
 #xjzl-player-hud .s-val {
-    font-size: 12px;
-    color: #ffd700;
-    font-weight: bold;
-    font-family: 'Roboto Condensed', sans-serif;
-    flex-shrink: 0;
-    /* 禁止数值被压缩 */
+    flex: 0 0 auto;
+    font-size: 10px;
 }
 
-
-/* 技艺特殊样式 */
 #xjzl-player-hud .skill-btn.art {
-    border-left: 2px solid #00e676;
+    border-left: 2px solid var(--hud-jade);
 }
 
-/* =========================================
-   普通攻击和趁虚而入按钮
-   ========================================= */
-
-#xjzl-player-hud .combat-satellite {
-    position: absolute;
-    top: -15px;
-
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    /* 图标稍微调小一点点，更精致 */
-    cursor: pointer;
-
-    background: radial-gradient(circle at 30% 30%, #444, #1a1a1a);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: #ddd;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
-    z-index: 30;
-    /* 层级调高，确保在最上层 */
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+/* 原版折叠行为：所有内容收起，仅保留展开按钮。 */
+#xjzl-player-hud.collapsed {
+    display: block;
+    width: 38px;
+    height: 24px;
+    overflow: visible;
 }
 
-/* --- 左右定位 --- */
-.combat-satellite.left {
-    left: -29px;
-    /* 往左拉开，利用左上角的大片空地 */
+#xjzl-player-hud.collapsed .player-hud-glow,
+#xjzl-player-hud.collapsed .hud-wing,
+#xjzl-player-hud.collapsed .hud-dock,
+#xjzl-player-hud.collapsed .avatar-wrapper,
+#xjzl-player-hud.collapsed .stance-badge,
+#xjzl-player-hud.collapsed .upper-actions,
+#xjzl-player-hud.collapsed .core-caption,
+#xjzl-player-hud.collapsed .hud-center::before,
+#xjzl-player-hud.collapsed .hud-center::after {
+    display: none;
 }
 
-.combat-satellite.right {
-    right: -29px;
-    /* 往右拉开，利用右上角空地 */
-}
-
-/* --- 悬停效果 --- */
-#xjzl-player-hud .combat-satellite:hover {
-    transform: scale(1.15) translateY(-2px);
-    color: #fff;
-    border-color: #fff;
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
-}
-
-/* 左星：普攻 */
-.combat-satellite.left:hover {
-    background: radial-gradient(circle at 30% 30%, #555, #222);
-}
-
-/* 右星：趁虚 */
-.combat-satellite.right {
-    border-color: rgba(183, 28, 28, 0.6);
-    color: #ef9a9a;
-}
-
-.combat-satellite.right:hover {
-    background: radial-gradient(circle at 30% 30%, #d32f2f, #500);
-    border-color: #ff5252;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
-}
-
-/* =================================================================
-   招式类型颜色编码 (Color Coding for Moves)
-   ================================================================= */
-
-/* 1. 定义颜色变量 (基于你的角色卡配色) */
-#xjzl-player-hud {
-    --c-move-real: #c0392b;
-    /* 实招: 红色 */
-    --c-move-feint: #2980b9;
-    /* 虚招: 蓝色 */
-    --c-move-stance: #27ae60;
-    /* 架招: 绿色 */
-    --c-move-qi: #8e44ad;
-    /* 气招: 紫色 */
-    --c-move-counter: #7f8c8d;
-    /* 反击: 灰色 */
-    --c-move-ultimate: #ffd700;
-    /* 绝招: 金色 */
-}
-
-/* 2. 基础覆盖样式 */
-#xjzl-player-hud .item-btn.move {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    /* 默认微弱边框 */
+#xjzl-player-hud.collapsed .hud-center {
     position: relative;
-    overflow: hidden;
-    transition: all 0.2s ease;
+    display: block;
+    width: 38px;
+    height: 24px;
+    min-height: 24px;
 }
 
-/* 3. 各类型具体样式 */
-
-/* 实招 (Real) */
-#xjzl-player-hud .item-btn.move.real {
-    border-color: var(--c-move-real);
-    background: linear-gradient(135deg, rgba(192, 57, 43, 0.15), transparent);
-    box-shadow: 0 0 5px rgba(192, 57, 43, 0.2);
+#xjzl-player-hud.collapsed .toggle-hud-btn {
+    top: 0;
+    width: 38px;
+    height: 24px;
+    pointer-events: auto;
 }
 
-/* 虚招 (Feint) */
-#xjzl-player-hud .item-btn.move.feint {
-    border-color: var(--c-move-feint);
-    background: linear-gradient(135deg, rgba(41, 128, 185, 0.15), transparent);
-    box-shadow: 0 0 5px rgba(41, 128, 185, 0.2);
+#xjzl-player-hud.collapsed .toggle-hud-btn i {
+    transform: rotate(180deg);
 }
 
-/* 架招 (Stance) */
-#xjzl-player-hud .item-btn.move.stance {
-    border-color: var(--c-move-stance);
-    background: linear-gradient(135deg, rgba(39, 174, 96, 0.15), transparent);
-    box-shadow: 0 0 5px rgba(39, 174, 96, 0.2);
+@keyframes xjzl-wuxia-breathe {
+    from { transform: scale(.99); opacity: .62; }
+    to { transform: scale(1.025); opacity: 1; }
 }
 
-/* 气招 (Qi) */
-#xjzl-player-hud .item-btn.move.qi {
-    border-color: var(--c-move-qi);
-    background: linear-gradient(135deg, rgba(142, 68, 173, 0.15), transparent);
-    box-shadow: 0 0 5px rgba(142, 68, 173, 0.2);
+@keyframes xjzl-wuxia-rotate {
+    from { transform: rotate(0); }
+    to { transform: rotate(360deg); }
 }
 
-/* 反击 (Counter) */
-#xjzl-player-hud .item-btn.move.counter {
-    border-color: var(--c-move-counter);
-    background: linear-gradient(135deg, rgba(189, 195, 199, 0.15), transparent);
-    box-shadow: 0 0 5px rgba(189, 195, 199, 0.3);
+@keyframes xjzl-wuxia-ultimate-btn {
+    from { box-shadow: 0 0 4px rgba(185, 154, 96, .16); }
+    to { box-shadow: 0 0 12px rgba(185, 154, 96, .42); }
 }
 
-/* 绝招 (Ultimate) - 更华丽 */
-#xjzl-player-hud .item-btn.move.ultimate {
-    border-color: var(--c-move-ultimate);
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(0, 0, 0, 0));
-    box-shadow: 0 0 8px rgba(255, 215, 0, 0.4), inset 0 0 5px rgba(255, 215, 0, 0.1);
-    animation: kf-ult-pulse 2s infinite alternate;
-    /* 绝招特有呼吸灯 */
-}
-
-/* 悬停增强效果 */
-#xjzl-player-hud .item-btn.move:hover {
-    filter: brightness(1.2);
-    transform: translateY(-2px);
-    z-index: 2;
-    /* 悬停时浮起 */
-}
-
-/* 绝招呼吸动画 */
-@keyframes kf-ult-pulse {
-    0% {
-        box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
-        border-color: #e6c200;
+@media (max-width: 680px) {
+    #xjzl-player-hud {
+        width: 430px;
+        grid-template-columns: 132px 142px 132px;
+        column-gap: 12px;
     }
 
-    100% {
-        box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
-        border-color: #ffd700;
+    #xjzl-player-hud .hud-wing {
+        padding-right: 8px;
+        padding-left: 8px;
+    }
+
+    #xjzl-player-hud .combat-stat-grid {
+        gap: 0 6px;
+    }
+
+    #xjzl-player-hud .c-stat .label {
+        font-size: 9px;
+    }
+
+    #xjzl-player-hud .c-stat .val {
+        font-size: 16px;
+    }
+
+    #xjzl-player-hud .resource-line {
+        grid-template-columns: 25px minmax(0, 1fr);
+        gap: 3px;
+    }
+
+    #xjzl-player-hud .resource-meta {
+        font-size: 9px;
+    }
+
+    #xjzl-player-hud .res-bar .bar-text {
+        right: 5px;
+        font-size: 10px;
+    }
+
+    #xjzl-player-hud .upper-actions {
+        width: 164px;
+    }
+
+    #xjzl-player-hud .cat-content {
+        position: fixed;
+        bottom: calc(var(--xjzl-hud-bottom, 16px) + 49px);
+        width: min(330px, calc(100vw - 16px));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #xjzl-player-hud *,
+    #xjzl-player-hud *::before,
+    #xjzl-player-hud *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
     }
 }

@@ -18,6 +18,10 @@ const HUD_STATE = {
     renderer: null
 };
 
+let refreshPartyHudPositions = () => {};
+let sidebarResizeObserver = null;
+let hudContainerPromise = null;
+
 // =================================================================
 // 1. 初始化与配置 (Initialization)
 // =================================================================
@@ -77,7 +81,9 @@ Hooks.once("init", async function () {
 
     // 预缓存视频文件
     // 这会让浏览器在后台静默下载文件到缓存，但不会触发并发读取错误
-    fetch("modules/xjzl-token-hud/resource/effect.webm").then(r => r.blob()).catch(e => { });
+    fetch("modules/xjzl-token-hud/resource/effect.webm")
+        .then(response => response.blob())
+        .catch(error => console.warn("My Token HUD | 特效资源预缓存失败:", error));
 });
 
 /**
@@ -85,10 +91,8 @@ Hooks.once("init", async function () {
  * 游戏核心数据加载完毕，画布准备好之前。
  */
 Hooks.once("ready", function () {
-    if (canvas.ready) {
-        initHudSystem();
-        PlayerHUD.init();
-    }
+    PlayerHUD.init();
+    if (canvas.ready) initHudSystem();
 });
 
 /**
@@ -97,19 +101,19 @@ Hooks.once("ready", function () {
  */
 Hooks.on("canvasReady", function () {
     initHudSystem();
-    // 每次切地图，HUD 重新渲染，但不会重复注册监听器
-    if (PlayerHUD.debouncedRender) {
-        PlayerHUD.debouncedRender();
-    }
+    // 某些版本 ready 早于 canvasReady；这里补齐一次人物 HUD 初始化。
+    if (!PlayerHUD.debouncedRender) PlayerHUD.init();
+    else PlayerHUD.debouncedRender();
 });
 
 /**
  * 初始化 HUD 系统容器并刷新所有 Token
- * 注意：此处不再强制计算侧边栏位置，依赖 CSS 默认值 (60px) 处理初始状态
+ * 等待 HUD 容器就绪后刷新 Token，并让友方使用固定安全初始位置、敌方避开右侧栏
  */
-function initHudSystem() {
-    createHUDContainer();
-    // updateSidebarOffset(); 默认是收起的，不要在初始化执行这个
+async function initHudSystem() {
+    await createHUDContainer();
+    updateSidebarOffset();
+    observeSidebarLayout();
     updateAllTokens();
 
     // 初始化时应用当前的缩放比例
@@ -129,15 +133,6 @@ function initHudSystem() {
  */
 Hooks.on("collapseSidebar", (sidebar, collapsed) => {
     updateSidebarOffset(collapsed);
-});
-
-/**
- * 监听设置变更
- */
-Hooks.on("updateSetting", (setting) => {
-    if (setting.key === "xjzl-token-hud.onlyCombatants") {
-        updateAllTokens();
-    }
 });
 
 /**
@@ -233,54 +228,255 @@ Hooks.on("deleteCombat", (combat) => { // 战斗结束
 
 /**
  * 动态设置 CSS 变量，控制右侧 HUD 的偏移量
- * @param {boolean} isCollapsed - 侧边栏是否折叠
+ * @param {boolean} [isCollapsed] - 侧边栏是否折叠；省略时读取当前实际宽度
  */
 function updateSidebarOffset(isCollapsed) {
-    // 展开状态：侧边栏宽度(约300px) + 安全间距 = 360px
-    const EXPANDED_WIDTH = 360;
+    const sidebar = document.getElementById("sidebar");
+    const rect = sidebar?.getBoundingClientRect();
+    const measuredWidth = rect && rect.width > 0
+        ? Math.ceil(window.innerWidth - rect.left + 12)
+        : 0;
+    const offset = isCollapsed === true
+        ? 60
+        : isCollapsed === false
+            ? Math.max(360, measuredWidth)
+            : Math.max(60, measuredWidth || 60);
 
-    // 折叠状态：侧边栏宽度(约32px) + 安全间距 = 60px
-    const COLLAPSED_WIDTH = 60;
+    document.documentElement.style.setProperty("--hud-right-offset", offset + "px");
+    requestAnimationFrame(() => refreshPartyHudPositions());
 
-    // 如果 isCollapsed 为 true，使用 60px；否则使用 360px
-    const offset = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
+    // Foundry 的侧栏带有展开动画，动画结束后再按真实边界校准一次。
+    if (typeof isCollapsed === "boolean") {
+        window.setTimeout(() => {
+            const liveSidebar = document.getElementById("sidebar");
+            const liveRect = liveSidebar?.getBoundingClientRect();
+            const liveOffset = isCollapsed
+                ? 60
+                : Math.max(60, liveRect?.width > 0
+                    ? Math.ceil(window.innerWidth - liveRect.left + 12)
+                    : 360);
 
-    // 修改 CSS 变量，触发 CSS 中的 transition 动画
-    document.documentElement.style.setProperty('--hud-right-offset', `${offset}px`);
+            document.documentElement.style.setProperty("--hud-right-offset", liveOffset + "px");
+            refreshPartyHudPositions();
+        }, 260);
+    }
 }
 
+/**
+ * 监听侧栏和窗口尺寸变化，让敌方 HUD 避开右侧界面；友方 HUD 使用固定初始安全位置。
+ */
+function observeSidebarLayout() {
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar && !sidebarResizeObserver && globalThis.ResizeObserver) {
+        sidebarResizeObserver = new ResizeObserver(() => updateSidebarOffset());
+        sidebarResizeObserver.observe(sidebar);
+    }
+
+    if (document.body.dataset.xjzlHudResizeBound !== "true") {
+        document.body.dataset.xjzlHudResizeBound = "true";
+        window.addEventListener("resize", () => updateSidebarOffset());
+    }
+}
 /**
  * 创建主容器 (单例模式)
  */
 async function createHUDContainer() {
-    if (document.getElementById("xjzl-custom-hud")) return;
+    const existing = document.getElementById("xjzl-custom-hud");
+    if (existing) {
+        setupHudDragging(existing);
+        return;
+    }
 
-    const html = await HUD_STATE.renderer("modules/xjzl-token-hud/templates/hud-container.hbs", {});
-    document.body.insertAdjacentHTML('beforeend', html);
+    // ready 与 canvasReady 可能并行触发；用共享 Promise 保证模板只渲染一次。
+    if (hudContainerPromise) return hudContainerPromise;
 
-    // 绑定“一键收起”按钮事件
-    const toggleBtn = document.getElementById("hud-toggle-party-btn");
-    if (toggleBtn) {
-        toggleBtn.addEventListener("click", () => {
-            const container = document.getElementById("xjzl-custom-hud");
-            if (container) {
-                container.classList.toggle("hidden-ui");
-                // 切换图标样式 (可选: 从 眼睛 变成 闭眼)
-                const icon = toggleBtn.querySelector("i");
-                if (container.classList.contains("hidden-ui")) {
-                    icon.className = "fas fa-eye-slash";
-                } else {
-                    icon.className = "fas fa-eye";
+    hudContainerPromise = (async () => {
+        const html = await HUD_STATE.renderer("modules/xjzl-token-hud/templates/hud-container.hbs", {});
+        if (document.getElementById("xjzl-custom-hud")) return;
+        document.body.insertAdjacentHTML('beforeend', html);
+
+        // 绑定“一键收起”按钮事件
+        const toggleBtn = document.getElementById("hud-toggle-party-btn");
+        if (toggleBtn) {
+            toggleBtn.addEventListener("click", () => {
+                const container = document.getElementById("xjzl-custom-hud");
+                if (container) {
+                    container.classList.toggle("hidden-ui");
+                    const icon = toggleBtn.querySelector("i");
+                    if (container.classList.contains("hidden-ui")) {
+                        icon.className = "fas fa-eye-slash";
+                    } else {
+                        icon.className = "fas fa-eye";
+                    }
                 }
+            });
+        }
+
+        setupHudDragging(document.getElementById("xjzl-custom-hud"));
+    })();
+
+    try {
+        await hudContainerPromise;
+    } finally {
+        hudContainerPromise = null;
+    }
+}
+
+/**
+ * 为左右小队 HUD 绑定拖动、边界限制和本地位置记忆。
+ * 位置只保存在当前浏览器，避免改变世界设置或影响其他玩家。
+ * @param {HTMLElement|null} root - 小队 HUD 根节点
+ */
+function setupHudDragging(root) {
+    if (!root) return;
+
+    const storageKey = "xjzl-token-hud.party-positions.v3";
+    const FRIENDS_INITIAL_LEFT = 100;
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), Math.max(min, max));
+    const readPositions = () => {
+        try {
+            return JSON.parse(localStorage.getItem(storageKey) || "{}") || {};
+        } catch (error) {
+            console.warn("XJZL Token HUD | 无法读取小队 HUD 位置:", error);
+            return {};
+        }
+    };
+
+    const getRightSafeOffset = () => {
+        const value = getComputedStyle(document.documentElement)
+            .getPropertyValue("--hud-right-offset");
+        return Math.max(60, Number.parseFloat(value) || 60);
+    };
+
+    /**
+     * 将用户保存的位置限制在当前可用战场区域内。
+     * 右侧栏展开时只临时收紧位置，不覆盖用户原本保存的坐标。
+     * @param {HTMLElement} side - 左侧或右侧小队 HUD
+     * @param {{top:number,left:number}|undefined} position - 用户保存的期望坐标
+     */
+    const applyPosition = (side, position) => {
+        if (!position || !Number.isFinite(position.top) || !Number.isFinite(position.left)) return;
+
+        const rect = side.getBoundingClientRect();
+        const leftInset = side.dataset.dragSide === "friends" ? FRIENDS_INITIAL_LEFT : 8;
+        const rightInset = side.dataset.dragSide === "enemies" ? getRightSafeOffset() + 8 : 8;
+        const maxLeft = Math.max(leftInset, window.innerWidth - rect.width - rightInset);
+        const maxTop = Math.max(8, window.innerHeight - rect.height - 8);
+        const left = clamp(position.left, leftInset, maxLeft);
+        const top = clamp(position.top, 8, maxTop);
+
+        side.style.top = top + "px";
+        side.style.bottom = "auto";
+        side.style.left = left + "px";
+        side.style.right = "auto";
+    };
+
+    refreshPartyHudPositions = () => {
+        const positions = readPositions();
+        root.querySelectorAll("[data-drag-side]").forEach(side => {
+            if (!side.classList.contains("is-dragging")) {
+                applyPosition(side, positions[side.dataset.dragSide]);
             }
         });
-    }
+    };
+
+    const persistPosition = side => {
+        const positions = readPositions();
+        const rect = side.getBoundingClientRect();
+        positions[side.dataset.dragSide] = {
+            top: Math.round(rect.top),
+            left: Math.round(rect.left)
+        };
+
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(positions));
+        } catch (error) {
+            console.warn("XJZL Token HUD | 无法保存小队 HUD 位置:", error);
+        }
+    };
+
+    /**
+     * 清除当前浏览器记忆的小队 HUD 坐标，并立即恢复 CSS 初始位置。
+     * 通过全局调试入口暴露，便于测试不同分辨率下的默认布局，不增加游戏界面按钮。
+     */
+    const resetPartyPositions = () => {
+        try {
+            localStorage.removeItem(storageKey);
+        } catch (error) {
+            console.warn("XJZL Token HUD | 无法清除小队 HUD 位置:", error);
+        }
+
+        root.querySelectorAll("[data-drag-side]").forEach(side => {
+            side.style.removeProperty("top");
+            side.style.removeProperty("bottom");
+            side.style.removeProperty("left");
+            side.style.removeProperty("right");
+        });
+        refreshPartyHudPositions();
+    };
+
+    globalThis.XJZLTokenHUD ??= {};
+    globalThis.XJZLTokenHUD.resetPartyPositions = resetPartyPositions;
+    refreshPartyHudPositions();
+
+    root.querySelectorAll("[data-drag-side]").forEach(side => {
+        const sideKey = side.dataset.dragSide;
+        const handle = side.querySelector('[data-drag-handle="' + sideKey + '"]');
+        if (!handle || handle.dataset.dragBound === "true") return;
+
+        handle.dataset.dragBound = "true";
+        handle.addEventListener("pointerdown", event => {
+            if (event.button !== 0) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            handle.setPointerCapture?.(event.pointerId);
+
+            const rect = side.getBoundingClientRect();
+            const offsetX = event.clientX - rect.left;
+            const offsetY = event.clientY - rect.top;
+            side.classList.add("is-dragging");
+
+            const updatePosition = moveEvent => {
+                if (moveEvent.pointerId !== event.pointerId) return;
+
+                const liveRect = side.getBoundingClientRect();
+                const leftInset = sideKey === "friends" ? FRIENDS_INITIAL_LEFT : 8;
+                const rightInset = sideKey === "enemies" ? getRightSafeOffset() + 8 : 8;
+                const maxLeft = Math.max(leftInset, window.innerWidth - liveRect.width - rightInset);
+                const maxTop = Math.max(8, window.innerHeight - liveRect.height - 8);
+                const left = clamp(moveEvent.clientX - offsetX, leftInset, maxLeft);
+                const top = clamp(moveEvent.clientY - offsetY, 8, maxTop);
+
+                side.style.top = top + "px";
+                side.style.bottom = "auto";
+                side.style.left = left + "px";
+                side.style.right = "auto";
+            };
+
+            const finishDrag = upEvent => {
+                if (upEvent.pointerId !== event.pointerId) return;
+
+                side.classList.remove("is-dragging");
+                handle.releasePointerCapture?.(event.pointerId);
+                window.removeEventListener("pointermove", updatePosition);
+                window.removeEventListener("pointerup", finishDrag);
+                window.removeEventListener("pointercancel", finishDrag);
+                persistPosition(side);
+            };
+
+            window.addEventListener("pointermove", updatePosition);
+            window.addEventListener("pointerup", finishDrag);
+            window.addEventListener("pointercancel", finishDrag);
+        });
+    });
 }
 
 // 更新缩放比例的辅助函数
 function updateHudScale(scale) {
-    // 通过设置 CSS 变量来控制缩放
-    document.documentElement.style.setProperty('--hud-party-scale', scale);
+    // 缩放会改变实际占用宽度，因此同步重新限制拖动后的安全边界。
+    document.documentElement.style.setProperty("--hud-party-scale", scale);
+    requestAnimationFrame(() => refreshPartyHudPositions());
 }
 
 /**
