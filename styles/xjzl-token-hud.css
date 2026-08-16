@@ -598,6 +598,12 @@
     left: 7px;
 }
 
+/* 没有任何单位卡片时，不保留空的控制把手和显示按钮。 */
+#xjzl-custom-hud.hud-empty #hud-toggle-party-btn,
+#xjzl-custom-hud.hud-empty .hud-side {
+    opacity: 0;
+    pointer-events: none;
+}
 #xjzl-custom-hud.hidden-ui .hud-side,
 #xjzl-custom-hud.hidden-ui .hud-atmosphere {
     opacity: 0;

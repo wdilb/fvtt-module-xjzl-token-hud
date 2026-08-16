@@ -217,8 +217,10 @@ Hooks.on("deleteCombatant", (combatant) => { // 离开战斗
     const token = canvas.tokens.get(combatant.tokenId);
     if (token) updateSingleToken(token);
 });
-Hooks.on("deleteCombat", (combat) => { // 战斗结束
-    updateAllTokens();
+Hooks.on("deleteCombat", () => { // 战斗结束
+    // 删除遭遇后 Token 的 inCombat 状态可能在当前调用栈结束后才同步。
+    // 延后一帧刷新，避免旧状态把已删除的 HUD 卡片重新创建出来。
+    requestAnimationFrame(() => updateAllTokens());
 });
 
 
@@ -480,6 +482,16 @@ function updateHudScale(scale) {
 }
 
 /**
+ * 根据当前是否存在卡片切换空 HUD 状态。
+ * 空容器不显示眼睛按钮和拖动把手；新卡片插入后会自动恢复。
+ */
+function updateHudEmptyState() {
+    const root = document.getElementById("xjzl-custom-hud");
+    if (!root) return;
+    root.classList.toggle("hud-empty", !root.querySelector(".hud-card"));
+}
+
+/**
  * 刷新当前场景所有 Token 的 HUD
  */
 function updateAllTokens() {
@@ -491,9 +503,10 @@ function updateAllTokens() {
 
     // 清理残留的卡片 (比如切换场景后)
     const currentIds = new Set(tokens.map(t => t.id));
-    document.querySelectorAll('.hud-card').forEach(card => {
+    document.querySelectorAll('#xjzl-custom-hud .hud-card').forEach(card => {
         if (!currentIds.has(card.dataset.tokenId)) card.remove();
     });
+    updateHudEmptyState();
 }
 
 /**
@@ -616,6 +629,7 @@ async function updateSingleToken(token) {
             });
             // 初始化状态缓存
             HUD_STATE.tokens.set(id, { hp: hpValue, neili: neiliValue, rage: rageValue });
+            updateHudEmptyState();
         }
     }
 
@@ -801,15 +815,18 @@ async function updateSingleToken(token) {
  * 安全移除卡片并清理缓存
  */
 function removeTokenCard(tokenId) {
-    const card = document.getElementById(`hud-token-${tokenId}`);
+    const card = document.getElementById("hud-token-" + tokenId);
     if (card) {
         card.classList.remove('active');
         // 等待 CSS 离场动画结束后移除 DOM (300ms)
-        setTimeout(() => card.remove(), 300);
+        setTimeout(() => {
+            card.remove();
+            updateHudEmptyState();
+        }, 300);
     }
     HUD_STATE.tokens.delete(tokenId);
+    updateHudEmptyState();
 }
-
 /**
  * 触发 CSS 动画类 (自动重置)
  */
