@@ -178,6 +178,36 @@ Hooks.on("updateActor", (actor, changes, options, userId) => {
     tokens.forEach(t => updateSingleToken(t));
 });
 
+/**
+ * [绝招判定] 监听系统招式聊天卡
+ * 系统确认施展绝招后，会在招式聊天卡中注入隐形标签【绝招标签】。
+ * 聊天卡会广播到所有客户端，因此每个正在观看场景的客户端都能同步播放 Cut-in 动画。
+ */
+Hooks.on("createChatMessage", (message) => {
+    if (!canvas.ready) return;
+    if (!message.content?.includes("【绝招标签】")) return;
+
+    // 优先用发言 token 精确定位：同一 Actor 的多个非关联 token 只有实际出招的那个播放动画
+    const speakerTokenId = message.speaker?.token;
+    let tokens = [];
+    if (speakerTokenId) {
+        const speakerToken = canvas.tokens.get(speakerTokenId);
+        if (speakerToken) tokens = [speakerToken];
+    } else {
+        // 没有 token 时回退到 Actor 维度（例如未放置 token 的 Actor 发招）
+        const actorId = message.speaker?.actor;
+        if (actorId) {
+            const actor = game.actors.get(actorId);
+            tokens = actor ? actor.getActiveTokens() : canvas.tokens.placeables.filter(t => t.actor?.id === actorId);
+        }
+    }
+
+    tokens.forEach(token => {
+        const card = document.getElementById(`hud-token-${token.id}`);
+        if (card) triggerAnimation(card, 'effect-ultimate');
+    });
+});
+
 // 处理 Token 创建/删除/战斗状态变更
 Hooks.on("createToken", (tokenDocument) => {
     if (tokenDocument.object) requestAnimationFrame(() => updateSingleToken(tokenDocument.object));
@@ -489,7 +519,7 @@ async function updateSingleToken(token) {
         // --- 2.5 动画与特效逻辑 ---
         // 对比上一次的状态，决定播放什么动画
         const lastState = HUD_STATE.tokens.get(id) || { hp: hpValue, neili: neiliValue, rage: rageValue };
-        const { hp: lastHp, neili: lastNeili, rage: lastRage } = lastState;
+        const { hp: lastHp, neili: lastNeili } = lastState;
 
         let animToPlay = null;
 
@@ -511,8 +541,8 @@ async function updateSingleToken(token) {
                 card.style.removeProperty('--rage-intensity');
             }
 
-            // 绝招触发：怒气减少时，判定为释放了大招 -> 播放 Cut-in 动画
-            if (rageValue < lastRage) animToPlay = 'effect-ultimate';
+            // 绝招动画由系统绝招聊天卡确认后触发，怒气下降本身不再播放绝招动画
+
         }
 
         // -> HP 更新
