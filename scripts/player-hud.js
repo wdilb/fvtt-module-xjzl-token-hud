@@ -9,6 +9,21 @@ export class PlayerHUD {
     static initialized = false;
 
     /**
+     * 打开系统状态工具并锁定当前 Actor，复用 xjzl-system 的唯一状态盘入口。
+     * @param {Actor} actor - 当前受控角色
+     * @returns {Promise<void>}
+     */
+    static async openStatusPicker(actor) {
+        try {
+            const moduleUrl = foundry.utils.getRoute("systems/xjzl-system/module/applications/effect-selection-dialog.mjs");
+            const { EffectSelectionDialog } = await import(moduleUrl);
+            EffectSelectionDialog.openForActor(actor);
+        } catch (err) {
+            console.error("PlayerHUD Status Picker Error:", err);
+        }
+    }
+
+    /**
      * 初始化监听器
      * 在 Foundry VTT 启动或模块加载时调用
      */
@@ -38,6 +53,15 @@ export class PlayerHUD {
         Hooks.on("updateItem", (item) => {
             if (this.currentActor && this.currentActor.id === item.parent?.id) this.debouncedRender();
         });
+
+        // 状态创建、叠层、持续时间和移除不会稳定地触发 Actor 更新，单独监听以保持状态胶囊即时同步。
+        for (const hookName of ["createActiveEffect", "updateActiveEffect", "deleteActiveEffect"]) {
+            Hooks.on(hookName, (effect) => {
+                const effectActorId = effect.parent?.id || effect.actor?.id;
+                // 删除 Hook 的 parent 在部分时机已经被清空，无法确认归属时刷新一次是安全的。
+                if (!effectActorId || this.currentActor?.id === effectActorId) this.debouncedRender();
+            });
+        }
 
         // 4. 战斗轮次更新 (使用防抖)
         // 战斗回合变化可能导致资源或冷却刷新
@@ -303,6 +327,7 @@ export class PlayerHUD {
             if (currentHudEl) {
                 // 保留根节点，避免刷新数值时触发 fixed/transform 动画和位置重置。
                 const wasCollapsed = currentHudEl.classList.contains("collapsed");
+                const wasBuffCollapsed = currentHudEl.querySelector(".buff-panel")?.classList.contains("is-collapsed") ?? false;
                 const preservedPanelIndex = Array.from(currentHudEl.querySelectorAll(".dock-category"))
                     .findIndex(category => category.classList.contains("is-open"));
                 const temp = document.createElement("div");
@@ -313,6 +338,9 @@ export class PlayerHUD {
                 currentHudEl.classList.toggle("collapsed", wasCollapsed);
                 currentHudEl.querySelector('[data-action="toggle-collapse"]')
                     ?.setAttribute("aria-expanded", String(!wasCollapsed));
+                currentHudEl.querySelector(".buff-panel")?.classList.toggle("is-collapsed", wasBuffCollapsed);
+                currentHudEl.querySelector('[data-action="toggle-buffs"]')
+                    ?.setAttribute("aria-expanded", String(!wasBuffCollapsed));
 
                 if (preservedPanelIndex >= 0) {
                     const preservedCategory = currentHudEl.querySelectorAll(".dock-category")[preservedPanelIndex];
@@ -554,24 +582,20 @@ export class PlayerHUD {
             }
         }
 
-        const realmLevel = sys.cultivation?.realmLevel ?? 0;
-        const realmName = game.i18n.localize(`XJZL.Realm.${realmLevel}`);
+        const buffs = this._prepareBuffs(actor);
 
         // 返回所有数据
         return {
             actorImg: actor.img,
-            realmName, neigongElement, stanceName, stanceDesc,
+            neigongElement, stanceName, stanceDesc,
             hp, mp, rage, rageVal, hutiValue, hutiPercent,
             hpPercent: (hp.value / hp.max) * 100,
             mpPercent: (mp.value / mp.max) * 100,
             rageDots: Array.from({ length: 10 }, (_, i) => ({ active: i < rageVal })),
-
-            leftStats: [
-                { label: "格挡", value: combat.blockTotal || 0 },
-                { label: "闪避", value: combat.dodgeTotal || 0 },
-                { label: "看破", value: combat.kanpoTotal || 0 },
-                { label: "速度", value: combat.speedTotal || 0 }
-            ],
+            speed: combat.speedTotal || 0,
+            buffs,
+            // 少量状态用紧凑横向徽章，避免网格行把单个状态拉成大卡片。
+            buffLayout: buffs.length <= 2 ? "is-compact" : "is-dense",
 
             shortcuts,          // 包含 rich html tooltip 的招式列表
             consumables,        // 消耗品
@@ -581,6 +605,59 @@ export class PlayerHUD {
 
             isCollapsed: false
         };
+    }
+
+    /**
+     * 整理角色当前可见状态，供 HUD 胶囊区使用；返回值只含展示字段，不修改 ActiveEffect。
+     * @param {Actor} actor - 当前受控角色
+     * @returns {Array<{name:string,img:string,stackLabel:string,durationLabel:string,tooltip:string}>}
+     */
+    static _prepareBuffs(actor) {
+        const buffs = [];
+        const effects = actor.appliedEffects || [];
+
+        for (const effect of effects) {
+            if (effect.disabled || !(effect.isTemporary || effect.transfer === false)) continue;
+
+            let durationLabel = "";
+            const duration = effect.duration;
+            if (duration?.seconds) {
+                const startTime = duration.startTime || game.time.worldTime;
+                const remaining = Math.max(0, startTime + duration.seconds - game.time.worldTime);
+                durationLabel = remaining >= 3600
+                    ? `${Math.floor(remaining / 3600)}h`
+                    : remaining >= 60 ? `${Math.floor(remaining / 60)}m` : `${remaining}s`;
+            } else if (duration?.rounds) {
+                if (game.combat?.round) {
+                    const startRound = duration.startRound || game.combat.round;
+                    durationLabel = `${Math.max(0, duration.rounds - (game.combat.round - startRound))}回合`;
+                } else {
+                    durationLabel = `${duration.rounds}回合`;
+                }
+            } else if (duration?.turns) {
+                durationLabel = `${duration.turns}轮`;
+            }
+
+            const stacks = Number(effect.stacks || 1);
+            const stackLabel = stacks > 1 ? `x${stacks}` : "";
+            const description = this.cleanRichText(effect.description || "");
+            const tooltip = [
+                effect.name,
+                stackLabel,
+                durationLabel ? `剩余 ${durationLabel}` : "持续中",
+                description
+            ].filter(Boolean).join("\n");
+
+            buffs.push({
+                name: effect.name,
+                img: effect.img || "icons/svg/aura.svg",
+                stackLabel,
+                durationLabel,
+                tooltip
+            });
+        }
+
+        return buffs;
     }
 
     /**
@@ -677,6 +754,29 @@ export class PlayerHUD {
         html.querySelector('[data-action="open-sheet"]')?.addEventListener("click", (ev) => {
             ev.preventDefault(); actor.sheet.render(true);
         });
+
+        // 状态胶囊和空态徽记都打开系统原生状态盘，确保 HUD 与角色卡使用同一套状态操作。
+        html.querySelectorAll('[data-action="open-status-picker"]').forEach(el => {
+            const openPicker = (ev) => {
+                ev.preventDefault(); ev.stopPropagation();
+                void this.openStatusPicker(actor);
+            };
+            el.addEventListener("click", openPicker);
+            el.addEventListener("keydown", (ev) => {
+                if (ev.key === "Enter" || ev.key === " ") openPicker(ev);
+            });
+        });
+
+        // 状态列表独立折叠；保留标题和状态数量，避免收起后右侧失去可识别的入口。
+        const buffToggle = html.querySelector('[data-action="toggle-buffs"]');
+        if (buffToggle) {
+            buffToggle.addEventListener("click", (ev) => {
+                ev.preventDefault(); ev.stopPropagation();
+                const panel = buffToggle.closest(".buff-panel");
+                const isCollapsed = panel?.classList.toggle("is-collapsed") ?? false;
+                buffToggle.setAttribute("aria-expanded", String(!isCollapsed));
+            });
+        }
 
         // 2. 属性/技能/技艺检定
         html.querySelectorAll('[data-action="roll-stat"]').forEach(el => {

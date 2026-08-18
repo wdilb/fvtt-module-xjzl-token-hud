@@ -1,15 +1,29 @@
 <div id="xjzl-player-hud" aria-label="角色战术控制台">
     <div class="player-hud-glow" aria-hidden="true"></div>
 
-    <section class="hud-wing left" aria-label="战斗属性">
-        <div class="wing-heading"><span class="wing-mark"></span><span>战斗属性</span></div>
-        <div class="combat-stat-grid">
-            {{#each leftStats}}
-            <div class="c-stat" data-tooltip="{{label}}">
-                <span class="label">{{label}}</span>
-                <span class="val">{{value}}</span>
+    <section class="hud-wing left" aria-label="资源与速度">
+        <div class="wing-heading"><span class="wing-mark"></span><span>资源与速度</span></div>
+        <div class="resource-cluster">
+            {{#if hutiValue}}
+            <div class="huti-badge" data-tooltip="护体真气"><i class="fas fa-shield-alt"></i><span>护体</span>
+                <input type="text" class="res-input huti-input" data-target="system.resources.huti" value="{{hutiValue}}" aria-label="护体真气">
             </div>
-            {{/each}}
+            {{/if}}
+            <div class="resource-line hp-line">
+                <div class="res-bar hp">
+                    <div class="bar-fill" style="width: {{hpPercent}}%;"></div>
+                    {{#if hutiPercent}}<div class="bar-shield" style="width: {{hutiPercent}}%;"></div>{{/if}}
+                    <div class="bar-text"><input type="text" class="res-input" data-target="system.resources.hp.value" value="{{hp.value}}" aria-label="气血当前值"><span class="sep">/</span><span class="max">{{hp.max}}</span></div>
+                </div>
+                <div class="resource-meta"><span>气血</span></div>
+            </div>
+            <div class="resource-line mp-line">
+                <div class="res-bar mp">
+                    <div class="bar-fill" style="width: {{mpPercent}}%;"></div>
+                    <div class="bar-text"><input type="text" class="res-input" data-target="system.resources.mp.value" value="{{mp.value}}" aria-label="内力当前值"><span class="sep">/</span><span class="max">{{mp.max}}</span></div>
+                </div>
+                <div class="resource-meta"><span>内力</span></div>
+            </div>
         </div>
     </section>
 
@@ -33,6 +47,11 @@
             </button>
         </div>
 
+        <div class="speed-stat" data-tooltip="速度">
+            <span class="label">速</span>
+            <span class="val">{{speed}}</span>
+        </div>
+
         <div class="avatar-wrapper">
             <div class="core-label">角色</div>
             <div class="avatar-frame clickable" data-action="open-sheet" data-tooltip="点击打开角色面板">
@@ -40,45 +59,47 @@
                 <div class="aura-ring {{neigongElement}}"></div>
                 <div class="avatar-glare" aria-hidden="true"></div>
             </div>
-            {{#if realmName}}
-            <div class="realm-seal" data-tooltip="当前境界"><span>境界</span>{{realmName}}</div>
-            {{/if}}
             <div class="rage-ring-container" aria-label="当前怒气">
                 {{#each rageDots}}
                 <div class="rage-orb {{#if this.active}}active{{/if}}" style="--i:{{@index}}"></div>
                 {{/each}}
             </div>
-            <div class="rage-core" data-tooltip="当前怒气">
-                <i class="fas fa-fire"></i>
-                <input type="text" class="res-input rage-input" data-target="system.resources.rage.value" value="{{rage.value}}" aria-label="怒气值">
-            </div>
+        </div>
+        <div class="rage-core" data-tooltip="当前怒气">
+            <span class="rage-glyph">怒</span>
+            <input type="text" class="res-input rage-input" data-target="system.resources.rage.value" value="{{rage.value}}" aria-label="怒气值">
         </div>
         <div class="core-caption">已同步</div>
     </section>
 
-    <section class="hud-wing right" aria-label="资源状态">
-        <div class="wing-heading"><span class="wing-mark"></span><span>资源状态</span></div>
-        {{#if hutiValue}}
-        <div class="huti-badge" data-tooltip="护体真气"><i class="fas fa-shield-alt"></i><span>护体</span>
-            <input type="text" class="res-input huti-input" data-target="system.resources.huti" value="{{hutiValue}}" aria-label="护体真气">
-        </div>
-        {{/if}}
-        <div class="resource-line hp-line">
-            <div class="resource-meta"><span>气血</span></div>
-            <div class="res-bar hp">
-                <div class="bar-fill" style="width: {{hpPercent}}%;"></div>
-                <div class="bar-shield" style="width: {{hutiPercent}}%;"></div>
-                <div class="bar-text"><input type="text" class="res-input" data-target="system.resources.hp.value" value="{{hp.value}}" aria-label="气血当前值"><span class="sep">/</span><span class="max">{{hp.max}}</span></div>
+    <section class="hud-wing right" aria-label="当前状态">
+        <div class="buff-panel">
+            <div class="buff-heading">
+                <span class="buff-heading-line" aria-hidden="true"></span>
+                <button class="buff-toggle" type="button" data-action="toggle-buffs" data-tooltip="收起/展开状态" aria-label="收起或展开状态列表" aria-expanded="true">
+                    <i class="fas fa-yin-yang" aria-hidden="true"></i><span>状态</span><i class="fas fa-chevron-up buff-toggle-icon" aria-hidden="true"></i>
+                </button>
+                <span class="buff-count">{{#if buffs.length}}{{buffs.length}} 项{{else}}清静{{/if}}</span>
             </div>
-        </div>
-        <div class="resource-line mp-line">
-            <div class="resource-meta"><span>内力</span></div>
-            <div class="res-bar mp">
-                <div class="bar-fill" style="width: {{mpPercent}}%;"></div>
-                <div class="bar-text"><input type="text" class="res-input" data-target="system.resources.mp.value" value="{{mp.value}}" aria-label="内力当前值"><span class="sep">/</span><span class="max">{{mp.max}}</span></div>
+            {{#if buffs.length}}
+            <div class="buff-list {{buffLayout}}" aria-label="当前状态列表">
+                {{#each buffs}}
+                <div class="buff-chip" data-action="open-status-picker" data-tooltip="{{tooltip}}" data-tooltip-direction="UP" role="button" tabindex="0" aria-label="打开状态工具：{{name}}">
+                    <img src="{{img}}" class="buff-icon" alt="{{name}}">
+                    <span class="buff-name">{{name}}</span>
+                    {{#if stackLabel}}<span class="buff-stack">{{stackLabel}}</span>{{/if}}
+                    {{#if durationLabel}}<span class="buff-duration">剩余 {{durationLabel}}</span>{{/if}}
+                </div>
+                {{/each}}
             </div>
+            {{else}}
+            <div class="buff-empty" data-action="open-status-picker" data-tooltip="打开状态工具" role="button" tabindex="0" aria-label="打开状态工具">
+                <span class="buff-empty-seal"><i class="fas fa-yin-yang"></i></span>
+                <span class="buff-empty-label">气机清静</span>
+                <span class="buff-empty-hint">暂无生效状态</span>
+            </div>
+            {{/if}}
         </div>
-        <div class="wing-footer">状态稳定<span class="telemetry-pulse"></span></div>
     </section>
 
     <nav class="hud-dock" aria-label="角色操作">
