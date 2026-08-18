@@ -6,7 +6,6 @@
     --team-jade: #709f8f;
     --team-red: #b95748;
     --team-bronze: #b99a60;
-    --hud-party-base-scale: 1.2;
     position: fixed;
     inset: 0;
     z-index: 30;
@@ -34,8 +33,8 @@
     top: 70px;
     right: calc(var(--hud-right-offset, 60px) + 10px);
     display: grid;
-    width: 31px;
-    height: 26px;
+    width: 37px;
+    height: 32px;
     place-items: center;
     padding: 0;
     cursor: pointer;
@@ -47,7 +46,7 @@
     clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
     font-size: 11px;
     pointer-events: auto;
-    transform: scale(calc(var(--hud-party-scale, 1) * var(--hud-party-base-scale, 1)));
+    transform: scale(var(--hud-party-scale, 1));
     transform-origin: top right;
     transition: right .35s ease, color .16s ease, background .16s ease;
 }
@@ -66,13 +65,14 @@
 #xjzl-custom-hud .hud-side {
     position: fixed;
     top: 18vh;
-    bottom: 17vh;
+    bottom: auto;
     display: flex;
-    width: min(232px, 18vw);
+    height: 65.34vh;
+    width: min(281px, 21.78vw);
     align-items: flex-start;
-    gap: 5px;
+    gap: 7px;
     pointer-events: none;
-    transform: scale(calc(var(--hud-party-scale, 1) * var(--hud-party-base-scale, 1)));
+    transform: scale(var(--hud-party-scale, 1));
     transition: right .35s ease, left .35s ease, opacity .24s ease, filter .24s ease, transform .24s ease;
 }
 
@@ -94,9 +94,9 @@
 
 #xjzl-custom-hud .hud-side-rail {
     display: grid;
-    width: 21px;
-    height: 34px;
-    flex: 0 0 21px;
+    width: 25px;
+    height: 41px;
+    flex: 0 0 25px;
     place-items: center;
     padding: 0;
     cursor: grab;
@@ -128,21 +128,35 @@
 }
 
 #xjzl-custom-hud .hud-side-rail i {
-    font-size: 11px;
+    font-size: 13px;
 }
 
 #xjzl-custom-hud .hud-column {
     display: flex;
     min-width: 0;
-    max-height: calc(100vh - 160px);
-    flex: 1;
+    height: auto;
+    min-height: 0;
+    max-height: 100%;
+    flex: 0 1 auto;
+    align-self: flex-start;
     flex-direction: column;
-    gap: 5px;
+    gap: 7px;
     overflow-x: hidden;
     overflow-y: auto;
     scrollbar-gutter: stable;
     padding-right: 2px;
+    /* 高度由卡片内容撑开；超出可用高度时才滚动，避免空白区形成热区。 */
     pointer-events: auto;
+}
+
+/* 空列表不保留交互热区，让画布点击直接穿透。 */
+#xjzl-custom-hud .hud-column:empty {
+    pointer-events: none;
+}
+
+#xjzl-custom-hud .hud-side:has(.hud-column:empty) .hud-side-rail {
+    opacity: 0;
+    pointer-events: none;
 }
 
 #xjzl-custom-hud .hud-column::-webkit-scrollbar {
@@ -159,10 +173,10 @@
     display: grid;
     min-width: 0;
     width: 100%;
-    min-height: 68px;
-    grid-template-columns: 50px minmax(0, 1fr);
-    gap: 7px;
-    padding: 6px 13px 6px 5px;
+    min-height: 83px;
+    grid-template-columns: 61px minmax(0, 1fr);
+    gap: 9px;
+    padding: 8px 15px 8px 7px;
     overflow: hidden;
     isolation: isolate;
     opacity: 0;
@@ -172,14 +186,15 @@
     border: 0;
     box-shadow: none;
     filter: drop-shadow(0 6px 9px rgba(0, 0, 0, .2));
+    pointer-events: auto;
     transform: translateX(-13px);
     transition: opacity .24s ease, transform .28s ease, filter .22s ease;
 }
 
 #xjzl-custom-hud .hud-card.enemy {
     --side-color: var(--team-red);
-    padding-right: 5px;
-    padding-left: 13px;
+    padding-right: 7px;
+    padding-left: 15px;
     background:
         radial-gradient(ellipse at 85% 50%, rgba(145, 57, 43, .14), transparent 42%),
         linear-gradient(90deg, transparent, rgba(22, 13, 11, .74) 26%, rgba(25, 14, 12, .9));
@@ -232,13 +247,13 @@
 #xjzl-custom-hud .hud-card-signal {
     position: absolute;
     top: 4px;
-    left: 58px;
+    left: 70px;
     display: flex;
     align-items: center;
     gap: 4px;
     color: var(--side-color);
     filter: brightness(1.25) saturate(1.12);
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 700;
     line-height: 1;
     text-shadow: 0 1px 3px #000, 0 0 5px rgba(0, 0, 0, .9);
@@ -246,14 +261,14 @@
 }
 
 #xjzl-custom-hud .hud-card.enemy .hud-card-signal {
-    right: 58px;
+    right: 70px;
     left: auto;
     justify-content: flex-end;
 }
 
 #xjzl-custom-hud .signal-dot {
-    width: 4px;
-    height: 4px;
+    width: 6px;
+    height: 6px;
     background: currentColor;
     box-shadow: 0 0 5px currentColor;
     transform: rotate(45deg);
@@ -262,8 +277,8 @@
 #xjzl-custom-hud .hud-avatar-container {
     position: relative;
     align-self: center;
-    width: 50px;
-    height: 55px;
+    width: 61px;
+    height: 67px;
     overflow: hidden;
     background: #111511;
     border: 1px solid rgba(112, 159, 143, .52);
@@ -282,13 +297,14 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center top;
     filter: saturate(.78) contrast(1.06);
     transition: filter .2s ease, transform .2s ease;
 }
 
 #xjzl-custom-hud .hud-card:hover .hud-avatar {
     filter: saturate(.98) contrast(1.08);
-    transform: scale(1.035);
+    transform: scale(1.02);
 }
 
 #xjzl-custom-hud .avatar-glass {
@@ -308,7 +324,7 @@
     flex-direction: column;
     justify-content: flex-end;
     gap: 3px;
-    padding-top: 7px;
+    padding-top: 9px;
 }
 
 #xjzl-custom-hud .hud-header {
@@ -316,13 +332,13 @@
     min-width: 0;
     align-items: center;
     justify-content: space-between;
-    gap: 5px;
+    gap: 7px;
 }
 
 #xjzl-custom-hud .hud-name {
     overflow: hidden;
     color: #fff8e7;
-    font: 600 14px "STKaiti", "KaiTi", "Noto Serif SC", serif;
+    font: 600 16px "STKaiti", "KaiTi", "Noto Serif SC", serif;
     line-height: 1.15;
     text-overflow: ellipsis;
     text-shadow: 0 2px 4px #000, 0 0 6px rgba(0, 0, 0, .9);
@@ -335,7 +351,7 @@
     color: var(--team-jade);
     border: 0;
     border-bottom: 1px solid currentColor;
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 700;
     line-height: 1.2;
     text-shadow: 0 1px 3px #000;
@@ -354,7 +370,7 @@
 
 #xjzl-custom-hud .bar-track {
     position: relative;
-    height: 15px;
+    height: 18px;
     overflow: hidden;
     isolation: isolate;
     background: rgba(5, 6, 6, .72);
@@ -416,17 +432,17 @@
 }
 
 #xjzl-custom-hud .bar-caption {
-    left: 7px;
+    left: 9px;
     color: rgba(255, 246, 225, .94);
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 700;
 }
 
 #xjzl-custom-hud .bar-text {
-    right: 7px;
+    right: 9px;
     color: #fff8e7;
     font-family: "DIN Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
     text-shadow: 0 1px 3px #000, 0 0 5px rgba(0, 0, 0, .9);
 }
@@ -492,7 +508,7 @@
 
 #xjzl-custom-hud .rage-track {
     display: flex;
-    height: 7px;
+    height: 9px;
     align-items: center;
     gap: 2px;
 }
@@ -501,12 +517,12 @@
 #xjzl-custom-hud .rage-max {
     flex: 0 0 auto;
     color: #d2c4a5;
-    font-size: 9px;
+    font-size: 11px;
     text-shadow: 0 1px 3px #000;
 }
 
 #xjzl-custom-hud .rage-segment {
-    height: 3px;
+    height: 4px;
     min-width: 2px;
     flex: 1;
     background: rgba(238, 228, 204, .13);
@@ -548,7 +564,7 @@
     width: 56%;
     height: 82%;
     object-fit: contain;
-    object-position: right center;
+    object-position: right top;
     filter: drop-shadow(0 0 14px rgba(239, 213, 155, .62));
     transform: translateX(30%);
 }
@@ -571,7 +587,7 @@
 }
 
 #xjzl-custom-hud .hud-side-right .hud-card {
-    grid-template-columns: minmax(0, 1fr) 50px;
+    grid-template-columns: minmax(0, 1fr) 61px;
 }
 
 #xjzl-custom-hud .hud-side-right .hud-avatar-container {
@@ -590,13 +606,13 @@
 }
 
 #xjzl-custom-hud .hud-side-right .bar-caption {
-    right: 7px;
+    right: 9px;
     left: auto;
 }
 
 #xjzl-custom-hud .hud-side-right .bar-text {
     right: auto;
-    left: 7px;
+    left: 9px;
 }
 
 /* 没有任何单位卡片时，不保留空的控制把手和显示按钮。 */
@@ -612,11 +628,11 @@
 }
 
 #xjzl-custom-hud.hidden-ui .hud-side-left {
-    transform: translateX(-18px) scale(calc(var(--hud-party-scale, 1) * var(--hud-party-base-scale, 1)));
+    transform: translateX(-18px) scale(var(--hud-party-scale, 1));
 }
 
 #xjzl-custom-hud.hidden-ui .hud-side-right {
-    transform: translateX(18px) scale(calc(var(--hud-party-scale, 1) * var(--hud-party-base-scale, 1)));
+    transform: translateX(18px) scale(var(--hud-party-scale, 1));
 }
 
 @keyframes xjzl-wuxia-rage {
@@ -651,32 +667,32 @@
 
 @media (max-width: 900px) {
     #xjzl-custom-hud .hud-side {
-        width: min(214px, 25vw);
+        width: min(259px, 30.25vw);
     }
 
     #xjzl-custom-hud .hud-card {
-        min-height: 62px;
-        grid-template-columns: 44px minmax(0, 1fr);
-        gap: 5px;
-        padding-top: 5px;
-        padding-bottom: 5px;
+        min-height: 75px;
+        grid-template-columns: 54px minmax(0, 1fr);
+        gap: 7px;
+        padding-top: 7px;
+        padding-bottom: 7px;
     }
 
     #xjzl-custom-hud .hud-side-right .hud-card {
-        grid-template-columns: minmax(0, 1fr) 44px;
+        grid-template-columns: minmax(0, 1fr) 54px;
     }
 
     #xjzl-custom-hud .hud-avatar-container {
-        width: 44px;
-        height: 49px;
+        width: 54px;
+        height: 59px;
     }
 
     #xjzl-custom-hud .hud-name {
-        font-size: 12px;
+        font-size: 14px;
     }
 
     #xjzl-custom-hud .bar-track {
-        height: 14px;
+        height: 16.5px;
     }
 }
 

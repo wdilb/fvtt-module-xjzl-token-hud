@@ -68,6 +68,18 @@ Hooks.once("init", async function () {
         onChange: (value) => updateHudScale(value)
     });
 
+    // 注册设置: 人物 HUD 缩放比例
+    game.settings.register("xjzl-token-hud", "playerScale", {
+        name: "人物HUD缩放比例",
+        hint: "调整底部人物 HUD 的大小 (0.8 - 1.5 倍，1.0 为当前设计基准)。",
+        scope: "client",
+        config: true,
+        type: Number,
+        range: { min: 0.8, max: 1.5, step: 0.05 },
+        default: 1.0,
+        onChange: (value) => updatePlayerHudScale(value)
+    });
+
     // 注册设置: 完全隐藏敌方血条长度
     game.settings.register("xjzl-token-hud", "hideEnemyBars", {
         name: "隐藏敌方血条长度",
@@ -119,6 +131,8 @@ async function initHudSystem() {
     // 初始化时应用当前的缩放比例
     const scale = game.settings.get("xjzl-token-hud", "partyScale");
     updateHudScale(scale);
+    const playerScale = game.settings.get("xjzl-token-hud", "playerScale");
+    updatePlayerHudScale(playerScale);
 }
 
 // =================================================================
@@ -163,8 +177,11 @@ Hooks.on("updateToken", (tokenDocument, changes, options, userId) => {
 Hooks.on("updateActor", (actor, changes, options, userId) => {
     // 如果是容器，直接忽略，不执行后续逻辑
     if (actor.type === "container") return;
-    // 使用 foundry.utils.hasProperty 进行深度检查，只关心 attributes 变化
-    const hasResourceChange = foundry.utils.hasProperty(changes, "system.resources");
+    // Foundry 可能把更新路径作为嵌套对象或扁平键传入；两种形式都要识别，
+    // 否则资源确实变化了，但 HUD 不会重新计算状态文本。
+    const changedPaths = Object.keys(changes ?? {});
+    const hasResourceChange = foundry.utils.hasProperty(changes, "system.resources")
+        || changedPaths.some(path => path === "system.resources" || path.startsWith("system.resources."));
 
     if (!hasResourceChange) return;
 
@@ -482,6 +499,16 @@ function updateHudScale(scale) {
 }
 
 /**
+ * 应用人物 HUD 的客户端缩放比例；缩放原点由人物 HUD 自身固定在底部中心，因此不会压到技能栏。
+ * @param {number} scale - 人物 HUD 的显示比例
+ */
+function updatePlayerHudScale(scale) {
+    const numericScale = Number(scale);
+    if (!Number.isFinite(numericScale)) return;
+    document.documentElement.style.setProperty("--hud-player-scale", String(numericScale));
+}
+
+/**
  * 根据当前是否存在卡片切换空 HUD 状态。
  * 空容器不显示眼睛按钮和拖动把手；新卡片插入后会自动恢复。
  */
@@ -720,11 +747,12 @@ async function updateSingleToken(token) {
         updateText('.neili-text-overlay .max-val', neiliMax);
 
         // 2.4 状态文字颜色更新
-        const statusEl = card.querySelector('.status-label');
-        if (statusEl) {
+        // 卡片顶部使用 hud-state，屏蔽数值时血条内还会出现 status-label；两处必须同步刷新。
+        card.querySelectorAll('.hud-state, .status-label').forEach(statusEl => {
+            const baseClass = statusEl.classList.contains('hud-state') ? 'hud-state' : 'status-label';
             statusEl.innerText = statusLabel;
-            statusEl.className = `status-label ${statusColorClass}`;
-        }
+            statusEl.className = `${baseClass} ${statusColorClass}`;
+        });
 
         // --- 2.5 动画与特效逻辑 ---
         // 对比上一次的状态，决定播放什么动画

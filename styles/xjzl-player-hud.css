@@ -9,18 +9,17 @@
     --hud-bronze-bright: #e3c98b;
     --hud-jade: #6d9f8e;
     --hud-red: #b95647;
-    --hud-player-scale: 1.15;
     position: fixed;
     z-index: 40;
     left: 50%;
     bottom: var(--xjzl-hud-bottom, 16px);
     display: grid;
-    width: 580px;
-    grid-template-columns: 184px 150px 184px;
+    width: 609px;
+    grid-template-columns: 193px 158px 193px;
     grid-template-areas:
         "left center right"
         "dock dock dock";
-    column-gap: 31px;
+    column-gap: 32px;
     row-gap: 1px;
     align-items: end;
     color: var(--hud-paper);
@@ -65,11 +64,11 @@
 /* 两侧采用向外消散的薄墨，不形成网页卡片。 */
 #xjzl-player-hud .hud-wing {
     position: relative;
-    height: 112px;
+    height: 118px;
     min-width: 0;
     align-self: end;
-    margin-bottom: 10px;
-    padding: 8px 11px;
+    margin-bottom: 11px;
+    padding: 8px 12px;
     isolation: isolate;
 }
 
@@ -769,7 +768,7 @@
     z-index: 5;
     grid-area: center;
     display: flex;
-    min-height: 132px;
+    min-height: 139px;
     align-items: flex-end;
     justify-content: center;
 }
@@ -803,11 +802,11 @@
 #xjzl-player-hud .toggle-hud-btn {
     position: absolute;
     z-index: 20;
-    top: -23px;
+    top: -24px;
     left: 50%;
     display: grid;
-    width: 34px;
-    height: 20px;
+    width: 36px;
+    height: 21px;
     place-items: center;
     padding: 0;
     cursor: pointer;
@@ -836,8 +835,8 @@
     top: 1px;
     left: 50%;
     display: flex;
-    max-width: 132px;
-    height: 21px;
+    max-width: 138px;
+    height: 22px;
     align-items: center;
     gap: 5px;
     padding: 0 9px;
@@ -868,10 +867,10 @@
 #xjzl-player-hud .upper-actions {
     position: absolute;
     z-index: 16;
-    top: 35px;
+    top: 37px;
     left: 50%;
     display: flex;
-    width: 174px;
+    width: 183px;
     justify-content: space-between;
     pointer-events: none;
     transform: translateX(-50%);
@@ -880,8 +879,8 @@
 #xjzl-player-hud .avatar-wrapper {
     position: relative;
     display: flex;
-    width: 112px;
-    height: 107px;
+    width: 118px;
+    height: 112px;
     align-items: center;
     justify-content: center;
     pointer-events: none;
@@ -908,8 +907,8 @@
 #xjzl-player-hud .avatar-frame {
     position: relative;
     z-index: 10;
-    width: 85px;
-    height: 85px;
+    width: 89px;
+    height: 89px;
     overflow: hidden;
     cursor: pointer;
     background: #171813;
@@ -945,6 +944,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center top;
     pointer-events: none;
     filter: saturate(.78) contrast(1.08);
 }
@@ -965,7 +965,7 @@
 #xjzl-player-hud .aura-ring {
     position: absolute;
     z-index: -1;
-    inset: -11px;
+    inset: -12px;
     border: 1px solid rgba(185, 154, 96, .52);
     border-radius: 50%;
     box-shadow: 0 0 15px rgba(185, 154, 96, .16);
@@ -1001,7 +1001,7 @@
     border: 1px solid rgba(185, 154, 96, .42);
     border-radius: 50%;
     background: rgba(12, 12, 10, .94);
-    transform: rotate(var(--angle)) translateY(-51px) rotate(calc(var(--angle) * -1));
+    transform: rotate(var(--angle)) translateY(-54px) rotate(calc(var(--angle) * -1));
 }
 
 #xjzl-player-hud .rage-orb.active {
@@ -1013,11 +1013,11 @@
 #xjzl-player-hud .rage-core {
     position: absolute;
     z-index: 15;
-    bottom: 13px;
-    left: calc(50% + 33px);
+    bottom: 14px;
+    left: calc(50% + 35px);
     display: grid;
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     place-items: center;
     color: #e88670;
     background: rgba(56, 21, 17, .97);
@@ -1048,8 +1048,8 @@
 
 #xjzl-player-hud .rage-core .rage-input {
     align-self: end;
-    width: 23px;
-    height: 14px;
+    width: 24px;
+    height: 15px;
     margin-bottom: 2px;
     padding: 1px 2px 0;
     color: #fff0dd;
@@ -1098,13 +1098,13 @@
 }
 
 #xjzl-player-hud .combat-satellite {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
 }
 
 #xjzl-player-hud .cat-btn {
-    width: 41px;
-    height: 41px;
+    width: 43px;
+    height: 43px;
 }
 
 #xjzl-player-hud .combat-satellite::before,
@@ -1156,10 +1156,10 @@
     position: relative;
     grid-area: dock;
     display: flex;
-    min-height: 44px;
+    min-height: 46px;
     align-items: flex-start;
     justify-content: center;
-    gap: 13px;
+    gap: 14px;
     padding: 0;
     background: transparent;
 }
