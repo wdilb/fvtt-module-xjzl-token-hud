@@ -15,7 +15,7 @@
 ### 1. 玩家主控面板 (Player Control HUD)
 屏幕下方常驻的综合操作台，集成了资源监控与快捷操作，完全替代繁琐的角色卡交互。
 
-[玩家HUD预览]<img width="1305" height="436" alt="1" src="https://github.com/user-attachments/assets/81f21248-ec3b-4ff5-9fe2-b1889cb29393" />
+[玩家HUD预览]<img width="1183" height="420" alt="image" src="https://github.com/user-attachments/assets/d52bffcf-bcd3-4ba9-86be-bd76bc7b2bf4" />
 
 
 *   **本我中庭**：
@@ -34,7 +34,7 @@
 ### 2. 小队/敌人侧边栏 (Party & Enemy HUD)
 屏幕两侧显示战场上的单位状态。
 
-[侧边栏预览]<img width="2419" height="753" alt="2" src="https://github.com/user-attachments/assets/e69fd37b-4409-4069-b3b5-4ffd43232e80" />
+[侧边栏预览]<img width="2884" height="840" alt="image" src="https://github.com/user-attachments/assets/c4c41139-eb6e-4974-9e87-9e27a9e1ad69" />
 
 
 *   **智能分组**：左侧显示友方（绿色系），右侧显示敌方（红色系）。
