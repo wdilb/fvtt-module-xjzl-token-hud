@@ -106,12 +106,13 @@
         <span class="dock-label">操作</span>
 
         <div class="dock-category">
+        {{!-- 面板交互项使用 tabindex=-1，让鼠标焦点留在分类内部，避免 focusout 在 click 前关闭面板。 --}}
             <button class="cat-btn" type="button" aria-expanded="false" aria-haspopup="true" data-tooltip="常用招式" aria-label="常用招式"><i class="fas fa-fist-raised"></i><span>招式</span></button>
             <div class="cat-content">
                 <div class="panel-heading"><span>常用招式</span></div>
                 <div class="scroll-area"><div class="simple-grid">
                     {{#each shortcuts}}
-                    <div class="item-btn move {{cssType}}" data-action="{{#if actionType}}{{actionType}}{{else}}use-move{{/if}}" data-item-id="{{item.id}}" data-move-id="{{move.id}}" data-ability-index="{{abilityIndex}}" data-tooltip="{{{tooltip}}}" data-tooltip-direction="UP">
+                    <div class="item-btn move {{cssType}}" tabindex="-1" data-action="{{#if actionType}}{{actionType}}{{else}}use-move{{/if}}" data-item-id="{{item.id}}" data-move-id="{{move.id}}" data-ability-index="{{abilityIndex}}" data-tooltip="{{{tooltip}}}" data-tooltip-direction="UP">
                         <span class="item-hotkey">{{@index}}</span>
                         <img src="{{#if img}}{{img}}{{else}}{{item.img}}{{/if}}" alt="{{move.name}}">
                         <span class="label">{{move.name}}</span>
@@ -127,7 +128,7 @@
                 <div class="panel-heading"><span>消耗品</span></div>
                 <div class="scroll-area"><div class="simple-grid">
                     {{#each consumables}}
-                    <div class="item-btn" data-action="use-item" data-item-id="{{id}}" data-tooltip="{{{tooltip}}}" data-tooltip-direction="UP">
+                    <div class="item-btn" tabindex="-1" data-action="use-item" data-item-id="{{id}}" data-tooltip="{{{tooltip}}}" data-tooltip-direction="UP">
                         <img src="{{img}}" alt="{{name}}"><span class="qty">{{system.quantity}}</span><span class="label">{{name}}</span>
                     </div>
                     {{/each}}
@@ -142,10 +143,10 @@
                 <div class="scroll-area">
                     {{#each equipmentGroups}}
                     <div class="equip-group">
-                        <div class="group-header" title="点击折叠/展开"><span class="g-label">{{label}}</span><div class="header-right"><span class="g-count">{{items.length}}</span><i class="fas fa-chevron-down g-icon"></i></div></div>
+                        <div class="group-header" tabindex="-1" title="点击折叠/展开"><span class="g-label">{{label}}</span><div class="header-right"><span class="g-count">{{items.length}}</span><i class="fas fa-chevron-down g-icon"></i></div></div>
                         <div class="group-items">
                             {{#each items}}
-                            <div class="item-btn {{#if system.equipped}}equipped{{/if}}" data-action="toggle-equip" data-item-id="{{id}}" data-tooltip="{{{tooltip}}}" data-tooltip-direction="UP">
+                            <div class="item-btn {{#if system.equipped}}equipped{{/if}}" tabindex="-1" data-action="toggle-equip" data-item-id="{{id}}" data-tooltip="{{{tooltip}}}" data-tooltip-direction="UP">
                                 <img src="{{img}}" alt="{{name}}">{{#if system.equipped}}<i class="fas fa-check equip-mark"></i>{{/if}}<span class="label">{{name}}</span>
                             </div>
                             {{/each}}
@@ -164,20 +165,20 @@
                 <div class="scroll-area">
                     {{#each skillGroups}}
                     <div class="equip-group skill-group-wrapper" data-group="{{key}}">
-                        <div class="group-header">
-                            <div class="header-left" data-action="roll-stat" data-key="{{key}}" title="点击检定: {{label}}"><i class="fas fa-dice-d20"></i><span class="g-label">{{label}}</span><span class="g-val">{{value}}</span></div>
+                        <div class="group-header" tabindex="-1">
+                            <div class="header-left" tabindex="-1" data-action="roll-stat" data-key="{{key}}" title="点击检定: {{label}}"><i class="fas fa-dice-d20"></i><span class="g-label">{{label}}</span><span class="g-val">{{value}}</span></div>
                             <div class="header-right toggle-trigger" title="折叠/展开技能"><i class="fas fa-chevron-down g-icon"></i></div>
                         </div>
                         <div class="group-items skill-grid">
-                            {{#each skills}}<div class="skill-btn" data-action="roll-stat" data-key="{{key}}" data-tooltip="点击检定: {{label}}" data-tooltip-direction="UP"><span class="s-name">{{label}}</span><span class="s-val">{{value}}</span></div>{{/each}}
+                            {{#each skills}}<div class="skill-btn" tabindex="-1" data-action="roll-stat" data-key="{{key}}" data-tooltip="点击检定: {{label}}" data-tooltip-direction="UP"><span class="s-name">{{label}}</span><span class="s-val">{{value}}</span></div>{{/each}}
                         </div>
                     </div>
                     {{/each}}
                     {{#if learnedArts.length}}
                     <div class="equip-group collapsed">
-                        <div class="group-header toggle-trigger" title="点击展开技艺"><span class="g-label">技艺</span><div class="header-right"><span class="g-count">{{learnedArts.length}}</span><i class="fas fa-chevron-down g-icon"></i></div></div>
+                        <div class="group-header toggle-trigger" tabindex="-1" title="点击展开技艺"><span class="g-label">技艺</span><div class="header-right"><span class="g-count">{{learnedArts.length}}</span><i class="fas fa-chevron-down g-icon"></i></div></div>
                         <div class="group-items skill-grid">
-                            {{#each learnedArts}}<div class="skill-btn art" data-action="roll-stat" data-key="{{key}}"><span class="s-name">{{label}}</span><span class="s-val">等级 {{value}}</span></div>{{/each}}
+                            {{#each learnedArts}}<div class="skill-btn art" tabindex="-1" data-action="roll-stat" data-key="{{key}}"><span class="s-name">{{label}}</span><span class="s-val">等级 {{value}}</span></div>{{/each}}
                         </div>
                     </div>
                     {{/if}}
