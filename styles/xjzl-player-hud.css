@@ -322,7 +322,8 @@
 }
 
 #xjzl-player-hud .res-bar .res-input {
-    width: 3ch;
+    /* 资源上限可超过三位，输入框至少留出五位避免当前值被自身裁切。 */
+    width: 5ch;
     font-variant-numeric: tabular-nums;
     text-align: center;
 }
