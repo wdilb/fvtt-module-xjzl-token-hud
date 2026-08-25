@@ -1299,13 +1299,39 @@
     background: rgba(240, 229, 204, .035);
     border: 1px solid rgba(240, 229, 204, .12);
     border-radius: 0;
-    transition: background .16s ease, border-color .16s ease, transform .16s ease;
+    transition: background .16s ease, border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+
+/* 招式保留原有色相，以同色底纹和顶部色线提高类型辨识度。 */
+#xjzl-player-hud .item-btn.move {
+    --move-edge: var(--hud-bronze);
+    --move-wash: rgba(185, 154, 96, .14);
+    --move-border: rgba(185, 154, 96, .9);
+    background: linear-gradient(180deg, var(--move-wash), rgba(240, 229, 204, .035) 72%);
+    border-color: var(--move-border);
+}
+
+#xjzl-player-hud .item-btn.move::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 2px;
+    content: "";
+    background: var(--move-edge);
+    opacity: .9;
+    pointer-events: none;
 }
 
 #xjzl-player-hud .item-btn:hover {
     background: rgba(185, 154, 96, .12);
     border-color: rgba(211, 180, 117, .58);
     transform: translateY(-1px);
+}
+
+#xjzl-player-hud .item-btn.move:hover {
+    background: var(--move-wash);
+    border-color: var(--move-edge);
 }
 
 #xjzl-player-hud .item-btn img {
@@ -1324,14 +1350,6 @@
     text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-#xjzl-player-hud .item-hotkey {
-    position: absolute;
-    top: 2px;
-    left: 3px;
-    color: var(--hud-muted);
-    font-size: 8px;
 }
 
 #xjzl-player-hud .item-btn .qty,
@@ -1364,23 +1382,33 @@
 }
 
 #xjzl-player-hud .item-btn.move.real {
-    border-color: rgba(185, 86, 71, .6);
+    --move-edge: #b95647;
+    --move-wash: rgba(185, 86, 71, .15);
+    --move-border: rgba(185, 86, 71, .92);
 }
 
 #xjzl-player-hud .item-btn.move.feint {
-    border-color: rgba(99, 137, 170, .58);
+    --move-edge: #6389aa;
+    --move-wash: rgba(99, 137, 170, .15);
+    --move-border: rgba(99, 137, 170, .92);
 }
 
 #xjzl-player-hud .item-btn.move.stance {
-    border-color: rgba(109, 159, 142, .6);
+    --move-edge: #6d9f8e;
+    --move-wash: rgba(109, 159, 142, .15);
+    --move-border: rgba(109, 159, 142, .92);
 }
 
 #xjzl-player-hud .item-btn.move.qi {
-    border-color: rgba(151, 116, 160, .58);
+    --move-edge: #9774a0;
+    --move-wash: rgba(151, 116, 160, .15);
+    --move-border: rgba(151, 116, 160, .92);
 }
 
 #xjzl-player-hud .item-btn.move.ultimate {
-    border-color: var(--hud-bronze);
+    --move-edge: var(--hud-bronze);
+    --move-wash: rgba(185, 154, 96, .16);
+    --move-border: var(--hud-bronze);
     box-shadow: 0 0 10px rgba(185, 154, 96, .2);
     animation: xjzl-wuxia-ultimate-btn 2s ease-in-out infinite alternate;
 }
