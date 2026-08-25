@@ -127,8 +127,7 @@
     transform-origin: left;
 }
 
-#xjzl-player-hud .wing-heading,
-#xjzl-player-hud .wing-footer {
+#xjzl-player-hud .wing-heading {
     display: none;
 }
 
@@ -220,6 +219,10 @@
     grid-template-columns: minmax(0, 1fr) 35px;
     align-items: center;
     gap: 7px;
+    /* 投影落在整行，沿用原有条形几何，不增加资源条尺寸或制造额外端部。 */
+    filter:
+        drop-shadow(0 1px 1px rgba(4, 5, 4, .94))
+        drop-shadow(0 0 1px rgba(0, 0, 0, .72));
 }
 
 #xjzl-player-hud .resource-meta {
@@ -232,7 +235,7 @@
     font-weight: 700;
     letter-spacing: .06em;
     text-align: right;
-    text-shadow: 0 1px 2px #000, 0 0 5px rgba(0, 0, 0, .85);
+    text-shadow: 0 1px 2px #000, 0 0 6px rgba(0, 0, 0, .96);
 }
 
 #xjzl-player-hud .resource-meta::after {
@@ -261,11 +264,11 @@
     width: 100%;
     height: 18px;
     overflow: hidden;
-    background: rgba(5, 6, 6, .78);
-    border: 0;
+    background: rgba(5, 6, 6, .84);
+    border: 1px solid rgba(4, 5, 4, .96);
     box-shadow:
-        inset 0 1px 5px rgba(0, 0, 0, .7),
-        0 1px 0 rgba(240, 229, 204, .12);
+        inset 0 1px 5px rgba(0, 0, 0, .82),
+        0 1px 0 rgba(240, 229, 204, .2);
     clip-path: polygon(4px 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 4px 100%, 0 50%);
 }
 
@@ -278,6 +281,9 @@
     background:
         linear-gradient(180deg, rgba(255, 255, 255, .13), transparent 42%),
         repeating-linear-gradient(90deg, transparent 0 29px, rgba(240, 229, 204, .07) 30px, transparent 31px);
+    /* 细铜线只压在条体内侧，避免边框变成突兀的白色外框。 */
+    box-shadow:
+        inset 0 0 0 1px rgba(240, 229, 204, .34);
 }
 
 #xjzl-player-hud .res-bar .bar-fill,
@@ -316,7 +322,7 @@
     font-family: "DIN Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
     font-size: 12px;
     font-weight: 700;
-    text-shadow: 0 1px 3px #000, 0 0 5px #000;
+    text-shadow: 0 1px 3px #000, 0 0 7px rgba(0, 0, 0, .98);
     white-space: nowrap;
     transform: translate(-50%, -50%);
 }
