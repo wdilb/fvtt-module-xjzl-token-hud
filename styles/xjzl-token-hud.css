@@ -514,7 +514,7 @@
 }
 
 #xjzl-custom-hud .rage-label,
-#xjzl-custom-hud .rage-max {
+#xjzl-custom-hud .rage-value {
     flex: 0 0 auto;
     color: #d2c4a5;
     font-size: 11px;

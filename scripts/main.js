@@ -637,7 +637,7 @@ async function updateSingleToken(token) {
             id, name: token.name, img: actorImg, actorImg: actorImg, isVideo: isVideo,
             hpValue, hpMax, hpPercent,
             neiliValue, neiliMax, neiliPercent, hasNeili,
-            rageDots, hasRage,
+            rageDots, rageValue, hasRage,
             type, isEnemy, showExactHp,
             statusLabel, statusColorClass
         };
@@ -745,6 +745,7 @@ async function updateSingleToken(token) {
         updateText('.hp-text-overlay .max-val', hpMax);
         updateText('.neili-text-overlay .current-val', neiliValue);
         updateText('.neili-text-overlay .max-val', neiliMax);
+        updateText('.rage-value', rageValue);
 
         // 2.4 状态文字颜色更新
         // 卡片顶部使用 hud-state，屏蔽数值时血条内还会出现 status-label；两处必须同步刷新。
