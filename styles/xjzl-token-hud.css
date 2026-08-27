@@ -173,7 +173,8 @@
     display: grid;
     min-width: 0;
     width: 100%;
-    min-height: 83px;
+    /* 高度需容纳标题、气血、内力和怒气四行，避免怒气行被卡片裁掉。 */
+    min-height: 98px;
     grid-template-columns: 61px minmax(0, 1fr);
     gap: 9px;
     padding: 8px 15px 8px 7px;
@@ -671,7 +672,7 @@
     }
 
     #xjzl-custom-hud .hud-card {
-        min-height: 75px;
+        min-height: 90px;
         grid-template-columns: 54px minmax(0, 1fr);
         gap: 7px;
         padding-top: 7px;
