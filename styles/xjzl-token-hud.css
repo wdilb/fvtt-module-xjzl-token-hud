@@ -68,7 +68,7 @@
     bottom: auto;
     display: flex;
     height: 65.34vh;
-    width: min(281px, 21.78vw);
+    width: min(265px, 20.5vw);
     align-items: flex-start;
     gap: 7px;
     pointer-events: none;
@@ -137,7 +137,9 @@
     height: auto;
     min-height: 0;
     max-height: 100%;
-    flex: 0 1 auto;
+    /* 以小队容器的剩余空间为唯一宽度来源，避免名称长度改变卡片尺寸。 */
+    flex: 1 1 0;
+    width: 0;
     align-self: flex-start;
     flex-direction: column;
     gap: 7px;
@@ -333,17 +335,32 @@
     min-width: 0;
     align-items: center;
     justify-content: space-between;
-    gap: 7px;
+    gap: 4px;
 }
 
 #xjzl-custom-hud .hud-name {
+    flex: 1 1 0;
+    min-width: 0;
     overflow: hidden;
     color: #fff8e7;
-    font: 600 16px "STKaiti", "KaiTi", "Noto Serif SC", serif;
+    font: 600 15px "STKaiti", "KaiTi", "Noto Serif SC", serif;
     line-height: 1.15;
-    text-overflow: ellipsis;
+    text-overflow: clip;
     text-shadow: 0 2px 4px #000, 0 0 6px rgba(0, 0, 0, .9);
     white-space: nowrap;
+}
+#xjzl-custom-hud .hud-name-text {
+    display: inline-block;
+    min-width: 100%;
+    white-space: nowrap;
+}
+/* 只有测量到文字超出标题行时才滚动，避免短名称产生多余动效。 */
+#xjzl-custom-hud .hud-name.is-overflowing .hud-name-text {
+    animation: xjzl-hud-name-scroll 3s ease-in-out infinite alternate;
+}
+@keyframes xjzl-hud-name-scroll {
+    0%, 18% { transform: translateX(0); }
+    82%, 100% { transform: translateX(calc(-1 * var(--hud-name-overflow, 0px))); }
 }
 
 #xjzl-custom-hud .hud-state {
@@ -352,7 +369,7 @@
     color: var(--team-jade);
     border: 0;
     border-bottom: 1px solid currentColor;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     line-height: 1.2;
     text-shadow: 0 1px 3px #000;
@@ -668,7 +685,7 @@
 
 @media (max-width: 900px) {
     #xjzl-custom-hud .hud-side {
-        width: min(259px, 30.25vw);
+        width: min(245px, 28.5vw);
     }
 
     #xjzl-custom-hud .hud-card {
@@ -704,5 +721,8 @@
         animation-duration: .01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: .01ms !important;
+    }
+    #xjzl-custom-hud .hud-name.is-overflowing .hud-name-text {
+        animation: none !important;
     }
 }

@@ -20,6 +20,7 @@ const HUD_STATE = {
 
 let refreshPartyHudPositions = () => {};
 let sidebarResizeObserver = null;
+let refreshHudNameOverflow = () => {};
 let hudContainerPromise = null;
 
 // =================================================================
@@ -293,7 +294,10 @@ function observeSidebarLayout() {
 
     if (document.body.dataset.xjzlHudResizeBound !== "true") {
         document.body.dataset.xjzlHudResizeBound = "true";
-        window.addEventListener("resize", () => updateSidebarOffset());
+        window.addEventListener("resize", () => {
+            updateSidebarOffset();
+            refreshHudNameOverflow();
+        });
     }
 }
 /**
@@ -519,6 +523,23 @@ function updateHudEmptyState() {
 }
 
 /**
+ * 测量名称是否超出标题行的可用宽度，并把超出量交给 CSS 往返滚动。
+ * @param {HTMLElement|null} card - 需要更新名称显示状态的小队卡片
+ */
+function updateHudNameOverflow(card) {
+    const nameEl = card?.querySelector('.hud-name');
+    const textEl = nameEl?.querySelector('.hud-name-text');
+    if (!nameEl || !textEl) return;
+
+    const overflow = Math.max(0, textEl.scrollWidth - nameEl.clientWidth);
+    nameEl.style.setProperty('--hud-name-overflow', `${overflow}px`);
+    nameEl.classList.toggle('is-overflowing', overflow > 1);
+}
+
+refreshHudNameOverflow = () => {
+    document.querySelectorAll('#xjzl-custom-hud .hud-card').forEach(updateHudNameOverflow);
+};
+/**
  * 刷新当前场景所有 Token 的 HUD
  */
 function updateAllTokens() {
@@ -627,6 +648,7 @@ async function updateSingleToken(token) {
         card = null;
         HUD_STATE.tokens.delete(id);
     }
+    const isNewCard = !card;
     // 逻辑：优先取 Actor 图片，如果没有（比如默认神秘人），则回退使用 Token 图片
     const actorImg = token.actor.img || token.document.texture.src;
     // 判断是否为视频格式
@@ -685,7 +707,9 @@ async function updateSingleToken(token) {
 
         // 2.2 基础信息更新 (名字、头像)
         const nameEl = card.querySelector('.hud-name');
-        if (nameEl && nameEl.innerText !== token.name) nameEl.innerText = token.name;
+        const nameTextEl = nameEl?.querySelector('.hud-name-text');
+        const nameChanged = Boolean(nameTextEl && nameTextEl.textContent !== token.name);
+        if (nameChanged) nameTextEl.textContent = token.name;
 
         // 获取当前决定的新图像路径和类型
         const newImg = actorImg;
@@ -749,11 +773,23 @@ async function updateSingleToken(token) {
 
         // 2.4 状态文字颜色更新
         // 卡片顶部使用 hud-state，屏蔽数值时血条内还会出现 status-label；两处必须同步刷新。
+        let headerStateChanged = false;
         card.querySelectorAll('.hud-state, .status-label').forEach(statusEl => {
-            const baseClass = statusEl.classList.contains('hud-state') ? 'hud-state' : 'status-label';
-            statusEl.innerText = statusLabel;
-            statusEl.className = `${baseClass} ${statusColorClass}`;
+            const isHeaderState = statusEl.classList.contains('hud-state');
+            const baseClass = isHeaderState ? 'hud-state' : 'status-label';
+            const nextClassName = `${baseClass} ${statusColorClass}`;
+            const textChanged = statusEl.textContent !== statusLabel;
+            if (isHeaderState && textChanged) headerStateChanged = true;
+            if (textChanged) statusEl.textContent = statusLabel;
+            if (statusEl.className !== nextClassName) statusEl.className = nextClassName;
         });
+
+        // 状态文本会改变名称可用宽度；等待本轮 DOM 更新完成后再统一测量。
+        if (isNewCard || nameChanged || headerStateChanged) {
+            requestAnimationFrame(() => {
+                if (card.isConnected) updateHudNameOverflow(card);
+            });
+        }
 
         // --- 2.5 动画与特效逻辑 ---
         // 对比上一次的状态，决定播放什么动画
