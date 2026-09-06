@@ -1411,6 +1411,12 @@
     --move-border: rgba(151, 116, 160, .92);
 }
 
+#xjzl-player-hud .item-btn.move.counter {
+    --move-edge: #a7b2b4;
+    --move-wash: rgba(167, 178, 180, .18);
+    --move-border: rgba(167, 178, 180, .95);
+}
+
 #xjzl-player-hud .item-btn.move.ultimate {
     --move-edge: var(--hud-bronze);
     --move-wash: rgba(185, 154, 96, .16);
