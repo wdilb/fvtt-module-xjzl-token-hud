@@ -2,7 +2,7 @@
  * =================================================================
  *  My Token HUD - 主程序入口 (Main Entry Point)
  *  作者: Tiwelee
- *  适配: FVTT V12 / V13
+ *  适配: FVTT V14
  *  描述: 这是一个高性能的战斗状态追踪 HUD，支持实时血量、内力、怒气显示及特效。
  * =================================================================
  */
@@ -13,7 +13,7 @@ const HUD_STATE = {
     // Key: TokenID, Value: { hp, neili, rage }
     tokens: new Map(),
 
-    // V13 兼容性：模板加载器引用
+    // V14 Handlebars API：模板加载器引用
     loader: null,
     renderer: null
 };
@@ -35,10 +35,9 @@ let hudContainerPromise = null;
 Hooks.once("init", async function () {
     console.log("My Token HUD | 正在初始化...");
 
-    // [V13 适配] 动态获取 Handlebars 帮助函数
-    // 优先尝试 foundry.applications 路径，回退到全局 globalThis 以兼容旧版本
-    HUD_STATE.loader = foundry.applications?.handlebars?.loadTemplates || globalThis.loadTemplates;
-    HUD_STATE.renderer = foundry.applications?.handlebars?.renderTemplate || globalThis.renderTemplate;
+    // V14 不再保留旧版全局模板 API 的兼容回退。
+    HUD_STATE.loader = foundry.applications.handlebars.loadTemplates;
+    HUD_STATE.renderer = foundry.applications.handlebars.renderTemplate;
 
     // 预加载 HBS 模板文件，防止渲染时闪烁
     await HUD_STATE.loader([

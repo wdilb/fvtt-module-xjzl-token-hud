@@ -84,7 +84,7 @@
             {{#if buffs.length}}
             <div class="buff-list {{buffLayout}}" aria-label="当前状态列表">
                 {{#each buffs}}
-                <div class="buff-chip" data-action="open-status-picker" data-tooltip="{{tooltip}}" data-tooltip-direction="UP" role="button" tabindex="0" aria-label="打开状态工具：{{name}}">
+                <div class="buff-chip" data-action="open-status-picker" data-tooltip-html="{{{tooltip}}}" data-tooltip-class="xjzl-buff-tooltip-host" data-tooltip-direction="UP" role="button" tabindex="0" aria-label="打开状态工具：{{name}}">
                     <img src="{{img}}" class="buff-icon" alt="{{name}}">
                     <span class="buff-name">{{name}}</span>
                     {{#if stackLabel}}<span class="buff-stack">{{stackLabel}}</span>{{/if}}

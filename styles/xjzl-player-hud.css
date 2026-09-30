@@ -711,6 +711,91 @@
     white-space: nowrap;
 }
 
+/* 不覆盖 Foundry #tooltip 的 fixed 定位；relative 会让悬浮层撑出侧边栏空白。 */
+#tooltip.xjzl-buff-tooltip-host {
+    --hud-paper: #f0e5cc;
+    --hud-muted: #b9ad94;
+    --hud-bronze-bright: #e3c98b;
+    --hud-jade: #6d9f8e;
+    overflow: hidden;
+    padding: 0;
+    color: var(--hud-paper);
+    background:
+        radial-gradient(circle at 92% 0%, rgba(227, 201, 139, .24), transparent 38%),
+        linear-gradient(145deg, rgba(48, 73, 64, .97), rgba(25, 36, 32, .96) 58%, rgba(68, 52, 37, .97));
+    border: 1px solid rgba(185, 154, 96, .5);
+    border-left-color: rgba(109, 159, 142, .82);
+    border-radius: 10px 13px 8px 13px;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, .34), inset 0 0 0 1px rgba(240, 229, 204, .06);
+    backdrop-filter: blur(10px);
+}
+
+#tooltip.xjzl-buff-tooltip-host::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    content: "";
+    background: linear-gradient(var(--hud-jade), var(--hud-bronze), rgba(109, 159, 142, .2));
+    box-shadow: 0 0 10px rgba(109, 159, 142, .38);
+}
+
+#tooltip.xjzl-buff-tooltip-host .xjzl-buff-tooltip {
+    min-width: 190px;
+    max-width: 280px;
+    padding: 11px 13px 12px 15px;
+    color: var(--hud-paper);
+    font-family: "FZKai-Z03", "STKaiti", "KaiTi", "Noto Serif SC", serif;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+#tooltip.xjzl-buff-tooltip-host .xjzl-buff-tooltip__title {
+    padding-bottom: 5px;
+    color: #f4ead3;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+#tooltip.xjzl-buff-tooltip-host .xjzl-buff-tooltip__details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 5px 0;
+    border-top: 1px solid rgba(185, 154, 96, .28);
+    border-bottom: 1px solid rgba(185, 154, 96, .2);
+}
+
+#tooltip.xjzl-buff-tooltip-host .xjzl-buff-tooltip__tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 18px;
+    padding: 1px 6px;
+    color: #f0c96a;
+    font-family: "DIN Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
+    font-size: 11px;
+    line-height: 1.1;
+    background: rgba(109, 159, 142, .16);
+    border: 1px solid rgba(109, 159, 142, .28);
+    border-radius: 4px;
+}
+
+#tooltip.xjzl-buff-tooltip-host .xjzl-buff-tooltip__tag--duration {
+    color: #e3c98b;
+    background: rgba(185, 154, 96, .14);
+    border-color: rgba(185, 154, 96, .3);
+}
+
+#tooltip.xjzl-buff-tooltip-host .xjzl-buff-tooltip__description {
+    margin-top: 6px;
+    color: #d6d0c3;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
 #xjzl-player-hud .buff-empty {
     position: relative;
     z-index: 1;

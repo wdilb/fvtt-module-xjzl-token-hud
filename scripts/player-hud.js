@@ -57,14 +57,15 @@ export class PlayerHUD {
         // 状态创建、叠层、持续时间和移除不会稳定地触发 Actor 更新，单独监听以保持状态胶囊即时同步。
         for (const hookName of ["createActiveEffect", "updateActiveEffect", "deleteActiveEffect"]) {
             Hooks.on(hookName, (effect) => {
-                const effectActorId = effect.parent?.id || effect.actor?.id;
+                const effectActorUuid = effect.actor?.uuid || effect.parent?.actor?.uuid;
                 // 删除 Hook 的 parent 在部分时机已经被清空，无法确认归属时刷新一次是安全的。
-                if (!effectActorId || this.currentActor?.id === effectActorId) this.debouncedRender();
+                if (!effectActorUuid || this.currentActor?.uuid === effectActorUuid) this.debouncedRender();
             });
         }
 
-        // 4. 战斗轮次更新 (使用防抖)
-        // 战斗回合变化可能导致资源或冷却刷新
+        // 4. 时间和战斗轮次更新 (使用防抖)
+        // V14 的 ActiveEffect.duration 派生剩余值依赖世界时间和战斗上下文。
+        Hooks.on("updateWorldTime", () => this.debouncedRender());
         Hooks.on("updateCombat", () => this.debouncedRender());
 
         // 5. 删除 Token (强制刷新)
@@ -315,7 +316,7 @@ export class PlayerHUD {
             if (this.currentActor?.id !== targetId) return;
 
             // 渲染 Handlebars 模板
-            const renderer = foundry.applications?.handlebars?.renderTemplate || globalThis.renderTemplate;
+            const renderer = foundry.applications.handlebars.renderTemplate;
             const html = await renderer("modules/xjzl-token-hud/templates/hud-player.hbs", data);
 
             // 模板渲染期间再次检查
@@ -608,7 +609,36 @@ export class PlayerHUD {
     }
 
     /**
-     * 整理角色当前可见状态，供 HUD 胶囊区使用；返回值只含展示字段，不修改 ActiveEffect。
+     * 构建状态 Tooltip 的分层 HTML，避免名称、叠层、时效和描述挤在一行。
+     * 入参均已清洗或由模块生成，HTML 属性使用单引号以适配 data-tooltip-html 属性。
+     * @param {string} name - 状态名称
+     * @param {string} stackLabel - 叠层标签
+     * @param {string} durationLabel - 时效标签
+     * @param {string} description - 清洗后的状态描述
+     * @returns {string} 可供 Foundry Tooltip 渲染的 HTML
+     */
+    static _buildBuffTooltip(name, stackLabel, durationLabel, description) {
+        const title = this.cleanRichText(name || "状态") || "状态";
+        const duration = this.cleanRichText(durationLabel || "持续中");
+        const details = [
+            stackLabel ? `<span class='xjzl-buff-tooltip__tag'>叠层 ${stackLabel}</span>` : "",
+            !stackLabel
+                ? `<span class='xjzl-buff-tooltip__tag xjzl-buff-tooltip__tag--duration'>时效 ${duration}</span>`
+                : ""
+        ].filter(Boolean).join("");
+        const descriptionMarkup = description
+            ? `<div class='xjzl-buff-tooltip__description'>${description}</div>`
+            : "";
+
+        return `<div class='xjzl-buff-tooltip'>
+            <div class='xjzl-buff-tooltip__title'>${title}</div>
+            <div class='xjzl-buff-tooltip__details'>${details}</div>
+            ${descriptionMarkup}
+        </div>`;
+    }
+
+    /**
+     * 整理角色当前可见状态，供 HUD 胶囊区使用；时长只通过系统 V14 门面读取，返回值不修改 ActiveEffect。
      * @param {Actor} actor - 当前受控角色
      * @returns {Array<{name:string,img:string,stackLabel:string,durationLabel:string,tooltip:string}>}
      */
@@ -617,36 +647,25 @@ export class PlayerHUD {
         const effects = actor.appliedEffects || [];
 
         for (const effect of effects) {
-            if (effect.disabled || !(effect.isTemporary || effect.transfer === false)) continue;
+            // appliedEffects 也包含物品转移的常驻效果；只纳入当前 Actor 直接持有的永久状态，
+            // 避免把装备来源的被动效果重复显示在状态舱中。
+            const isActorEffect = effect.parent?.documentName === "Actor";
+            if (effect.disabled || !(effect.isTemporary || isActorEffect || effect.transfer === false)) continue;
 
-            let durationLabel = "";
             const duration = effect.duration;
-            if (duration?.seconds) {
-                const startTime = duration.startTime || game.time.worldTime;
-                const remaining = Math.max(0, startTime + duration.seconds - game.time.worldTime);
-                durationLabel = remaining >= 3600
-                    ? `${Math.floor(remaining / 3600)}h`
-                    : remaining >= 60 ? `${Math.floor(remaining / 60)}m` : `${remaining}s`;
-            } else if (duration?.rounds) {
-                if (game.combat?.round) {
-                    const startRound = duration.startRound || game.combat.round;
-                    durationLabel = `${Math.max(0, duration.rounds - (game.combat.round - startRound))}回合`;
-                } else {
-                    durationLabel = `${duration.rounds}回合`;
-                }
-            } else if (duration?.turns) {
-                durationLabel = `${duration.turns}轮`;
-            }
+            const isPermanent = !effect.isTemporary
+                || (duration?.value == null && duration?.expiry == null);
+            const durationValue = isPermanent
+                ? ""
+                : game.xjzl.api.effects.getDurationLabel(effect) || "";
+            const durationLabel = isPermanent
+                ? "无限"
+                : durationValue ? `剩余 ${durationValue}` : "";
 
             const stacks = Number(effect.stacks || 1);
             const stackLabel = stacks > 1 ? `x${stacks}` : "";
             const description = this.cleanRichText(effect.description || "");
-            const tooltip = [
-                effect.name,
-                stackLabel,
-                durationLabel ? `剩余 ${durationLabel}` : "持续中",
-                description
-            ].filter(Boolean).join("\n");
+            const tooltip = this._buildBuffTooltip(effect.name, stackLabel, durationLabel, description);
 
             buffs.push({
                 name: effect.name,
@@ -872,7 +891,7 @@ export class PlayerHUD {
                     <div class="form-group">
                         <label>选择放入穴位:</label>
                         <div class="form-fields">
-                            <select name="acupoint" style="width: 100%; min-width: 250px; height: 30px; font-size: 1.1em; color: var(--color-text-dark-primary);">
+                            <select name="acupoint" style="width: 100%; min-width: 250px; height: 30px; font-size: 1.1em; color: var(--color-text-primary);">
                                 ${availableSlots.map(slot => `<option value="${slot.key}">${slot.label}</option>`).join("")}
                             </select>
                         </div>

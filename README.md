@@ -1,6 +1,6 @@
 # 侠界之旅 - 战斗 HUD (XJZL Token HUD)
 
-![Foundry v13](https://img.shields.io/badge/Foundry-v13-orange)
+![Foundry v14](https://img.shields.io/badge/Foundry-v14-orange)
 ![System](https://img.shields.io/badge/System-侠界之旅-red)
 ![Version](https://img.shields.io/badge/Version-1.1.0-blue)
 
@@ -86,7 +86,7 @@
 
 ## 🛠️ 技术细节 (Technical)
 
-*   **兼容性**：Foundry VTT v13+
+*   **兼容性**：Foundry VTT v14
 *   **依赖系统**：`xjzl-system`
 *   **技术栈**：原生 JavaScript (ES Modules), Handlebars, CSS3 (Grid/Flexbox, Animations)。
 
