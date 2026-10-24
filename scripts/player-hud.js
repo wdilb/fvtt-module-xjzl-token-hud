@@ -392,12 +392,13 @@ export class PlayerHUD {
             for (const str of pinnedList) {
                 if (typeof str !== 'string') continue;
 
-                // 如果是野兽特性
+                // 如果是野兽特性：配置了攻击段或检定段（豁免/对抗）任一项即可发起
                 if (str.startsWith("Ability.")) {
                     const index = parseInt(str.split(".")[1]);
                     const ability = actor.system.abilities[index];
+                    const checkEnabled = ability?.check?.enabled === true;
 
-                    if (ability && ability.isAttack) {
+                    if (ability && (ability.isAttack || checkEnabled)) {
                         // 尝试获取本地化的伤害类型名称，获取不到默认显示"伤害"
                         let dmgTypeName = "伤害";
                         if (CONFIG.XJZL.damageTypes && CONFIG.XJZL.damageTypes[ability.damageType]) {
@@ -405,13 +406,29 @@ export class PlayerHUD {
                             dmgTypeName = game.i18n.localize(CONFIG.XJZL.damageTypes[ability.damageType]) || CONFIG.XJZL.damageTypes[ability.damageType];
                         }
 
+                        // 检定摘要：豁免显示属性与 DC，对抗显示双方属性（与野兽卡摘要一致）
+                        let checkLine = "";
+                        if (checkEnabled) {
+                            const c = ability.check;
+                            const attrLabel = (key) => {
+                                const k = CONFIG.XJZL.attributes[key] || CONFIG.XJZL.skills[key] || CONFIG.XJZL.arts[key] || key;
+                                return game.i18n.localize(k);
+                            };
+                            if (c.mode === "contest") {
+                                checkLine = `<div style='font-size:12px; color:#3c5a70; margin-bottom:4px;'><i class='fas fa-bolt'></i> 对抗: ${attrLabel(c.contest.attAttr)} vs ${attrLabel(c.contest.defAttr)}</div>`;
+                            } else {
+                                checkLine = `<div style='font-size:12px; color:#3c5a70; margin-bottom:4px;'><i class='fas fa-shield-halved'></i> 豁免: ${attrLabel(c.save.attr)} DC ${c.save.dc}</div>`;
+                            }
+                        }
+
                         // 这里的 HTML 属性全部使用单引号，防止与外层的双引号冲突！！！
                         let tooltip = `<div style='text-align:left; min-width:160px; font-family:var(--font-serif); font-size:13px;'>
                             <div style='border-bottom:1px solid rgba(255,255,255,0.2); margin-bottom:6px; padding-bottom:4px; font-weight:bold; color:#fff;'>${ability.name}</div>
-                            <div style='font-size:12px; color:#e74c3c; margin-bottom:4px;'><i class='fas fa-tint'></i> 预计${dmgTypeName}: ${ability.damage || 0}</div>
+                            ${ability.isAttack ? `<div style='font-size:12px; color:#e74c3c; margin-bottom:4px;'><i class='fas fa-tint'></i> 预计${dmgTypeName}: ${ability.damage || 0}</div>` : ""}
+                            ${checkLine}
                             <div style='font-size:11px; color:#aaa; line-height:1.4;'>${this.cleanRichText(ability.description) || "野兽基础攻击"}</div>
                             <hr style='border:0; border-top:1px solid #444; margin:6px 0;'>
-                            <div style='font-size:10px; color:#777;'><i class='fas fa-mouse-pointer'></i> 左键攻击</div>
+                            <div style='font-size:10px; color:#777;'><i class='fas fa-mouse-pointer'></i> 左键使用（攻击与检定一体发起）</div>
                         </div>`;
 
                         shortcuts.push({
@@ -822,24 +839,29 @@ export class PlayerHUD {
             });
         });
 
-        // 野兽特性操作 (只需左键攻击)
+        // 野兽特性操作 (只需左键使用；攻击与豁免/对抗检定的一体化流程由系统侧
+        // XJZLActor.useCreatureAbility 统一处理，HUD 不再单独调 rollBasicAttack)
         html.querySelectorAll('[data-action="use-ability"]').forEach(el => {
             el.addEventListener("click", async (ev) => {
                 ev.preventDefault(); ev.stopPropagation();
 
                 const index = ev.currentTarget.dataset.abilityIndex;
-                const ability = actor.system.abilities[index];
 
-                if (ability) {
-                    // 复刻在 XJZLCreatureSheet 里的攻击方法
-                    await actor.rollBasicAttack({
-                        isCreatureAttack: true,
-                        baseDamage: ability.damage || 0,
-                        damageType: ability.damageType || "waigong",
-                        defaultDamageType: ability.damageType || "waigong",
-                        damageTypes: CONFIG.XJZL.damageTypes,
-                        label: ability.name || "野兽攻击"
-                    });
+                if (typeof actor.useCreatureAbility === "function") {
+                    await actor.useCreatureAbility(parseInt(index));
+                } else {
+                    // 兼容旧版系统：退回纯攻击发起
+                    const ability = actor.system.abilities[index];
+                    if (ability) {
+                        await actor.rollBasicAttack({
+                            isCreatureAttack: true,
+                            baseDamage: ability.damage || 0,
+                            damageType: ability.damageType || "waigong",
+                            defaultDamageType: ability.damageType || "waigong",
+                            damageTypes: CONFIG.XJZL.damageTypes,
+                            label: ability.name || "野兽攻击"
+                        });
+                    }
                 }
             });
         });
