@@ -392,13 +392,15 @@ export class PlayerHUD {
             for (const str of pinnedList) {
                 if (typeof str !== 'string') continue;
 
-                // 如果是野兽特性：配置了攻击段或检定段（豁免/对抗）任一项即可发起
+                // 如果是野兽特性：攻击、检定或直接状态任一项已配置即可发起。
+                // directEffects 是纯状态特性的可执行配置，与野兽卡 canUse 的判定保持一致。
                 if (str.startsWith("Ability.")) {
                     const index = parseInt(str.split(".")[1]);
                     const ability = actor.system.abilities[index];
                     const checkEnabled = ability?.check?.enabled === true;
+                    const hasDirectEffects = ability?.directEffects?.length > 0;
 
-                    if (ability && (ability.isAttack || checkEnabled)) {
+                    if (ability && (ability.isAttack || checkEnabled || hasDirectEffects)) {
                         // 尝试获取本地化的伤害类型名称，获取不到默认显示"伤害"
                         let dmgTypeName = "伤害";
                         if (CONFIG.XJZL.damageTypes && CONFIG.XJZL.damageTypes[ability.damageType]) {
@@ -428,7 +430,7 @@ export class PlayerHUD {
                             ${checkLine}
                             <div style='font-size:11px; color:#aaa; line-height:1.4;'>${this.cleanRichText(ability.description) || "野兽基础攻击"}</div>
                             <hr style='border:0; border-top:1px solid #444; margin:6px 0;'>
-                            <div style='font-size:10px; color:#777;'><i class='fas fa-mouse-pointer'></i> 左键使用（攻击与检定一体发起）</div>
+                            <div style='font-size:10px; color:#777;'><i class='fas fa-mouse-pointer'></i> 左键使用（攻击、检定或施加状态）</div>
                         </div>`;
 
                         shortcuts.push({
